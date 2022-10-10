@@ -1,4 +1,4 @@
-﻿using GliToJiraImporter;
+﻿using Atlassian.Jira;
 using GliToJiraImporter.Models;
 using log4net;
 using log4net.Config;
@@ -6,9 +6,9 @@ using log4net.Repository;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace GLIRegulationExtract
+namespace GliToJiraImporter
 {
-    internal class Program
+    public class Program
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
@@ -23,9 +23,10 @@ namespace GLIRegulationExtract
             try
             {
                 ParameterModel parameterModel = parseCommandLine(args);
-
-                Parser parser = new(parameterModel);
+                Jira jiraConnection = Jira.CreateRestClient(parameterModel.JiraUrl, parameterModel.UserName, parameterModel.Password);
+                Parser parser = new(parameterModel, jiraConnection);
                 parser.Parse();
+                //parser.ParseMementos();
             }
             catch (Exception e)
             {
@@ -46,9 +47,9 @@ namespace GLIRegulationExtract
             }
 
             ParameterModel result = (commandLineArgs as CommandLine.Parsed<ParameterModel>).Value;
-            if (File.Exists(result.FileName) == false)
+            if (File.Exists(result.FilePath) == false)
             {
-                log.Debug($"No processing happened.  Unable to find the specified file:  {result.FileName}");
+                log.Debug($"No processing happened.  Unable to find the specified file:  {result.FilePath}");
             }
 
             return result;

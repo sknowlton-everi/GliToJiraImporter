@@ -1,9 +1,11 @@
+using Atlassian.Jira;
 using GliToJiraImporter.Models;
 using log4net;
 using log4net.Config;
 using log4net.Repository;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 
 namespace GliToJiraImporter.Testing.Tests
@@ -13,10 +15,11 @@ namespace GliToJiraImporter.Testing.Tests
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
         private Parser sut;
-
         private ParameterModel parameterModelStub;
-
+        private Jira jiraConnectionStub;
+        Project jiraProjectStub;
         private string path;
+        IList<CategoryModel> expectedResult;
 
         [SetUp]
         public void Setup()
@@ -28,209 +31,187 @@ namespace GliToJiraImporter.Testing.Tests
 
             path = @"..\..\..\Public\";
 
+            //parameterModelStub = new()
+            //{
+            //    FilePath = $"{path}Australia-New-Zealand.docx",
+            //    Type = 1,
+            //    SleepTime = 0,
+            //    IssueType = "Task",
+            //    JiraUrl = "http://jira.austin.mgam/",
+            //    Password = "Password#1",
+            //    ProjectKey = "STP",
+            //    UserName = "JiraBot"
+            //};
+            //ParameterModel 
             parameterModelStub = new()
             {
-                //FileName = @"C:\MForce\GliToJiraImporter\GliToJiraImporter.Testing\Public\Australia-New-Zealand.docx",
-                FileName = $"{path}Australia-New-Zealand.docx",
-                Type = 1
+                FilePath = $"{path}Australia-New-Zealand.docx",
+                JiraUrl = "http://localhost:8080/",
+                UserName = "Samantha.knowlton",
+                Password = "Jarasa98",
+                IssueType = "Test Plan",
+                SleepTime = 0,
+                ProjectKey = "SAM",
+                Type = 1,
             };
 
-            sut = new Parser(parameterModelStub);
+            this.jiraConnectionStub = Jira.CreateRestClient(parameterModelStub.JiraUrl, parameterModelStub.UserName, parameterModelStub.Password);
+            this.jiraProjectStub = jiraConnectionStub.Projects.GetProjectAsync(parameterModelStub.ProjectKey).Result;
+
+            sut = new Parser(this.parameterModelStub, this.jiraConnectionStub);
         }
 
-        //[Test]
-        public void ParserTest()
+        //[TearDown]
+        public void TearDown()
         {
-            //given
-            //TODO Create result? Remove? I guess decide how to deal with this test
-            string result = "";
-
-            //when
-            sut.Parse();
-
-            //then
-            //Assert.That(result, Is.EqualTo(true), "Invalid Data Model");
+            int index = 0;
+            int itemsPerPage = 50;
+            string queryString = string.Format("project = {0}", parameterModelStub.ProjectKey);
+            IPagedQueryResult<Issue> jiraExistingIssueList = this.jiraConnectionStub.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
+            //IList<string> ClauseIds = expectedResult.Select(cat => cat.RegulationList.Select(reg => reg.ClauseID).ToList).ToList;
+            IList<string> categories = expectedResult.Select(cat => cat.Category).ToList();
+            //Dictionary<string, Issue> issues = (Dictionary<string, Issue>)this.jiraConnectionStub.Issues.GetIssuesAsync().Result;
+            foreach (Issue issue in jiraExistingIssueList)
+            {
+                if (issue["GLICategory"] != null && categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not good enough
+                {
+                    bool success = this.deleteIssueByKey(issue.Key.Value);
+                    if (success != true)
+                    {
+                        log.Error($"Issue failed to delete. {issue.Key.Value}");//TODO Not really?
+                    }
+                }
+            }
+            expectedResult.Clear();
         }
 
         [Test]
         public void ParserSingleTest()
         {
             //given
-            parameterModelStub.FileName = $"{path}SINGLE-Australia-New-Zealand.docx";
-            List<CategoryModel> expectedResult = new List<CategoryModel>()
-            {
-                new CategoryModel()
-                {
-                    Category = "Cabinet",
-                    RegulationList = new List<RegulationModel>()
-                    {
-                        new RegulationModel()
-                        {
-                            ClauseID = "NS2.3.2",
-                            Subcategory = "Cabinet Identification",
-                            Description = "The ID badge is to be fixed on the exterior of the gaming machine in a position that allows it to be easily read."
-                        }
-                    }
-                }
-            };
+            parameterModelStub.FilePath = $"{path}SINGLE-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserSingleTestExpectedResult.txt"));
 
             //when
-            List<CategoryModel> result = sut.Parse();
+            IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].RegulationList.Count, Is.EqualTo(1));
-            TestAssertModel(expectedResult, result);
+            testAssertModel(expectedResult, result);
         }
 
         [Test]
         public void ParserSingleMultiDescTest()
         {
             //given
-            parameterModelStub.FileName = $"{path}SINGLE-MULTIDESC-Australia-New-Zealand.docx";
-            List<CategoryModel> expectedResult = new List<CategoryModel>()
-            {
-                new CategoryModel()
-                {
-                    Category = "Cabinet",
-                    RegulationList = new List<RegulationModel>()
-                    {
-                        new RegulationModel()
-                        {
-                            ClauseID = "NS2.3.1",
-                            Subcategory = "Cabinet Identification",
-                            Description = "A gaming machine must have an identification badge permanently affixed to its cabinet by the manufacturer, and this badge must include the following information:" +
-                            "\na) the manufacturer;" +
-                            "\nb) a unique serial number;" +
-                            "\nc) the gaming machine model number; " +
-                            "\nd) the date of manufacture."
-                        }
-                    }
-                }
-            };
+            parameterModelStub.FilePath = $"{path}SINGLE-MULTIDESC-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserSingleMultiDescTestExpectedResult.txt"));
+            //IList<CategoryModel> expectedResult = new List<CategoryModel>()
+            //{
+            //    new CategoryModel()
+            //    {
+            //        Category = "Cabinet",
+            //        RegulationList = new List<RegulationModel>()
+            //        {
+            //            new RegulationModel()
+            //            {
+            //                ClauseID = "NS2.3.1",
+            //                Subcategory = "Cabinet Identification",
+            //                Description = "A gaming machine must have an identification badge permanently affixed to its cabinet by the manufacturer, and this badge must include the following information:" +
+            //                "\na) the manufacturer;" +
+            //                "\nb) a unique serial number;" +
+            //                "\nc) the gaming machine model number; " +
+            //                "\nd) the date of manufacture."
+            //            }
+            //        }
+            //    }
+            //};
 
             //when
-            List<CategoryModel> result = sut.Parse();
+            IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].RegulationList.Count, Is.EqualTo(1));
-            TestAssertModel(expectedResult, result);
+            testAssertModel(expectedResult, result);
         }
 
         [Test]
         public void ParserPicturesTest()
         {
             //given
-            parameterModelStub.FileName = $"{path}PICTURES-SHORT-Australia-New-Zealand.docx";
-            List<CategoryModel> expectedResult = new List<CategoryModel>()
-            {
-                new CategoryModel()
-                {
-                    Category = "Spinning Reel Games",
-                    RegulationList = new List<RegulationModel>()
-                    {
-                        new RegulationModel()
-                        {
-                            ClauseID = "NS4.3.24",
-                            Subcategory = "Lit Lines",
-                            Description = "Where winning patterns are paid on lit lines only, the artwork must include the statement \"All wins on lit lines only except [X] [Y] and [Z]\" where [X] [Y] and [Z] are the exceptions to this rule (e.g.. scatters, feature wins etc.)",
-                            AttachmentList = new List<byte[]>()
-                        },
-                        new RegulationModel()
-                        {
-                            ClauseID = "NS4.3.25",
-                            Subcategory = "Lit Lines",
-                            Description = "4.3.25, 4.3.26 and 4.3.27 refer to games with 5 reels, and 3 rows of symbols\nGames consisting of 1 line must contain the following line: ",
-                            AttachmentList = new List<byte[]>() { new byte[]{} } //TODO Add the image
-                        },
-                        new RegulationModel()
-                        {
-                            ClauseID = "NS4.3.26",
-                            Subcategory = "Lit Lines",
-                            Description = "Games consisting of 3 lines must contain the following lines, numbered as: ",
-                            AttachmentList = new List<byte[]>() { new byte[]{} } //TODO Add the image
-                        },
-                        new RegulationModel()
-                        {
-                            ClauseID = "NS4.3.27",
-                            Subcategory = "Lit Lines",
-                            Description = "Games consisting of 5 lines must contain the following lines, numbered as: ",
-                            AttachmentList = new List<byte[]>() { new byte[]{} } //TODO Add the image
-                        },
-                    }
-                }
-            };
+            parameterModelStub.FilePath = $"{path}PICTURES-SHORT-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}PicturesTestExpectedResult.txt"));
 
             //when
-            List<CategoryModel> result = sut.Parse();
+            IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.That(result.Count, Is.EqualTo(1));
-            Assert.That(result[0].RegulationList.Count, Is.EqualTo(4));
-            TestAssertModel(expectedResult, result);
+            Assert.NotNull(expectedResult);
+            testAssertModel(expectedResult, result);
         }
 
         [Test]
         public void ParserSpecialsTest()
         {
             //given
-            parameterModelStub.FileName = $"{path}SPECIALS-Australia-New-Zealand.docx";
-            List<CategoryModel> expectedResult = ReadFile($"{path}ParserSpecialsTestExpectedResult.txt");
-            //new List<CategoryModel>()
+            parameterModelStub.FilePath = $"{path}SPECIALS-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserSpecialsTestExpectedResult2.txt"));
 
             //when
-            List<CategoryModel> result = sut.Parse();
+            IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.That(result.Count, Is.EqualTo(17), $"Expected Categories: {17}, but was: {result.Count}");
-
-            int totalRegs = 0;
-            foreach (CategoryModel category in result)
-            {
-                log.Debug($"{category.Category} - {category.RegulationList.Count}");
-                totalRegs += category.RegulationList.Count;
-            }
-
-            Assert.That(totalRegs, Is.EqualTo(76));
-            TestAssertModel(expectedResult, result);
+            Assert.NotNull(expectedResult);
+            testAssertModel(expectedResult, result);
         }
 
         [Test]
+        [Ignore("Work in progress")]
         public void ParserFullTest()
         {
             //given
-            //List<CategoryModel> expectedResult = ReadFile($"{path}ParserFullTestExpectedResult.txt");
-
-            parameterModelStub.FileName = $"{path}Australia-New-Zealand.docx";
-
+            //expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}FullTestSearchExpectedResult.txt"));
+            parameterModelStub.FilePath = $"{path}Australia-New-Zealand.docx";
+            int expectedCount = 635;
             //when
-            List<CategoryModel> result = sut.Parse();
+            IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.That(result.Count, !Is.EqualTo(0));
+            Assert.NotZero(result.Count);
             int totalRegs = 0;
             foreach (CategoryModel category in result)
             {
                 totalRegs += category.RegulationList.Count;
             }
-            Assert.That(totalRegs, Is.EqualTo(635));
+            Assert.That(totalRegs, Is.EqualTo(expectedCount));
             //TestAssertModel(expectedResult, result);
         }
 
-        private void TestAssert(string expectedResult)
+        [Test]
+        [Ignore("Work in progress")]
+        public void ParserUnknownDocTypeTest()
         {
-            string result;
-            using (var reader = new StreamReader(@"..\..\..\Public\Result.txt"))
+            //given
+            parameterModelStub.FilePath = $"{path}SINGLE-Australia-New-Zealand.docx";
+            parameterModelStub.Type = 0;
+            IList<CategoryModel> result = new List<CategoryModel>();
+            //when
+            try
             {
-                result = reader.ReadToEnd();
+                result = sut.Parse();
             }
-
-            Assert.That(result, Is.EqualTo(expectedResult), $"Invalid Data Model; Received: {result}");
+            catch (Exception e)
+            {
+                //then
+                Assert.That(e.Message, Is.EqualTo("Provided Document Type is Unknown. Try type 1 for Checkoff documents."));
+                Assert.That(result, Is.Empty);
+            }
+            //Assert.Catch<Exception>(sut.Parse(),"Unknown document type did not throw an exception.");
         }
 
-        private void TestAssertModel(List<CategoryModel> expectedResult, List<CategoryModel> result)
+        //Test to check if -hello- is replaced with - hello -
+
+        private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
+            Assert.NotNull(result);
             Assert.That(result.Count, Is.EqualTo(expectedResult.Count));
             for (int i = 0; i < result.Count; i++)
             {
@@ -239,40 +220,47 @@ namespace GliToJiraImporter.Testing.Tests
 
                 for (int j = 0; j < result[i].RegulationList.Count; j++)
                 {
-                    Assert.That(result[i].RegulationList[j].ClauseID, Is.EqualTo(expectedResult[i].RegulationList[j].ClauseID));
-                    Assert.That(result[i].RegulationList[j].Subcategory, Is.EqualTo(expectedResult[i].RegulationList[j].Subcategory));
-                    Assert.That(result[i].RegulationList[j].Description, Is.EqualTo(expectedResult[i].RegulationList[j].Description));
-                    Assert.That(result[i].RegulationList[j].AttachmentList.Count, Is.EqualTo(expectedResult[i].RegulationList[j].AttachmentList.Count)); // TODO Not a good enough check
+                    RegulationModel resultRegulation = (RegulationModel)result[i].RegulationList[j];
+                    RegulationModel expectedResultRegulation = (RegulationModel)expectedResult[i].RegulationList[j];
+                    Assert.That(resultRegulation.ClauseID, Is.EqualTo(expectedResultRegulation.ClauseID));
+                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory));
+                    Assert.That(resultRegulation.Description, Is.EqualTo(expectedResultRegulation.Description));
+                    Assert.That(resultRegulation.AttachmentList.Count, Is.EqualTo(expectedResultRegulation.AttachmentList.Count));
+                    for (int k = 0; k < resultRegulation.AttachmentList.Count; k++)
+                    {
+                        Assert.That(resultRegulation.AttachmentList[k], Is.EqualTo(expectedResultRegulation.AttachmentList[k]));
+                    }
                 }
             }
         }
 
-        private List<CategoryModel> ReadFile(string path)
+        private bool deleteIssueByKey(string issueKey)
         {
-            List<CategoryModel> result = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(path));
-            //try
-            //{
-            //    // Check if file already exists. If yes, delete it.     
-            //    if (File.Exists(path))
-            //    {
-            //        using (FileStream fs = File.Open(path))
-            //        {
-                        
-            //            // Add some text to file    
-            //            Byte[] textBytes = new UTF8Encoding(true).GetBytes(text);
-            //            fs.Read();
-            //            List<CategoryModel> result = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(path));
-            //        }
-            //    }
+            bool success = false;
 
-            //    // Create a new file     
-            //}
-            //catch (Exception Ex)
-            //{
-            //    Console.WriteLine(Ex.ToString());
-            //}
+            Task t = this.jiraConnectionStub.Issues.DeleteIssueAsync(issueKey);
 
-            return result;
+            //IJiraRestClient rest = this.jiraConnection.RestClient;
+            //Chilkat.StringBuilder sbResponseBody = new Chilkat.StringBuilder();
+            //IRestRequest restRequest = new RestRequest();
+
+            //success = rest.ExecuteRequestAsync()
+            //    .FullRequestNoBodySb("DELETE", "/rest/api/2/issue/SCRUM-13", sbResponseBody);
+            //if (success != true)
+            //{
+            //    Debug.WriteLine(rest.LastErrorText);
+            //    return;
+            //}
+            while (t.Status == TaskStatus.Running || t.Status == TaskStatus.WaitingForChildrenToComplete || t.Status == TaskStatus.WaitingToRun)
+            {
+                log.Debug($"Waiting on issue {issueKey} to finish running. Status: {t.Status}");
+            }
+
+            success = (t.Status == TaskStatus.RanToCompletion);
+            log.Debug($"Task complete. Status: {t.Status}");
+
+            return success;
         }
+
     }
 }
