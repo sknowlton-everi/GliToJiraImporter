@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GliToJiraImporter": {
+      "commandName": "Project",
+      "commandLineArgs": "-f ..\\..\\..\\..\\GliToJiraImporter.Testing\\Public\\SPECIALS-Australia-New-Zealand.docx -t 1"
+    }
+  }
+}
