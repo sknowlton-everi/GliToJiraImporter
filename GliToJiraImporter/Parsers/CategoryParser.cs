@@ -29,19 +29,16 @@ namespace GliToJiraImporter.Parsers
 
         public bool Parse(IWTable table, ref int rowIndex)
         {
-            //IList<CategoryModel> result = new List<CategoryModel>();
-
             CategoryModel categoryModel = this._state;
             if (categoryModel == null)
             {
                 categoryModel = new CategoryModel();
             }
-            //RegulationModel currentRegulation = new RegulationModel();
             string currentCategoryName = string.Empty;
 
             // Originator instantiation
             RegulationParser regulationOriginator = new RegulationParser();
-            if (!categoryModel.IsEmpty() && (categoryModel.RegulationList.Count > 0))//.Last().IsValid())
+            if (!categoryModel.IsEmpty() && (categoryModel.RegulationList.Count > 0))
             {
                 regulationOriginator = new RegulationParser((RegulationModel)categoryModel.RegulationList.Last().GetState());
                 categoryModel.RegulationList.RemoveAt(categoryModel.RegulationList.Count - 1);
@@ -51,11 +48,11 @@ namespace GliToJiraImporter.Parsers
 
             bool categoryComplete = false;
 
-            //Iterates the rows of the table
+            // Iterates the rows of the table
             for (; rowIndex < table.Rows.Count && !categoryComplete; rowIndex++)
             {
                 Console.WriteLine(rowIndex);
-                //Checks for a gray background, with the idea that they are either a category, sub-category, or the extra header at the start
+                // Checks for a gray background, with the idea that they are either a category, sub-category, or the extra header at the start
                 WTableRow x = table.Rows[rowIndex];
                 if (x.Cells[0].CellFormat.BackColor.Name.Equals("ffd9d9d9") && !x.Cells[0].Paragraphs[0].Text.Equals(string.Empty))
                 {
@@ -66,7 +63,7 @@ namespace GliToJiraImporter.Parsers
                         categoryModel.RegulationList.Add((RegulationModel)y);//TODO 2 save? 
                     }
                     // Clear the originator as it was either invalid or added
-                    regulationOriginator = new RegulationParser((RegulationModel)regulationOriginator.Save()); //($"///{regulationOriginator.Save().GetName()}///");
+                    regulationOriginator = new RegulationParser((RegulationModel)regulationOriginator.Save());
 
                     // Checks for a double cell, with the idea that it's a category
                     if (categoryModel.Category.Equals(string.Empty) && x.Cells.Count == 2)

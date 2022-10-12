@@ -1,15 +1,10 @@
 ﻿using Atlassian.Jira;
-using Atlassian.Jira.Remote;
 using CsvHelper.Configuration;
 using GliToJiraImporter.Models;
 using log4net;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Utilities
 {
@@ -50,6 +45,7 @@ namespace GliToJiraImporter.Utilities
             }
         }
 
+        // This doesn't fully work
         public void SaveCsv(string fileName, IList<CategoryModel> categoryModelList)//TODO IList<IMemento> ?
         {
             // Category;SubCategory;ClauseID;Description;AttachmentList
@@ -110,7 +106,7 @@ namespace GliToJiraImporter.Utilities
                         //{
                         //TODO Add the above if-statement, if we change the list type of RegulationList from "IList<RegulationModel>" to "IList<IMemento>"
                         RegulationModel regulationModel = (RegulationModel)categoryModel.RegulationList[j];
-                        Issue issue = createIssue(regulationModel, categoryModel.Category);
+                        Issue issue = this.createIssue(regulationModel, categoryModel.Category);
                         //}
                     }
                 }

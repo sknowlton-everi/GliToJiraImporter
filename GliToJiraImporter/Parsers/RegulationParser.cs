@@ -1,13 +1,7 @@
 ﻿using GliToJiraImporter.Models;
 using log4net;
 using Syncfusion.DocIO.DLS;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Parsers
 {
@@ -15,7 +9,7 @@ namespace GliToJiraImporter.Parsers
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private RegulationModel _state;// = string.Empty;
+        private RegulationModel _state;
 
         public RegulationParser() 
         {
@@ -43,10 +37,10 @@ namespace GliToJiraImporter.Parsers
 
             bool regulationComplete = false;
 
-            //Iterates through the cells of rows
+            // Iterates through the cells of rows
             for (int i = 0; i < row.Cells.Count && !regulationComplete; i++)
             {
-                //Iterates through the paragraphs of the cell
+                // Iterates through the paragraphs of the cell
                 for (int j = 0; j < row.Cells[i].Paragraphs.Count && !regulationComplete; j++)
                 {
                     WParagraph paragraph = row.Cells[i].Paragraphs[j];
@@ -96,7 +90,7 @@ namespace GliToJiraImporter.Parsers
                         //foreach (WTable subTable in row.Cells[i].Tables)
                         //{
                         embeddedTableParser.Parse(row.Cells[i]);
-                        //Add the embedded table to the end of the description
+                        // Add the embedded table to the end of the description
                         descriptionParser.Restore(new RegulationExtrasModel(descriptionParser.Save().GetName() + embeddedTableParser.Save().GetName()));
                         //}
                     }
@@ -114,11 +108,6 @@ namespace GliToJiraImporter.Parsers
             this._state = (RegulationModel)regulationModel.GetState();
             //this._state = regulationModel.ToJson();
             return regulationComplete;
-        }
-
-        public void ParseRegulation()
-        {
-
         }
 
         // Saves the current state inside a memento.

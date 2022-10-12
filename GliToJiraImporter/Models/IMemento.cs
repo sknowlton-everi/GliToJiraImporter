@@ -10,7 +10,6 @@ namespace GliToJiraImporter.Models
     {
         string GetName();//TODO not necessary? because their names aren't called Name
         IMemento GetState();
-        //DateTime GetDate();
         bool IsValid();
         bool IsEmpty();
     }

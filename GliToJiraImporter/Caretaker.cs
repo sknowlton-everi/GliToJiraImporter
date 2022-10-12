@@ -1,11 +1,6 @@
 ﻿using GliToJiraImporter.Models;
 using log4net;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GliToJiraImporter
 {
@@ -41,7 +36,7 @@ namespace GliToJiraImporter
             var memento = this._mementos.Last();
             this._mementos.Remove(memento);
 
-            //log.Debug("Caretaker: Restoring state to: " + memento.GetState()); //GetName()
+            log.Debug("Caretaker: Restoring state to: " + memento.GetState());
 
             try
             {
@@ -59,7 +54,7 @@ namespace GliToJiraImporter
 
             foreach (var memento in this._mementos)
             {
-                log.Info(memento.GetState()); //GetName()
+                log.Info(memento.GetState());
             }
         }
 

@@ -4,13 +4,8 @@ using GliToJiraImporter.Types;
 using log4net;
 using System.Reflection;
 using System.Diagnostics;
-using System.Text.Json;
-using System.Text;
 using System.Text.RegularExpressions;
 using GliToJiraImporter.Parsers;
-using CsvHelper.Configuration;
-using CsvHelper;
-using System.Globalization;
 using Atlassian.Jira;
 using GliToJiraImporter.Utilities;
 
@@ -47,8 +42,9 @@ namespace GliToJiraImporter
             }
             log.Debug($"Completed list size: {result.Count}");
             storageUtilities.UploadToJira(result);
-            //this.saveText(@"C:\Users\samantha.knowlton\Documents\Results.txt", JsonSerializer.Serialize(result)); //TODO clean up
-            storageUtilities.SaveCsv(@"C:\Users\samantha.knowlton\Documents\ResultsCsv.csv", result);
+            // Uncomment if you want to save results to the public folder in the test project
+            //this.storageUtilities.SaveText(@"..\..\..\..\GliToJiraImporter.Testing\Public\Results.txt", JsonSerializer.Serialize(result));
+            //this.storageUtilities.SaveCsv(@"..\..\..\..\GliToJiraImporter.Testing\Public\ResultsCsv.csv", result);
             return result;
         }
 
@@ -56,18 +52,19 @@ namespace GliToJiraImporter
         {
             IList<CategoryModel> result = new List<CategoryModel>();
 
-            // Originator instantiation
+            // Originator and Caretaker instantiation
             CategoryParser categoryoriginator = new CategoryParser();
-            // Caretaker instantiation
             Caretaker caretaker = new Caretaker(categoryoriginator);
 
-            //Creates an instance of WordDocument class
+            // Creates an instance of WordDocument class
             WSection section = new WordDocument(parameterModel.FilePath).Sections[0];
 
-            //Iterates the tables of the section
+            // Iterates the tables of the section
+            //TODO if i is set to anything below 4, the tests get the following error. When running it myself it seems to maybe be an infinite loop issue
+                //log4net:ERROR RollingFileAppender: INTERNAL ERROR. Append is False but OutputFile [C:\MForce\GliToJiraImporter\GliToJiraImporter.Testing\bin\Debug\net6.0\gliToJiraImporter.log] already exists.
             for (int i = 4; i < section.Tables.Count; i++)
             {
-                //Iterates the tables of the section
+                // Iterates the tables of the section
                 for (int j = 0; j < section.Tables[i].Rows.Count; j++)
                 {
                     // Backup state and parse
@@ -98,18 +95,20 @@ namespace GliToJiraImporter
             {
                 result.Add((CategoryModel)categoryoriginator.Save());
             }
-            //else
-            //{
-            //    CategoryModel x = (CategoryModel)categoryoriginator.Save();
-            //    x.RegulationList.RemoveAt(x.RegulationList.Count - 1);
-            //    if (x.IsValid())
-            //    {
-            //        result.Add(x);
-            //    }
-            //}
+            else
+            {
+                CategoryModel x = (CategoryModel)categoryoriginator.Save();
+                x.RegulationList.RemoveAt(x.RegulationList.Count - 1);
+                if (x.IsValid())
+                {
+                    result.Add(x);
+                }
+            }
             return result;
         }
 
+
+        // Ignore. This is the previous way of parsing 
         private IList<CategoryModel> parseTable()
         {
             IList<CategoryModel> result = new List<CategoryModel>();
@@ -121,13 +120,13 @@ namespace GliToJiraImporter
             RegulationModel currentRegulation = new RegulationModel();
             string currentCategoryName = string.Empty;
 
-            //Iterates the tables of the section
+            // Iterates the tables of the section
             for (int i = 0; i < section.Tables.Count; i++)
             {
-                //Iterates the rows of the table
+                // Iterates the rows of the table
                 foreach (WTableRow row in section.Tables[i].Rows)
                 {
-                    //Checks for a gray background, with the idea that they are either a category, sub-category, or the extra header at the start
+                    // Checks for a gray background, with the idea that they are either a category, sub-category, or the extra header at the start
                     if (row.Cells[0].CellFormat.BackColor.Name.Equals("ffd9d9d9") && !row.Cells[0].Paragraphs[0].Text.Equals(string.Empty))
                     {
                         // Adds and clears currentRegulation if it isn't empty and is valid
@@ -142,7 +141,7 @@ namespace GliToJiraImporter
                         {
                             currentCategoryName = row.Cells[0].Paragraphs[0].Text;
                         }
-                        else //This row is a subcategory header
+                        else // This row is a subcategory header
                         {
                             // Checks if a new category is starting, then adds and clears the currentCategory if it's valid
                             if (!currentCategoryName.Equals(string.Empty))
@@ -150,7 +149,7 @@ namespace GliToJiraImporter
                                 if (currentCategory.IsValid())
                                 {
                                     result.Add(currentCategory);
-                                    currentCategory = new CategoryModel();//TODO
+                                    currentCategory = new CategoryModel(); //TODO Figure out why I put a todo here
                                 }
                                 // Stores the category and sub-category names
                                 currentCategory.Category = currentCategoryName;
@@ -162,10 +161,10 @@ namespace GliToJiraImporter
                     // Continue only if the category and regulation sub-category have been filled in
                     if (!currentCategory.Category.Equals(string.Empty) && !currentRegulation.Subcategory.Equals(string.Empty))
                     {
-                        //Iterates through the cells of rows
+                        // Iterates through the cells of rows
                         foreach (WTableCell cell in row.Cells)
                         {
-                            //Iterates through the paragraphs of the cell
+                            // Iterates through the paragraphs of the cell
                             foreach (WParagraph paragraph in cell.Paragraphs)
                             {
                                 if (!paragraph.Text.Equals(string.Empty) && !paragraph.Text.Contains("Choose an item"))

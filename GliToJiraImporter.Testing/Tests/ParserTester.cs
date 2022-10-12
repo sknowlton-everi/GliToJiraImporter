@@ -5,7 +5,6 @@ using log4net.Config;
 using log4net.Repository;
 using System.Diagnostics;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
 
 namespace GliToJiraImporter.Testing.Tests
@@ -47,8 +46,8 @@ namespace GliToJiraImporter.Testing.Tests
             {
                 FilePath = $"{path}Australia-New-Zealand.docx",
                 JiraUrl = "http://localhost:8080/",
-                UserName = "Samantha.knowlton",
-                Password = "Jarasa98",
+                UserName = "",
+                Password = "",
                 IssueType = "Test Plan",
                 SleepTime = 0,
                 ProjectKey = "SAM",
@@ -105,26 +104,6 @@ namespace GliToJiraImporter.Testing.Tests
             //given
             parameterModelStub.FilePath = $"{path}SINGLE-MULTIDESC-Australia-New-Zealand.docx";
             expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserSingleMultiDescTestExpectedResult.txt"));
-            //IList<CategoryModel> expectedResult = new List<CategoryModel>()
-            //{
-            //    new CategoryModel()
-            //    {
-            //        Category = "Cabinet",
-            //        RegulationList = new List<RegulationModel>()
-            //        {
-            //            new RegulationModel()
-            //            {
-            //                ClauseID = "NS2.3.1",
-            //                Subcategory = "Cabinet Identification",
-            //                Description = "A gaming machine must have an identification badge permanently affixed to its cabinet by the manufacturer, and this badge must include the following information:" +
-            //                "\na) the manufacturer;" +
-            //                "\nb) a unique serial number;" +
-            //                "\nc) the gaming machine model number; " +
-            //                "\nd) the date of manufacture."
-            //            }
-            //        }
-            //    }
-            //};
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -153,7 +132,7 @@ namespace GliToJiraImporter.Testing.Tests
         {
             //given
             parameterModelStub.FilePath = $"{path}SPECIALS-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserSpecialsTestExpectedResult2.txt"));
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserSpecialsTestExpectedResult.txt"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -207,8 +186,6 @@ namespace GliToJiraImporter.Testing.Tests
             //Assert.Catch<Exception>(sut.Parse(),"Unknown document type did not throw an exception.");
         }
 
-        //Test to check if -hello- is replaced with - hello -
-
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             Assert.NotNull(result);
@@ -240,17 +217,6 @@ namespace GliToJiraImporter.Testing.Tests
 
             Task t = this.jiraConnectionStub.Issues.DeleteIssueAsync(issueKey);
 
-            //IJiraRestClient rest = this.jiraConnection.RestClient;
-            //Chilkat.StringBuilder sbResponseBody = new Chilkat.StringBuilder();
-            //IRestRequest restRequest = new RestRequest();
-
-            //success = rest.ExecuteRequestAsync()
-            //    .FullRequestNoBodySb("DELETE", "/rest/api/2/issue/SCRUM-13", sbResponseBody);
-            //if (success != true)
-            //{
-            //    Debug.WriteLine(rest.LastErrorText);
-            //    return;
-            //}
             while (t.Status == TaskStatus.Running || t.Status == TaskStatus.WaitingForChildrenToComplete || t.Status == TaskStatus.WaitingToRun)
             {
                 log.Debug($"Waiting on issue {issueKey} to finish running. Status: {t.Status}");

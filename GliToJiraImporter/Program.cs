@@ -26,7 +26,6 @@ namespace GliToJiraImporter
                 Jira jiraConnection = Jira.CreateRestClient(parameterModel.JiraUrl, parameterModel.UserName, parameterModel.Password);
                 Parser parser = new(parameterModel, jiraConnection);
                 parser.Parse();
-                //parser.ParseMementos();
             }
             catch (Exception e)
             {
