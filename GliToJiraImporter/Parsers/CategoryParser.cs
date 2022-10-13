@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Parsers
@@ -24,7 +25,11 @@ namespace GliToJiraImporter.Parsers
         public CategoryParser(CategoryModel state)
         {
             this._state = state;
-            //log.Debug("CategoryParser: My initial state is: " + state);
+            log.Debug("CategoryParser: My initial state is: " + JsonSerializer.Serialize(this._state));
+            if (this._state == null)
+            {
+                this._state = new CategoryModel();
+            }
         }
 
         public bool Parse(IWTable table, ref int rowIndex)
@@ -60,7 +65,7 @@ namespace GliToJiraImporter.Parsers
                     IMemento y = regulationOriginator.Save();
                     if (y != null && y.IsValid())
                     {
-                        categoryModel.RegulationList.Add((RegulationModel)y);//TODO 2 save? 
+                        categoryModel.RegulationList.Add((RegulationModel)y);
                     }
                     // Clear the originator as it was either invalid or added
                     regulationOriginator = new RegulationParser((RegulationModel)regulationOriginator.Save());
@@ -81,7 +86,7 @@ namespace GliToJiraImporter.Parsers
                     {
                         RegulationModel z = new RegulationModel();
                         z.Subcategory = x.Cells[0].Paragraphs[0].Text;
-                        regulationOriginator = new RegulationParser(z); //new RegulationParser($"///{x.Cells[0].Paragraphs[0].Text}///");
+                        regulationOriginator = new RegulationParser(z);
                     }
                 }
                 // Continue only if the category and regulation sub-category have been filled in
@@ -104,7 +109,7 @@ namespace GliToJiraImporter.Parsers
                             categoryModel.RegulationList.Add((RegulationModel)regulationOriginator.Save());
                             RegulationModel newRegulationModel = new RegulationModel();
                             newRegulationModel.Subcategory = regulationOriginator.Save().GetName();
-                            regulationOriginator = new RegulationParser(newRegulationModel);//($"///{regulationOriginator.Save().GetName()}///");
+                            regulationOriginator = new RegulationParser(newRegulationModel);
                         }
                     }
                 }
@@ -135,7 +140,7 @@ namespace GliToJiraImporter.Parsers
             }
 
             this._state = (CategoryModel)memento.GetState();
-            log.Debug($"CategoryParser: My state has changed to: {_state}");
+            log.Debug($"CategoryParser: My state has changed to: {JsonSerializer.Serialize(this._state)}");
         }
     }
 }

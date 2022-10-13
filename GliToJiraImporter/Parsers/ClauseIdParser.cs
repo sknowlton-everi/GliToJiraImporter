@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -22,15 +23,14 @@ namespace GliToJiraImporter.Parsers
         public ClauseIdParser(RegulationExtrasModel state)
         {
             this._state = state;
-            log.Debug("ClauseIdParser: My initial state is: " + state);
+            log.Debug("ClauseIdParser: My initial state is: " + JsonSerializer.Serialize(this._state));
             if (this._state == null)
             {
                 this._state = new RegulationExtrasModel();
             }
         }
 
-        //TODO Remove bool?
-        public void Parse(WParagraph paragraph)//TODO change to just be a string of the text???
+        public void Parse(WParagraph paragraph)
         {
             Regex clauseIdRegex = new Regex(@"((NS)+(\d)+(.)+(\d)+(.)+(\d))");
             if (clauseIdRegex.IsMatch(paragraph.Text))
@@ -54,7 +54,7 @@ namespace GliToJiraImporter.Parsers
             }
 
             this._state = (RegulationExtrasModel)memento.GetState();
-            log.Debug($"ClauseIdParser: My state has changed to: {_state}");
+            log.Debug($"ClauseIdParser: My state has changed to: {JsonSerializer.Serialize(this._state)}");
         }
     }
 }

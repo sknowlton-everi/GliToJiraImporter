@@ -6,22 +6,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Parsers
 {
-    public class EmbeddedTableParser// : IOriginator
+    public class EmbeddedTableParser : IOriginator
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private string _state = string.Empty;
+        private RegulationExtrasModel _state = new RegulationExtrasModel();
 
         public EmbeddedTableParser() { }
 
-        public EmbeddedTableParser(string state)
+        public EmbeddedTableParser(RegulationExtrasModel state)
         {
             this._state = state;
-            log.Debug("EmbeddedTableParser: My initial state is: " + state);
+            log.Debug("EmbeddedTableParser: My initial state is: " + JsonSerializer.Serialize(this._state));
+            if (this._state == null)
+            {
+                this._state = new RegulationExtrasModel();
+            }
         }
         public void Parse(WTableCell cell)
         {
@@ -45,30 +50,30 @@ namespace GliToJiraImporter.Parsers
                     }
                     tableInfo += "|";
                 }
-                if (!this._state.Equals(string.Empty))
+                if (!this._state.State.Equals(string.Empty))
                 {
-                    this._state += "\n";
+                    this._state.State += "\n";
                 }
-                this._state += $"{tableInfo}";
+                this._state.State += $"{tableInfo}";
             }
         }
 
         // Saves the current state inside a memento.
         public IMemento Save()
         {
-            return new RegulationExtrasModel(this._state);
+            return this._state;
         }
 
-        //// Restores the Originator's state from a memento object.
-        //public void Restore(IMemento memento)
-        //{
-        //    if (!(memento is RegulationExtrasModel))
-        //    {
-        //        throw new Exception("Unknown memento class " + memento.ToString());
-        //    }
+        // Restores the Originator's state from a memento object.
+        public void Restore(IMemento memento)
+        {
+            if (!(memento is RegulationExtrasModel))
+            {
+                throw new Exception("Unknown memento class " + memento.ToString());
+            }
 
-        //    this._state = memento.GetState();
-        //    log.Debug($"EmbeddedTableParser: My state has changed to: {_state}");
-        //}
+            this._state = (RegulationExtrasModel)memento.GetState();
+            log.Debug($"EmbeddedTableParser: My state has changed to: {JsonSerializer.Serialize(this._state)}");
+        }
     }
 }

@@ -60,7 +60,7 @@ namespace GliToJiraImporter.Testing.Tests
             sut = new Parser(this.parameterModelStub, this.jiraConnectionStub);
         }
 
-        //[TearDown]
+        //[TearDown] //TODO This doesn't work yet
         public void TearDown()
         {
             int index = 0;
@@ -72,12 +72,12 @@ namespace GliToJiraImporter.Testing.Tests
             //Dictionary<string, Issue> issues = (Dictionary<string, Issue>)this.jiraConnectionStub.Issues.GetIssuesAsync().Result;
             foreach (Issue issue in jiraExistingIssueList)
             {
-                if (issue["GLICategory"] != null && categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not good enough
+                if (issue["GLICategory"] != null && categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not a good enough check
                 {
                     bool success = this.deleteIssueByKey(issue.Key.Value);
                     if (success != true)
                     {
-                        log.Error($"Issue failed to delete. {issue.Key.Value}");//TODO Not really?
+                        log.Error($"Issue failed to delete. {issue.Key.Value}");
                     }
                 }
             }
@@ -95,7 +95,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            testAssertModel(expectedResult, result);
+            this.testAssertModel(expectedResult, result);
         }
 
         [Test]
@@ -109,7 +109,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            testAssertModel(expectedResult, result);
+            this.testAssertModel(expectedResult, result);
         }
 
         [Test]
@@ -124,7 +124,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //then
             Assert.NotNull(expectedResult);
-            testAssertModel(expectedResult, result);
+            this.testAssertModel(expectedResult, result);
         }
 
         [Test]
@@ -139,7 +139,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //then
             Assert.NotNull(expectedResult);
-            testAssertModel(expectedResult, result);
+            this.testAssertModel(expectedResult, result);
         }
 
         [Test]
@@ -161,7 +161,7 @@ namespace GliToJiraImporter.Testing.Tests
                 totalRegs += category.RegulationList.Count;
             }
             Assert.That(totalRegs, Is.EqualTo(expectedCount));
-            //TestAssertModel(expectedResult, result);
+            //this.testAssertModel(expectedResult, result);
         }
 
         [Test]
@@ -228,6 +228,5 @@ namespace GliToJiraImporter.Testing.Tests
 
             return success;
         }
-
     }
 }

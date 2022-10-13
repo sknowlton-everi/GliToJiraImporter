@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Parsers
@@ -21,7 +22,7 @@ namespace GliToJiraImporter.Parsers
         public PictureParser(PictureModel state)
         {
             this._state = state;
-            log.Debug("PictureParser: My initial state is: " + this._state);
+            log.Debug("PictureParser: My initial state is: " + JsonSerializer.Serialize(this._state));
             if (this._state == null)
             {
                 this._state = new PictureModel();
@@ -55,7 +56,7 @@ namespace GliToJiraImporter.Parsers
             }
 
             this._state = (PictureModel)memento.GetState();
-            log.Debug($"PictureParser: My state has changed to: {this._state}");
+            log.Debug($"PictureParser: My state has changed to: {JsonSerializer.Serialize(this._state)}");
         }
     }
 }

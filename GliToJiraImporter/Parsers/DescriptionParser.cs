@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -22,7 +23,7 @@ namespace GliToJiraImporter.Parsers
         public DescriptionParser(RegulationExtrasModel state)
         {
             this._state = state;
-            log.Debug("DescriptionParser: My initial state is: " + this._state.State);
+            log.Debug("DescriptionParser: My initial state is: " + JsonSerializer.Serialize(this._state));
             if (this._state == null)
             {
                 this._state = new RegulationExtrasModel();
@@ -62,7 +63,7 @@ namespace GliToJiraImporter.Parsers
             }
 
             this._state = (RegulationExtrasModel)memento.GetState();
-            log.Debug($"DescriptionParser: My state has changed to: {this._state.State}");
+            log.Debug($"DescriptionParser: My state has changed to: {JsonSerializer.Serialize(this._state)}");
         }
     }
 }

@@ -22,6 +22,10 @@ namespace GliToJiraImporter.Parsers
         {
             this._state = state;
             log.Debug("RegulationParser: My initial state is: " + JsonSerializer.Serialize(this._state));
+            if (this._state == null)
+            {
+                this._state = new RegulationModel();
+            }
         }
 
         public bool Parse(WTableRow row)
@@ -35,7 +39,7 @@ namespace GliToJiraImporter.Parsers
             PictureParser pictureParser = new PictureParser();
             Caretaker pictureCaretaker = new Caretaker(pictureParser);
             EmbeddedTableParser embeddedTableParser = new EmbeddedTableParser();
-            //Caretaker EmbeddedTableCaretaker = new Caretaker(embeddedTableParser);
+            Caretaker embeddedTableCaretaker = new Caretaker(embeddedTableParser);
 
             bool regulationComplete = false;
 
@@ -64,9 +68,18 @@ namespace GliToJiraImporter.Parsers
                             break;
                         }
                         // Verify it's not ClauseID to ensure it's description
-                        else if (!regulationModel.ClauseID.Equals(string.Empty))//TODO do the care taker stuff for desc
+                        else if (!regulationModel.ClauseID.Equals(string.Empty))
                         {
+                            descriptionCaretaker.Backup();
                             descriptionParser.Parse(paragraph);
+                            if (!descriptionParser.Save().IsValid())
+                            {
+                                descriptionCaretaker.Undo();
+                            }
+                            else
+                            {
+                                regulationModel.Description = descriptionParser.Save().GetName();
+                            }
                         }
                     }
                     // Checks for a picture within a cell 
@@ -86,12 +99,17 @@ namespace GliToJiraImporter.Parsers
                     // Checks for a table within a cell 
                     if (row.Cells[i].Tables.Count != 0 && paragraph.Text.Equals(string.Empty))
                     {
-                        //foreach (WTable subTable in row.Cells[i].Tables)
-                        //{
+                        embeddedTableCaretaker.Backup();
                         embeddedTableParser.Parse(row.Cells[i]);
-                        // Add the embedded table to the end of the description
-                        descriptionParser.Restore(new RegulationExtrasModel(descriptionParser.Save().GetName() + embeddedTableParser.Save().GetName()));
-                        //}
+                        if (!embeddedTableParser.Save().IsValid())
+                        {
+                            embeddedTableCaretaker.Undo();
+                        }
+                        else
+                        {
+                            // Add the embedded table to the end of the description
+                            descriptionParser.Restore(new RegulationExtrasModel(descriptionParser.Save().GetName() + embeddedTableParser.Save().GetName()));
+                        }
                     }
                 }
             }
@@ -105,7 +123,6 @@ namespace GliToJiraImporter.Parsers
                 regulationModel.Description = descriptionParser.Save().GetName();
             }
             this._state = (RegulationModel)regulationModel.GetState();
-            //this._state = regulationModel.ToJson();
             return regulationComplete;
         }
 
@@ -124,7 +141,7 @@ namespace GliToJiraImporter.Parsers
             }
 
             this._state = (RegulationModel)memento.GetState();
-            log.Debug($"RegulationParser: My state has changed to: {_state}");
+            log.Debug($"RegulationParser: My state has changed to: {JsonSerializer.Serialize(this._state)}");
         }
     }
 }

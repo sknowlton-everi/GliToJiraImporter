@@ -8,7 +8,7 @@ namespace GliToJiraImporter.Models
 {
     public interface IMemento
     {
-        string GetName();//TODO not necessary? because their names aren't called Name
+        string GetName();//TODO Should this be renamed because their names aren't called Name?
         IMemento GetState();
         bool IsValid();
         bool IsEmpty();

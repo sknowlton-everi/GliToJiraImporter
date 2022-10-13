@@ -24,16 +24,6 @@ namespace GliToJiraImporter.Models
                 ClauseID = splitState[0];
                 Subcategory = splitState[1];
                 Description = splitState[2];
-
-                //int indexOfFirst = state.IndexOf("///");
-                //ClauseID = state.Substring(0, indexOfFirst + 1);
-                //Subcategory = state.Substring(indexOfFirst, state.LastIndexOf("///") - indexOfFirst);
-                //Description = state.Substring(state.LastIndexOf("///"));
-
-                //dynamic jObject = JObject.Parse(state);
-                //ClauseID = jObject.ClauseID;
-                //Subcategory = jObject.Subcategory;
-                //Description = jObject.Description;
             }
         }
 
@@ -41,11 +31,6 @@ namespace GliToJiraImporter.Models
         {
             return this.Subcategory;
         }
-
-        //public string GetState()
-        //{
-        //    return $"{ClauseID}///{Subcategory}///{Description}///";
-        //}
 
         public IMemento GetState()
         {
