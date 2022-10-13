@@ -84,6 +84,7 @@ namespace GliToJiraImporter.Testing.Tests
             expectedResult.Clear();
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleTest()
         {
@@ -98,6 +99,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleMultiDescTest()
         {
@@ -112,6 +114,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserPicturesTest()
         {
@@ -127,6 +130,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSpecialsTest()
         {

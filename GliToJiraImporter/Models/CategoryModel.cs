@@ -14,11 +14,11 @@ namespace GliToJiraImporter.Models
         public CategoryModel(string state)
         {
             string[] splitState = state.Split("|||");
-            Category = splitState[0];
-            RegulationList.Clear();
+            this.Category = splitState[0];
+            this.RegulationList.Clear();
             for (int i = 1; i < splitState.Length; i++)
             {
-                RegulationList.Add(new RegulationModel(splitState[i]));
+                this.RegulationList.Add(new RegulationModel(splitState[i]));
             }
         }
 
@@ -53,23 +53,13 @@ namespace GliToJiraImporter.Models
             return JsonSerializer.Serialize(this);
         }
 
-        //public string GetState()
-        //{
-        //    string state = $"{Category}";
-        //    foreach (RegulationModel regulationModel in RegulationList)
-        //    {
-        //        state += $"|||{regulationModel.GetState()}";
-        //    }
-        //    return state;
-        //}
-
         public IMemento GetState()
         {
             return this;
         }
         public string GetName()
         {
-            return $"{this.Category}";
+            return this.Category;
         }
     }
 }
