@@ -1,0 +1,1 @@
+[{"Category":"Cabinet","RegulationList":[{"ClauseID":"NS2.3.2","Subcategory":"Cabinet Identification","Description":"The ID badge is to be fixed on the exterior of the gaming machine in a position that allows it to be easily read.","AttachmentList":[]}]}]

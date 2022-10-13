@@ -2,7 +2,7 @@
   "profiles": {
     "GliToJiraImporter": {
       "commandName": "Project",
-      "commandLineArgs": "-f ..\\..\\..\\..\\GliToJiraImporter.Testing\\Public\\SPECIALS-Australia-New-Zealand.docx -t 1"
+      "commandLineArgs": "-f ..\\..\\..\\..\\GliToJiraImporter.Testing\\Public\\SINGLE-Australia-New-Zealand.docx -j http://localhost:8080/ -u Samantha.Knowlton -p Jarasa98 -i \"Test Plan\" -s 100 -k SAM -t 1"
     }
   }
 }
