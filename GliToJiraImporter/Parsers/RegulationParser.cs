@@ -2,6 +2,8 @@
 using log4net;
 using Syncfusion.DocIO.DLS;
 using System.Reflection;
+using System.Text;
+using System.Text.Json;
 
 namespace GliToJiraImporter.Parsers
 {
@@ -11,7 +13,7 @@ namespace GliToJiraImporter.Parsers
 
         private RegulationModel _state;
 
-        public RegulationParser() 
+        public RegulationParser()
         {
             _state = new RegulationModel();
         }
@@ -19,7 +21,7 @@ namespace GliToJiraImporter.Parsers
         public RegulationParser(RegulationModel state)
         {
             this._state = state;
-            //log.Debug("RegulationParser: My initial state is: " + state);
+            log.Debug("RegulationParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
         public bool Parse(WTableRow row)
@@ -31,7 +33,7 @@ namespace GliToJiraImporter.Parsers
             DescriptionParser descriptionParser = new DescriptionParser(new RegulationExtrasModel(regulationModel.Description));
             Caretaker descriptionCaretaker = new Caretaker(descriptionParser);
             PictureParser pictureParser = new PictureParser();
-            //Caretaker pictureCaretaker = new Caretaker(pictureParser);
+            Caretaker pictureCaretaker = new Caretaker(pictureParser);
             EmbeddedTableParser embeddedTableParser = new EmbeddedTableParser();
             //Caretaker EmbeddedTableCaretaker = new Caretaker(embeddedTableParser);
 
@@ -70,19 +72,16 @@ namespace GliToJiraImporter.Parsers
                     // Checks for a picture within a cell 
                     else if (paragraph.ChildEntities.Count != 0)
                     {
-                        //pictureCaretaker.Backup();
+                        pictureCaretaker.Backup();
                         pictureParser.Parse(paragraph);
-                        //if (!pictureParser.Save().IsValid())
-                        //{
-                        //    pictureCaretaker.Undo();
-                        //}
-                        //else
-                        //{
-                        if (pictureParser.Save().Any())
+                        if (!pictureParser.Save().IsValid())
                         {
-                            regulationModel.AttachmentList.Add(pictureParser.Save());
+                            pictureCaretaker.Undo();
                         }
-                        //}
+                        else
+                        {
+                            regulationModel.AttachmentList.Add((PictureModel)pictureParser.Save());
+                        }
                     }
                     // Checks for a table within a cell 
                     if (row.Cells[i].Tables.Count != 0 && paragraph.Text.Equals(string.Empty))

@@ -10,51 +10,52 @@ using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Parsers
 {
-    public class PictureParser //: IOriginator
+    public class PictureParser : IOriginator
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private byte[] _state = new byte[0];
+        private PictureModel _state = new PictureModel();
 
         public PictureParser() { }
 
-        public PictureParser(byte[] state)
+        public PictureParser(PictureModel state)
         {
             this._state = state;
-            log.Debug("PictureParser: My initial state is: " + state);
+            log.Debug("PictureParser: My initial state is: " + this._state);
             if (this._state == null)
             {
-                this._state = new byte[0];
+                this._state = new PictureModel();
             }
         }
-        public void Parse(WParagraph paragraph)//TODO change to just be a string of the text???
+
+        public void Parse(WParagraph paragraph)
         {
             for (int i = 0; i < paragraph.ChildEntities.Count; i++)
             {
                 if (paragraph.ChildEntities[i].GetType().Equals(typeof(WPicture)))
                 {
                     WPicture picture = (WPicture)paragraph.ChildEntities[i];
-                    this._state = picture.ImageBytes;
+                    this._state = new PictureModel(picture.Name, picture.ImageBytes);
                 }
             }
         }
 
         // Saves the current state inside a memento.
-        public byte[] Save()
+        public IMemento Save()
         {
             return this._state;
         }
 
-        ////Restores the Originator's state from a memento object.
-        //public void Restore(IMemento memento)
-        //{
-        //    if (!(memento is RegulationExtrasModel))
-        //    {
-        //        throw new Exception("Unknown memento class " + memento.ToString());
-        //    }
+        //Restores the Originator's state from a memento object.
+        public void Restore(IMemento memento)
+        {
+            if (!(memento is PictureModel))
+            {
+                throw new Exception("Unknown memento class " + memento.ToString());
+            }
 
-        //    this._state = (RegulationExtrasModel)memento.GetState();
-        //    log.Debug($"PictureParser: My state has changed to: {_state}");
-        //}
+            this._state = (PictureModel)memento.GetState();
+            log.Debug($"PictureParser: My state has changed to: {this._state}");
+        }
     }
 }

@@ -22,7 +22,7 @@ namespace GliToJiraImporter.Parsers
         public DescriptionParser(RegulationExtrasModel state)
         {
             this._state = state;
-            log.Debug("DescriptionParser: My initial state is: " + state);
+            log.Debug("DescriptionParser: My initial state is: " + this._state.State);
             if (this._state == null)
             {
                 this._state = new RegulationExtrasModel();
@@ -62,7 +62,7 @@ namespace GliToJiraImporter.Parsers
             }
 
             this._state = (RegulationExtrasModel)memento.GetState();
-            log.Debug($"DescriptionParser: My state has changed to: {_state}");
+            log.Debug($"DescriptionParser: My state has changed to: {this._state.State}");
         }
     }
 }

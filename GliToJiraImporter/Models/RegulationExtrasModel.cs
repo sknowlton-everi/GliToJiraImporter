@@ -23,11 +23,6 @@ namespace GliToJiraImporter.Models
             return this.State;
         }
 
-        //public string GetState()
-        //{
-        //    return this.State;
-        //}
-
         public IMemento GetState()
         {
             return this;
@@ -46,7 +41,7 @@ namespace GliToJiraImporter.Models
             //bool isDescription = !this.IsEmpty();
             
             //return isClauseId || isPicture || isEmbededdTable || isDescription;
-            return IsValidClauseId() || IsValidPicture() || IsValidDescription();
+            return IsValidClauseId() || IsValidDescription();
         }
 
         public bool IsValidClauseId()
@@ -57,11 +52,6 @@ namespace GliToJiraImporter.Models
         public bool IsValidDescription()
         {
             return !this.IsEmpty();
-        }
-
-        public bool IsValidPicture()
-        {
-            return !this.IsEmpty() && Convert.TryFromBase64String(this.State, new Span<byte>(), out int bytesWritten);
         }
     }
 }

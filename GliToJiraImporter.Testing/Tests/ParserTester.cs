@@ -189,23 +189,24 @@ namespace GliToJiraImporter.Testing.Tests
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             Assert.NotNull(result);
-            Assert.That(result.Count, Is.EqualTo(expectedResult.Count));
+            Assert.That(result.Count, Is.EqualTo(expectedResult.Count), $"The result count does not match the expected.");
             for (int i = 0; i < result.Count; i++)
             {
-                Assert.That(result[i].Category, Is.EqualTo(expectedResult[i].Category));
-                Assert.That(result[i].RegulationList.Count, Is.EqualTo(expectedResult[i].RegulationList.Count));
+                Assert.That(result[i].Category, Is.EqualTo(expectedResult[i].Category), $"The Category of {result[i].Category} does not match the expected.");
+                Assert.That(result[i].RegulationList.Count, Is.EqualTo(expectedResult[i].RegulationList.Count), $"The RegulationList count of {result[i].Category} does not match the expected.");
 
                 for (int j = 0; j < result[i].RegulationList.Count; j++)
                 {
                     RegulationModel resultRegulation = (RegulationModel)result[i].RegulationList[j];
                     RegulationModel expectedResultRegulation = (RegulationModel)expectedResult[i].RegulationList[j];
-                    Assert.That(resultRegulation.ClauseID, Is.EqualTo(expectedResultRegulation.ClauseID));
-                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory));
-                    Assert.That(resultRegulation.Description, Is.EqualTo(expectedResultRegulation.Description));
-                    Assert.That(resultRegulation.AttachmentList.Count, Is.EqualTo(expectedResultRegulation.AttachmentList.Count));
+                    Assert.That(resultRegulation.ClauseID, Is.EqualTo(expectedResultRegulation.ClauseID), $"The ClauseId of {resultRegulation.ClauseID} does not match the expected.");
+                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory), $"The Subcategory of {resultRegulation.ClauseID} does not match the expected.");
+                    Assert.That(resultRegulation.Description, Is.EqualTo(expectedResultRegulation.Description), $"The Description of {resultRegulation.ClauseID} does not match the expected.");
+                    Assert.That(resultRegulation.AttachmentList.Count, Is.EqualTo(expectedResultRegulation.AttachmentList.Count), $"The AttachmentList of {resultRegulation.ClauseID} does not match the expected.");
                     for (int k = 0; k < resultRegulation.AttachmentList.Count; k++)
                     {
-                        Assert.That(resultRegulation.AttachmentList[k], Is.EqualTo(expectedResultRegulation.AttachmentList[k]));
+                        Assert.That(resultRegulation.AttachmentList[k].ImageName, Is.EqualTo(expectedResultRegulation.AttachmentList[k].ImageName), $"ImageName at position {k} of {resultRegulation.ClauseID} does not match the expected.");
+                        Assert.That(resultRegulation.AttachmentList[k].ImageBytes, Is.EqualTo(expectedResultRegulation.AttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseID} does not match the expected.");
                     }
                 }
             }

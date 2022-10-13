@@ -161,7 +161,14 @@ namespace GliToJiraImporter.Utilities
             issue.SaveChanges();
             for (int i = 0; i < regulationModel.AttachmentList.Count; i++)
             {
-                issue.AddAttachment($"{regulationModel.ClauseID} attachment #{i}", regulationModel.AttachmentList[i]);
+                if (regulationModel.AttachmentList[i].ImageName == string.Empty)
+                {
+                    issue.AddAttachment($"{regulationModel.ClauseID} attachment #{i}.png", regulationModel.AttachmentList[i].ImageBytes);
+                }
+                else
+                {
+                    issue.AddAttachment($"{regulationModel.AttachmentList[i].ImageName}.png", regulationModel.AttachmentList[i].ImageBytes);
+                }
             }
             issue.SaveChanges();
 

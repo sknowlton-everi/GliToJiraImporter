@@ -13,7 +13,7 @@ namespace GliToJiraImporter.Models
         public string ClauseID { get; set; } = string.Empty;
         public string Subcategory { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
-        public IList<byte[]> AttachmentList { get; set; } = new List<byte[]>();
+        public IList<PictureModel> AttachmentList { get; set; } = new List<PictureModel>();
 
         public RegulationModel() { }
         public RegulationModel(string state)
