@@ -41,8 +41,41 @@ namespace GliToJiraImporter.Parsers
             string strikeThroughRegex = @"([^A-Za-z0-9])(-)([^\s].+[^\s])(-)([^A-Za-z0-9])";
             paragraph.Text = Regex.Replace(paragraph.Text, strikeThroughRegex, "$1 $2 $3 $4 $5");
 
-            // Checking for tabs and what I guess are dashes, as Jira doesn't know how to read them
-            paragraph.Text = paragraph.Text.Replace("\u000B", "&nbsp;&nbsp;&nbsp;&nbsp;");
+
+            // Check for different text styling
+            WParagraphFormat paragraphFormat = paragraph.ParagraphFormat;
+            for (int i = 0; i < paragraph.Items.Count; i++)
+            //foreach(WTextRange textRange in paragraph.Items)
+            {
+                //TODO whitespace might cause issues with all of these but I'm worried that trimming will remove any spacing between this and th other ranges
+                WTextRange textRange = (WTextRange)paragraph.Items[i];
+                if (textRange.CharacterFormat.Bold)
+                {
+                    textRange.Text = $"*{textRange.Text}*";
+                }
+                if (textRange.CharacterFormat.Italic)
+                {
+                    textRange.Text = $"_{textRange.Text}_";
+                }
+                if (textRange.CharacterFormat.Strikeout)
+                {
+                    textRange.Text = $"-{textRange.Text}-";
+                }
+                if (textRange.CharacterFormat.UnderlineStyle == UnderlineStyle.Single)
+                {
+                    textRange.Text = $"+{textRange.Text}+";
+                }
+                //System.Drawing.Color blackColor = System.Drawing.Color.Black;
+                //if (textRange.CharacterFormat.TextColor != System.Drawing.Color.Black)
+                //{
+                //    //string rgb = textRange.CharacterFormat.TextColor.R + textRange.CharacterFormat.TextColor.G + textRange.CharacterFormat.TextColor.B;
+                //    string rgb = textRange.CharacterFormat.TextColor.ToString();
+                //    textRange.Text = $"\\{{color: {rgb}\\}}{textRange.Text}\\{{color\\}}";
+                //}
+
+
+                // Checking for tabs and what I guess are dashes, as Jira doesn't know how to read them
+                paragraph.Text = paragraph.Text.Replace("\u000B", "&nbsp;&nbsp;&nbsp;&nbsp;");
             paragraph.Text = paragraph.Text.Replace('\u001E', '-');
 
             this._state.State += paragraph.Text;
