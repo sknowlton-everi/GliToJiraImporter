@@ -32,6 +32,7 @@ namespace GliToJiraImporter.Parsers
 
         public void Parse(WParagraph paragraph)
         {
+            string result = string.Empty;
             if (!this._state.State.Equals(string.Empty))
             {
                 this._state.State += "\n";
@@ -39,46 +40,72 @@ namespace GliToJiraImporter.Parsers
 
             // Checking for a dash (-) in front of and behind a word, then added spaces to avoid Jira crossing it out
             string strikeThroughRegex = @"([^A-Za-z0-9])(-)([^\s].+[^\s])(-)([^A-Za-z0-9])";
-            paragraph.Text = Regex.Replace(paragraph.Text, strikeThroughRegex, "$1 $2 $3 $4 $5");
-
+            result = Regex.Replace(paragraph.Text, strikeThroughRegex, "$1\\$2$3\\$4$5");
 
             // Check for different text styling
             WParagraphFormat paragraphFormat = paragraph.ParagraphFormat;
             for (int i = 0; i < paragraph.Items.Count; i++)
-            //foreach(WTextRange textRange in paragraph.Items)
             {
-                //TODO whitespace might cause issues with all of these but I'm worried that trimming will remove any spacing between this and th other ranges
-                WTextRange textRange = (WTextRange)paragraph.Items[i];
-                if (textRange.CharacterFormat.Bold)
+                if (paragraph.Items[i].GetType() == typeof(Break))
                 {
-                    textRange.Text = $"*{textRange.Text}*";
+                    result += '\n';
                 }
-                if (textRange.CharacterFormat.Italic)
+                else
                 {
-                    textRange.Text = $"_{textRange.Text}_";
+                    //TODO whitespace might cause issues with all of these but I'm worried that trimming will remove any spacing between this and the other ranges
+                    WTextRange textRange = (WTextRange)paragraph.Items[i];
+                    if (textRange.CharacterFormat.Bold)
+                    {
+                        if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Bold))
+                        {
+                            result = result.Replace(textRange.Text, $"*{textRange.Text}");
+                        }
+                        if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Bold))
+                        {
+                            result = result.Replace(textRange.Text, $"{textRange.Text}*");
+                        }
+                    }
+                    if (textRange.CharacterFormat.Italic)
+                    {
+                        if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Italic))
+                        {
+                            result = result.Replace(textRange.Text, $"_{textRange.Text}");
+                        }
+                        if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Italic))
+                        {
+                            result = result.Replace(textRange.Text, $"{textRange.Text}_");
+                        }
+                    }
+                    if (textRange.CharacterFormat.Strikeout)
+                    {
+                        if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Strikeout))
+                        {
+                            result = result.Replace(textRange.Text, $"-{textRange.Text}");
+                        }
+                        if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Strikeout))
+                        {
+                            result = result.Replace(textRange.Text, $"{textRange.Text}-");
+                        }
+                    }
+                    if (textRange.CharacterFormat.UnderlineStyle == UnderlineStyle.Single)
+                    {
+                        if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && ((WTextRange)textRange.PreviousSibling).CharacterFormat.UnderlineStyle != UnderlineStyle.Single))
+                        {
+                            result = result.Replace(textRange.Text, $"+{textRange.Text}");
+                        }
+                        if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && ((WTextRange)textRange.NextSibling).CharacterFormat.UnderlineStyle != UnderlineStyle.Single))
+                        {
+                            result = result.Replace(textRange.Text, $"{textRange.Text}+");
+                        }
+                    }
                 }
-                if (textRange.CharacterFormat.Strikeout)
-                {
-                    textRange.Text = $"-{textRange.Text}-";
-                }
-                if (textRange.CharacterFormat.UnderlineStyle == UnderlineStyle.Single)
-                {
-                    textRange.Text = $"+{textRange.Text}+";
-                }
-                //System.Drawing.Color blackColor = System.Drawing.Color.Black;
-                //if (textRange.CharacterFormat.TextColor != System.Drawing.Color.Black)
-                //{
-                //    //string rgb = textRange.CharacterFormat.TextColor.R + textRange.CharacterFormat.TextColor.G + textRange.CharacterFormat.TextColor.B;
-                //    string rgb = textRange.CharacterFormat.TextColor.ToString();
-                //    textRange.Text = $"\\{{color: {rgb}\\}}{textRange.Text}\\{{color\\}}";
-                //}
+            }
 
+            // Checking for tabs and what I guess are dashes, as Jira doesn't know how to read them
+            result = result.Replace("\u000B", "&nbsp;&nbsp;&nbsp;&nbsp;");
+            result = result.Replace('\u001E', '-');
 
-                // Checking for tabs and what I guess are dashes, as Jira doesn't know how to read them
-                paragraph.Text = paragraph.Text.Replace("\u000B", "&nbsp;&nbsp;&nbsp;&nbsp;");
-            paragraph.Text = paragraph.Text.Replace('\u001E', '-');
-
-            this._state.State += paragraph.Text;
+            this._state.State += result;
         }
 
         // Saves the current state inside a memento.
