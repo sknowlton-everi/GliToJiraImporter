@@ -32,10 +32,10 @@ namespace GliToJiraImporter.Parsers
 
         public void Parse(WParagraph paragraph)
         {
-            Regex clauseIdRegex = new Regex(@"((NS)+(\d)+(.)+(\d)+(.)+(\d))");
+            Regex clauseIdRegex = new Regex(@"((.{0,3})+(\d)+(.)+(\d)+(.)+(\d))");
             if (clauseIdRegex.IsMatch(paragraph.Text))
             {
-                this._state.State = paragraph.Text;
+                this._state.State = paragraph.Text.Trim();
             }
         }
 

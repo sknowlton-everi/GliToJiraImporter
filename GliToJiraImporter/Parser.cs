@@ -62,7 +62,7 @@ namespace GliToJiraImporter
 
             // Iterates the tables of the section
             //TODO if i is set to anything below 4, the tests get the following error. When running it myself it seems to maybe be an infinite loop issue
-                //log4net:ERROR RollingFileAppender: INTERNAL ERROR. Append is False but OutputFile [C:\MForce\GliToJiraImporter\GliToJiraImporter.Testing\bin\Debug\net6.0\gliToJiraImporter.log] already exists.
+            //log4net:ERROR RollingFileAppender: INTERNAL ERROR. Append is False but OutputFile [C:\MForce\GliToJiraImporter\GliToJiraImporter.Testing\bin\Debug\net6.0\gliToJiraImporter.log] already exists.
             for (int i = 4; i < section.Tables.Count; i++)
             {
                 // Iterates the tables of the section
@@ -99,10 +99,13 @@ namespace GliToJiraImporter
             else
             {
                 CategoryModel x = (CategoryModel)categoryoriginator.Save();
-                x.RegulationList.RemoveAt(x.RegulationList.Count - 1);
-                if (x.IsValid())
+                if (x.RegulationList.Any())
                 {
-                    result.Add(x);
+                    x.RegulationList.RemoveAt(x.RegulationList.Count - 1);
+                    if (x.IsValid())
+                    {
+                        result.Add(x);
+                    }
                 }
             }
             return result;
