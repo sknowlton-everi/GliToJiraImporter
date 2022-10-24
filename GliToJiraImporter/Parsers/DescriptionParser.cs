@@ -38,12 +38,7 @@ namespace GliToJiraImporter.Parsers
                 this._state.State += "\n";
             }
 
-            // Checking for a dash (-) in front of and behind a word, then added spaces to avoid Jira crossing it out
-            string strikeThroughRegex = @"([^A-Za-z0-9])(-)([^\s].+[^\s])(-)([^A-Za-z0-9])";
-            result = Regex.Replace(paragraph.Text, strikeThroughRegex, "$1\\$2$3\\$4$5");
-
             // Check for different text styling
-            WParagraphFormat paragraphFormat = paragraph.ParagraphFormat;
             for (int i = 0; i < paragraph.Items.Count; i++)
             {
                 if (paragraph.Items[i].GetType() == typeof(Break))
@@ -52,60 +47,76 @@ namespace GliToJiraImporter.Parsers
                 }
                 else
                 {
-                    //TODO whitespace might cause issues with all of these but I'm worried that trimming will remove any spacing between this and the other ranges
                     WTextRange textRange = (WTextRange)paragraph.Items[i];
+
+                    // Checking for certain characters in front of and behind a word, then added spaces to avoid Jira confusing them for formating
+                    textRange = this.ignoreUnintendedFormating(textRange);
+
                     if (textRange.CharacterFormat.Bold)
                     {
                         if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Bold))
                         {
-                            result = result.Replace(textRange.Text, $"*{textRange.Text}");
+                            textRange.Text = textRange.Text.Replace(textRange.Text, $"*{textRange.Text}");
                         }
                         if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Bold))
                         {
-                            result = result.Replace(textRange.Text, $"{textRange.Text}*");
+                            textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}*");
                         }
                     }
                     if (textRange.CharacterFormat.Italic)
                     {
                         if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Italic))
                         {
-                            result = result.Replace(textRange.Text, $"_{textRange.Text}");
+                            textRange.Text = textRange.Text.Replace(textRange.Text, $"_{textRange.Text}");
                         }
                         if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Italic))
                         {
-                            result = result.Replace(textRange.Text, $"{textRange.Text}_");
+                            textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}_");
                         }
                     }
                     if (textRange.CharacterFormat.Strikeout)
                     {
                         if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Strikeout))
                         {
-                            result = result.Replace(textRange.Text, $"-{textRange.Text}");
+                            textRange.Text = textRange.Text.Replace(textRange.Text, $"-{textRange.Text}");
                         }
                         if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Strikeout))
                         {
-                            result = result.Replace(textRange.Text, $"{textRange.Text}-");
+                            textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}-");
                         }
                     }
                     if (textRange.CharacterFormat.UnderlineStyle == UnderlineStyle.Single)
                     {
                         if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && ((WTextRange)textRange.PreviousSibling).CharacterFormat.UnderlineStyle != UnderlineStyle.Single))
                         {
-                            result = result.Replace(textRange.Text, $"+{textRange.Text}");
+                            textRange.Text = textRange.Text.Replace(textRange.Text, $"+{textRange.Text}");
                         }
                         if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && ((WTextRange)textRange.NextSibling).CharacterFormat.UnderlineStyle != UnderlineStyle.Single))
                         {
-                            result = result.Replace(textRange.Text, $"{textRange.Text}+");
+                            textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}+");
                         }
                     }
+                    result += textRange.Text;
                 }
             }
 
-            // Checking for tabs and what I guess are dashes, as Jira doesn't know how to read them
-            result = result.Replace("\u000B", "&nbsp;&nbsp;&nbsp;&nbsp;");
+            // Checking for what I guess are dashes, as Jira doesn't know how to read them
             result = result.Replace('\u001E', '-');
 
             this._state.State += result;
+        }
+
+        private WTextRange ignoreUnintendedFormating(WTextRange textRange)
+        {
+            string[] formatingChars = { @"\*", "_", "-", @"\+" };
+
+            foreach (string character in formatingChars)
+            {
+                string formatingCharRegex = "([^A-Za-z0-9])(" + character + @")([^\s].+[^\s])(" + character + ")([^A-Za-z0-9])";
+                textRange.Text = Regex.Replace(textRange.Text, formatingCharRegex, "$1\\$2$3\\$4$5");
+            }
+
+            return textRange;
         }
 
         // Saves the current state inside a memento.
