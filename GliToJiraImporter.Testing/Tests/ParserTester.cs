@@ -190,6 +190,22 @@ namespace GliToJiraImporter.Testing.Tests
             //Assert.Catch<Exception>(sut.Parse(),"Unknown document type did not throw an exception.");
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
+        [Test]
+        public void ParserCharFormatTest()
+        {
+            //given
+            parameterModelStub.FilePath = $"{path}CHARFORMAT-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserCharFormatTestExpectedResult.txt"));
+
+            //when
+            IList<CategoryModel> result = sut.Parse();
+
+            //then
+            Assert.NotNull(expectedResult);
+            this.testAssertModel(expectedResult, result);
+        }
+
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             Assert.NotNull(result);
