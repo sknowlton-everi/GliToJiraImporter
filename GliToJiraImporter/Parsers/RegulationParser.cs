@@ -18,9 +18,9 @@ namespace GliToJiraImporter.Parsers
             _state = new RegulationModel();
         }
 
-        public RegulationParser(RegulationModel state)
+        public RegulationParser(IMemento state)
         {
-            this._state = state;
+            this._state = (RegulationModel?)state;
             log.Debug("RegulationParser: My initial state is: " + JsonSerializer.Serialize(this._state));
             if (this._state == null)
             {

@@ -204,6 +204,22 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
+        [Test]
+        public void ParserClauseIdVarietiesTest()
+        {
+            //given
+            parameterModelStub.FilePath = $"{checkoffPath}CLAUSEID-VARIETIES.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserClauseIdVarietiesTestExpectedResult.txt"));
+
+            //when
+            IList<CategoryModel> result = sut.Parse();
+
+            //then
+            Assert.NotNull(expectedResult);
+            this.testAssertModel(expectedResult, result);
+        }
+
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             Assert.NotNull(result);
@@ -211,7 +227,7 @@ namespace GliToJiraImporter.Testing.Tests
             for (int i = 0; i < result.Count; i++)
             {
                 Assert.That(result[i].Category, Is.EqualTo(expectedResult[i].Category), $"The Category of {result[i].Category} does not match the expected.");
-                Assert.That(result[i].RegulationList.Count, Is.EqualTo(expectedResult[i].RegulationList.Count), $"The RegulationList count of {result[i].Category} does not match the expected.");
+                Assert.That(result[i].RegulationList.Count, Is.EqualTo(expectedResult[i].RegulationList.Count), $"The RegulationList count of \"{result[i].Category}\" does not match the expected.");
 
                 for (int j = 0; j < result[i].RegulationList.Count; j++)
                 {

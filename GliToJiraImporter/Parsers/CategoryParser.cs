@@ -1,13 +1,8 @@
 ﻿using GliToJiraImporter.Models;
 using log4net;
 using Syncfusion.DocIO.DLS;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Parsers
 {
@@ -56,7 +51,6 @@ namespace GliToJiraImporter.Parsers
             // Iterates the rows of the table
             for (; rowIndex < table.Rows.Count && !categoryComplete; rowIndex++)
             {
-                Console.WriteLine(rowIndex);
                 // Checks for a gray background, with the idea that they are either a category, sub-category, or the extra header at the start
                 WTableRow x = table.Rows[rowIndex];
                 if (x.Cells[0].CellFormat.BackColor.Name.Equals("ffd9d9d9") && !x.Cells[0].Paragraphs[0].Text.Equals(string.Empty))
@@ -68,7 +62,7 @@ namespace GliToJiraImporter.Parsers
                         categoryModel.RegulationList.Add((RegulationModel)y);
                     }
                     // Clear the originator as it was either invalid or added
-                    regulationOriginator = new RegulationParser((RegulationModel)regulationOriginator.Save());
+                    regulationOriginator = new RegulationParser(regulationOriginator.Save());
 
                     // Checks for a double cell, with the idea that it's a category
                     if (categoryModel.Category.Equals(string.Empty) && x.Cells.Count == 2)
@@ -116,7 +110,7 @@ namespace GliToJiraImporter.Parsers
 
             }
 
-            if (regulationOriginator.Save().IsValid() && (categoryModel.RegulationList.Count == 0 || !((RegulationModel)regulationOriginator.Save()).ClauseID.Equals(categoryModel.RegulationList.Last().ClauseID)))
+            if (regulationOriginator.Save().IsValid() && (categoryModel.RegulationList.Count == 0 || !((RegulationModel)regulationOriginator.Save()).Equals(categoryModel.RegulationList.Last())))
             {
                 categoryModel.RegulationList.Add((RegulationModel)regulationOriginator.Save());
             }

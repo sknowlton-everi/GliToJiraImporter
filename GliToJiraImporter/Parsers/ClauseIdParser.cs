@@ -32,10 +32,34 @@ namespace GliToJiraImporter.Parsers
 
         public void Parse(WParagraph paragraph)
         {
-            Regex clauseIdRegex = new Regex(@"((.{0,3})+(\d)+(.)+(\d)+(.)+(\d))");
-            if (clauseIdRegex.IsMatch(paragraph.Text))
+            Regex[] clauseIdRegexs = new Regex[]
             {
-                this._state.State = paragraph.Text.Trim();
+                // 3 sets of numbers
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([(])+(\d+)+([)]))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([A-Za-z0-9]))"),
+                // 2 sets of numbers
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([(])+(\d+)+([)]))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([A-Za-z0-9]))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+(\d+)+([)])+([(])+([A-Za-z0-9])+([)]))"),
+                // 1 set of numbers
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+(\d+)+([)]))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
+                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([A-Za-z0-9]))"),
+
+            };
+            for(int i = 0; i < clauseIdRegexs.Length; i++)
+            {
+                Match match = clauseIdRegexs[i].Match(paragraph.Text);
+                if (match.Success && match.Value.Equals(paragraph.Text.Trim()))
+                {
+                    this._state.State = paragraph.Text.Trim();
+                    break;
+                }
             }
         }
 

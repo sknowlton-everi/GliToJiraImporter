@@ -1,15 +1,12 @@
-﻿using Newtonsoft.Json.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using log4net;
+using System.Reflection;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Models
 {
     public class RegulationModel : IMemento
     {
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
         public string ClauseID { get; set; } = string.Empty;
         public string Subcategory { get; set; } = string.Empty;
         public string Description { get; set; } = string.Empty;
@@ -50,6 +47,29 @@ namespace GliToJiraImporter.Models
         public string ToJson()
         {
             return JsonSerializer.Serialize(this);
+        }
+
+        public override bool Equals(object? obj)
+        {
+            bool result = false;
+            try
+            {
+                RegulationModel inputModel = (RegulationModel)obj;
+                result = this.ClauseID.Equals(inputModel.ClauseID);
+                result = result && this.Subcategory.Equals(inputModel.Subcategory);
+                result = result && this.Description.Equals(inputModel.Description);
+                result = result && this.AttachmentList.Count == inputModel.AttachmentList.Count;
+                for (int i = 0; i < this.AttachmentList.Count && result; i++)
+                {
+                    result = result && this.AttachmentList[i].Equals(inputModel.AttachmentList[i]);
+                }
+            }
+            catch (InvalidCastException)
+            {
+                log.Error("The passed in object is not of type RegulationModel");
+                return false;
+            }
+            return result;
         }
     }
 }
