@@ -41,7 +41,7 @@ namespace GliToJiraImporter.Utilities
             }
             catch (Exception Ex)
             {
-                Console.WriteLine(Ex.ToString());
+                log.Error(Ex.ToString());
             }
         }
 
@@ -89,7 +89,7 @@ namespace GliToJiraImporter.Utilities
             }
             catch (Exception Ex)
             {
-                Console.WriteLine(Ex.ToString());
+                log.Error(Ex.ToString());
             }
         }
 

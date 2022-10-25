@@ -396,3 +396,4 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+GliToJiraImporter.Testing/Public/TestCheckoffs/extra-checkoffs-for-testing/

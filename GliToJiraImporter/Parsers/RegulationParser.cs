@@ -18,9 +18,9 @@ namespace GliToJiraImporter.Parsers
             _state = new RegulationModel();
         }
 
-        public RegulationParser(RegulationModel state)
+        public RegulationParser(IMemento state)
         {
-            this._state = state;
+            this._state = (RegulationModel?)state;
             log.Debug("RegulationParser: My initial state is: " + JsonSerializer.Serialize(this._state));
             if (this._state == null)
             {
@@ -53,7 +53,10 @@ namespace GliToJiraImporter.Parsers
                     // Checks for ClauseId or description within the cell
                     if (!paragraph.Text.Equals(string.Empty) && !paragraph.Text.Contains("Choose an item"))
                     {
-                        clauseIdParser.Parse(paragraph);
+                        if (i == 0)
+                        {
+                            clauseIdParser.Parse(paragraph);
+                        }
                         // If a clauseId was parsed and that the current models clauseId is empty, then save it if so
                         if (!clauseIdParser.Save().GetState().Equals(string.Empty) && regulationModel.ClauseID.Equals(string.Empty))
                         {
