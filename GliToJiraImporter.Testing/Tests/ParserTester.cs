@@ -17,7 +17,8 @@ namespace GliToJiraImporter.Testing.Tests
         private ParameterModel parameterModelStub;
         private Jira jiraConnectionStub;
         Project jiraProjectStub;
-        private string path;
+        private static readonly string checkoffPath = @"..\..\..\Public\TestCheckoffs\";
+        private static readonly string expectedResultPath = @"..\..\..\Public\ExpectedResults\";
         IList<CategoryModel> expectedResult;
 
         [SetUp]
@@ -27,8 +28,6 @@ namespace GliToJiraImporter.Testing.Tests
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
 
             log.Info(message: new StackFrame().GetMethod().Name);
-
-            path = @"..\..\..\Public\";
 
             //parameterModelStub = new()
             //{
@@ -44,7 +43,7 @@ namespace GliToJiraImporter.Testing.Tests
             //ParameterModel 
             parameterModelStub = new()
             {
-                FilePath = $"{path}Australia-New-Zealand.docx",
+                FilePath = $"{checkoffPath}Australia-New-Zealand.docx",
                 JiraUrl = "http://localhost:8080/",
                 UserName = "",
                 Password = "",
@@ -89,8 +88,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserSingleTest()
         {
             //given
-            parameterModelStub.FilePath = $"{path}SINGLE-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserSingleTestExpectedResult.txt"));
+            parameterModelStub.FilePath = $"{checkoffPath}SINGLE-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserSingleTestExpectedResult.txt"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -104,8 +103,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserSingleMultiDescTest()
         {
             //given
-            parameterModelStub.FilePath = $"{path}SINGLE-MULTIDESC-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserSingleMultiDescTestExpectedResult.txt"));
+            parameterModelStub.FilePath = $"{checkoffPath}SINGLE-MULTIDESC-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserSingleMultiDescTestExpectedResult.txt"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -119,8 +118,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserPicturesTest()
         {
             //given
-            parameterModelStub.FilePath = $"{path}PICTURES-SHORT-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}PicturesTestExpectedResult.txt"));
+            parameterModelStub.FilePath = $"{checkoffPath}PICTURES-SHORT-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}PicturesTestExpectedResult.txt"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -135,8 +134,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserSpecialsTest()
         {
             //given
-            parameterModelStub.FilePath = $"{path}SPECIALS-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserSpecialsTestExpectedResult.txt"));
+            parameterModelStub.FilePath = $"{checkoffPath}SPECIALS-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserSpecialsTestExpectedResult.txt"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -151,29 +150,29 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserFullTest()
         {
             //given
-            //expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}FullTestSearchExpectedResult.txt"));
-            parameterModelStub.FilePath = $"{path}Australia-New-Zealand.docx";
-            int expectedCount = 635;
+            //expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}FullTestSearchExpectedResult.txt"));
+            parameterModelStub.FilePath = $"{checkoffPath}Australia-New-Zealand.docx";
+            int expectedCount = 633;
             //when
             IList<CategoryModel> result = sut.Parse();
 
             //then
             Assert.NotZero(result.Count);
             int totalRegs = 0;
-            foreach (CategoryModel category in result)
+            foreach (CategoryModel categoryModel in result)
             {
-                totalRegs += category.RegulationList.Count;
+                totalRegs += categoryModel.RegulationList.Count;
             }
             Assert.That(totalRegs, Is.EqualTo(expectedCount));
             //this.testAssertModel(expectedResult, result);
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
-        [Ignore("Work in progress")]
         public void ParserUnknownDocTypeTest()
         {
             //given
-            parameterModelStub.FilePath = $"{path}SINGLE-Australia-New-Zealand.docx";
+            parameterModelStub.FilePath = $"{checkoffPath}SINGLE-Australia-New-Zealand.docx";
             parameterModelStub.Type = 0;
             IList<CategoryModel> result = new List<CategoryModel>();
             //when
@@ -187,7 +186,6 @@ namespace GliToJiraImporter.Testing.Tests
                 Assert.That(e.Message, Is.EqualTo("Provided Document Type is Unknown. Try type 1 for Checkoff documents."));
                 Assert.That(result, Is.Empty);
             }
-            //Assert.Catch<Exception>(sut.Parse(),"Unknown document type did not throw an exception.");
         }
 
         [Ignore("Can only run locally with a local Jira.")]
@@ -195,8 +193,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserCharFormatTest()
         {
             //given
-            parameterModelStub.FilePath = $"{path}CHARFORMAT-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{path}ParserCharFormatTestExpectedResult.txt"));
+            parameterModelStub.FilePath = $"{checkoffPath}CHARFORMAT-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserCharFormatTestExpectedResult.txt"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
