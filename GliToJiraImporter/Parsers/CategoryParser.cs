@@ -12,7 +12,7 @@ namespace GliToJiraImporter.Parsers
 
         private CategoryModel _state;
 
-        public CategoryParser() 
+        public CategoryParser()
         {
             _state = new CategoryModel();
         }
@@ -53,7 +53,7 @@ namespace GliToJiraImporter.Parsers
             {
                 // Checks for a gray background, with the idea that they are either a category, sub-category, or the extra header at the start
                 WTableRow row = table.Rows[rowIndex];
-                if (row.Cells[0].CellFormat.BackColor.Name.Equals("ffd9d9d9") 
+                if (row.Cells[0].CellFormat.BackColor.Name.Equals("ffd9d9d9")
                     && !row.Cells[0].Paragraphs[0].Text.Equals(string.Empty)
                     && row.Cells.Count > 1)
                 {
@@ -92,12 +92,12 @@ namespace GliToJiraImporter.Parsers
                         {
                             newRegulation.Subcategory = row.Cells[0].Paragraphs[0].Text;
                         }
-                        
+
                         regulationParser = new RegulationParser(newRegulation);
                     }
                 }
                 // Continue only if the category has been found, as well as the regulation sub-category unless no category was provided
-                else if (!categoryModel.Category.Equals(string.Empty) 
+                else if (!categoryModel.Category.Equals(string.Empty)
                     && (categoryModel.NoCategory || !((RegulationModel)regulationParser.Save()).Subcategory.Equals(string.Empty)))
                 {
                     regulationCaretaker.Backup();
