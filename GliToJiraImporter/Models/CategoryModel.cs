@@ -6,6 +6,7 @@ namespace GliToJiraImporter.Models
     {
         public string Category { get; set; } = string.Empty;
         public IList<RegulationModel> RegulationList { get; set; } = new List<RegulationModel>();
+        public bool NoCategory { get; set; } = false;
         //public IList<IMemento> RegulationList { get; set; } = (IList<IMemento>)new List<RegulationModel>();
         //TODO Should ln:8 be IMemento instead, like ln:9^?
 
@@ -29,7 +30,7 @@ namespace GliToJiraImporter.Models
             {
                 for (int i = 0; i < RegulationList.Count && result; i++)
                 {
-                    result = RegulationList[i].IsValid();
+                    result = RegulationList[i].IsValid() && (NoCategory || !RegulationList[i].Subcategory.Equals(string.Empty));
                 }
             }
             return result;

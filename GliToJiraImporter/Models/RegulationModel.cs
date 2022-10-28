@@ -36,7 +36,7 @@ namespace GliToJiraImporter.Models
 
         public bool IsValid()
         {
-            return !ClauseID.Equals(string.Empty) && !Description.Equals(string.Empty) && !Subcategory.Equals(string.Empty);
+            return !ClauseID.Equals(string.Empty) && !Description.Equals(string.Empty);
         }
 
         public bool IsEmpty()

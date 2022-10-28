@@ -220,6 +220,22 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
+        [Test]
+        public void ParserNoCategoryTest()
+        {
+            //given
+            parameterModelStub.FilePath = $"{checkoffPath}NO-CATEGORY-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserNoCategoryTestExpectedResult.txt"));
+
+            //when
+            IList<CategoryModel> result = sut.Parse();
+
+            //then
+            Assert.NotNull(expectedResult);
+            this.testAssertModel(expectedResult, result);
+        }
+
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             Assert.NotNull(result);

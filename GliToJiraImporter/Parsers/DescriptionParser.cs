@@ -45,7 +45,7 @@ namespace GliToJiraImporter.Parsers
                 {
                     result += '\n';
                 }
-                else
+                else if (paragraph.Items[i].GetType() == typeof(WTextRange))
                 {
                     WTextRange textRange = (WTextRange)paragraph.Items[i];
 
@@ -97,6 +97,11 @@ namespace GliToJiraImporter.Parsers
                         }
                     }
                     result += textRange.Text;
+                }
+                else
+                {
+                    log.Info($"Type {paragraph.Items[i].EntityType} is not accounted for");
+                    result += paragraph.Text;
                 }
             }
 

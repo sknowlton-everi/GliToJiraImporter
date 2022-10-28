@@ -37,14 +37,14 @@ namespace GliToJiraImporter.Parsers
             string currentCategoryName = string.Empty;
 
             // Originator instantiation
-            RegulationParser regulationOriginator = new RegulationParser();
+            RegulationParser regulationParser = new RegulationParser();
             if (!categoryModel.IsEmpty() && (categoryModel.RegulationList.Count > 0))
             {
-                regulationOriginator = new RegulationParser((RegulationModel)categoryModel.RegulationList.Last().GetState());
+                regulationParser = new RegulationParser((RegulationModel)categoryModel.RegulationList.Last().GetState());
                 categoryModel.RegulationList.RemoveAt(categoryModel.RegulationList.Count - 1);
             }
             // Caretaker instantiation
-            Caretaker caretaker = new Caretaker(regulationOriginator);
+            Caretaker regulationCaretaker = new Caretaker(regulationParser);
 
             bool categoryComplete = false;
 
@@ -52,25 +52,27 @@ namespace GliToJiraImporter.Parsers
             for (; rowIndex < table.Rows.Count && !categoryComplete; rowIndex++)
             {
                 // Checks for a gray background, with the idea that they are either a category, sub-category, or the extra header at the start
-                WTableRow x = table.Rows[rowIndex];
-                if (x.Cells[0].CellFormat.BackColor.Name.Equals("ffd9d9d9") && !x.Cells[0].Paragraphs[0].Text.Equals(string.Empty))
+                WTableRow row = table.Rows[rowIndex];
+                if (row.Cells[0].CellFormat.BackColor.Name.Equals("ffd9d9d9") 
+                    && !row.Cells[0].Paragraphs[0].Text.Equals(string.Empty)
+                    && row.Cells.Count > 1)
                 {
                     // Add the originators memento if it's valid
-                    IMemento y = regulationOriginator.Save();
-                    if (y != null && y.IsValid())
+                    IMemento regulationParserModel = regulationParser.Save();
+                    if (regulationParserModel != null && regulationParserModel.IsValid())
                     {
-                        categoryModel.RegulationList.Add((RegulationModel)y);
+                        categoryModel.RegulationList.Add((RegulationModel)regulationParserModel);
                     }
                     // Clear the originator as it was either invalid or added
-                    regulationOriginator = new RegulationParser(regulationOriginator.Save());
+                    regulationParser = new RegulationParser(regulationParser.Save());
 
                     // Checks for a double cell, with the idea that it's a category
-                    if (categoryModel.Category.Equals(string.Empty) && x.Cells.Count == 2)
+                    if (categoryModel.Category.Equals(string.Empty) && row.Cells.Count == 2)
                     {
-                        categoryModel.Category = x.Cells[0].Paragraphs[0].Text;
+                        categoryModel.Category = row.Cells[0].Paragraphs[0].Text;
                     }
-                    // Checks if a new category is starting, and exits if so
-                    else if (x.Cells.Count == 2)
+                    // Checks if a new category is starting
+                    else if (row.Cells.Count == 2 || (categoryModel.NoCategory && row.Cells.Count == 3))
                     {
                         rowIndex--;
                         this._state = (CategoryModel)categoryModel.GetState();
@@ -78,41 +80,53 @@ namespace GliToJiraImporter.Parsers
                     }
                     else //This row is a subcategory header
                     {
-                        RegulationModel z = new RegulationModel();
-                        z.Subcategory = x.Cells[0].Paragraphs[0].Text;
-                        regulationOriginator = new RegulationParser(z);
+                        RegulationModel newRegulation = new RegulationModel();
+
+                        // Check if a category was found, and if not, sets it using the Subcategory instead
+                        if (categoryModel.Category.Equals(string.Empty))
+                        {
+                            categoryModel.NoCategory = true;
+                            categoryModel.Category = row.Cells[0].Paragraphs[0].Text;
+                        }
+                        else
+                        {
+                            newRegulation.Subcategory = row.Cells[0].Paragraphs[0].Text;
+                        }
+                        
+                        regulationParser = new RegulationParser(newRegulation);
                     }
                 }
-                // Continue only if the category and regulation sub-category have been filled in
-                else if (!categoryModel.Category.Equals(string.Empty) && !((RegulationModel)regulationOriginator.Save()).Subcategory.Equals(string.Empty))
+                // Continue only if the category has been found, as well as the regulation sub-category unless no category was provided
+                else if (!categoryModel.Category.Equals(string.Empty) 
+                    && (categoryModel.NoCategory || !((RegulationModel)regulationParser.Save()).Subcategory.Equals(string.Empty)))
                 {
-                    caretaker.Backup();
-                    bool isRegulationComplete = regulationOriginator.Parse(table.Rows[rowIndex]);
+                    regulationCaretaker.Backup();
+                    bool isRegulationComplete = regulationParser.Parse(table.Rows[rowIndex]);
                     if (isRegulationComplete)
                     {
                         rowIndex--;
                         // Validate the parse and undo if invalid
-                        if (!regulationOriginator.Save().IsValid())
+                        if (!regulationParser.Save().IsValid())
                         {
                             log.Error("Regulation Parsing invalid, undoing");
-                            caretaker.Undo();
+                            regulationCaretaker.Undo();
                         }
-                        else if (regulationOriginator.Save().IsValid())
+                        else if (regulationParser.Save().IsValid())
                         {
                             log.Debug("Regulation Parsing valid");
-                            categoryModel.RegulationList.Add((RegulationModel)regulationOriginator.Save());
+                            categoryModel.RegulationList.Add((RegulationModel)regulationParser.Save());
                             RegulationModel newRegulationModel = new RegulationModel();
-                            newRegulationModel.Subcategory = regulationOriginator.Save().GetName();
-                            regulationOriginator = new RegulationParser(newRegulationModel);
+                            newRegulationModel.Subcategory = regulationParser.Save().GetName();
+                            regulationParser = new RegulationParser(newRegulationModel);
                         }
                     }
                 }
 
             }
 
-            if (regulationOriginator.Save().IsValid() && (categoryModel.RegulationList.Count == 0 || !((RegulationModel)regulationOriginator.Save()).Equals(categoryModel.RegulationList.Last())))
+            if (regulationParser.Save().IsValid() && (categoryModel.RegulationList.Count == 0 || !((RegulationModel)regulationParser.Save()).Equals(categoryModel.RegulationList.Last())))
             {
-                categoryModel.RegulationList.Add((RegulationModel)regulationOriginator.Save());
+                categoryModel.RegulationList.Add((RegulationModel)regulationParser.Save());
             }
             this._state = (CategoryModel)categoryModel.GetState();
             return categoryComplete;
