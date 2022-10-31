@@ -159,6 +159,7 @@ namespace GliToJiraImporter.Utilities
             issue[SUBCATEGORY] = regulationModel.Subcategory;
             issue.Description = $"{regulationModel.Description}";
             issue.SaveChanges();
+
             for (int i = 0; i < regulationModel.AttachmentList.Count; i++)
             {
                 if (regulationModel.AttachmentList[i].ImageName == string.Empty)
