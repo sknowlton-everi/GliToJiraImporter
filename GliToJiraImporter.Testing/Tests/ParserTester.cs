@@ -220,6 +220,24 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
+        [Test]
+        public void ParserLinkTest()
+        {
+            //given
+            parameterModelStub.FilePath = $"{checkoffPath}LINKs-Australia-New-Zealand.docx";
+            //parameterModelStub.FilePath = $"{checkoffPath}NO-CATEGORY-New-South-Wales.docx";
+            //parameterModelStub.FilePath = $"\"{checkoffPath}extra-checkoffs-for-testing/New South Wales Communications Protocol Checkoff FM-TC-1229-AU.docx\"";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserLinkTestExpectedResult.json"));
+
+            //when
+            IList<CategoryModel> result = sut.Parse();
+
+            //then
+            Assert.NotNull(expectedResult);
+            this.testAssertModel(expectedResult, result);
+        }
+
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             Assert.NotNull(result);

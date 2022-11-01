@@ -1,4 +1,5 @@
 ﻿using GliToJiraImporter.Models;
+using GliToJiraImporter.Utilities;
 using log4net;
 using Syncfusion.DocIO.DLS;
 using System;
@@ -45,7 +46,7 @@ namespace GliToJiraImporter.Parsers
                 {
                     result += '\n';
                 }
-                else
+                else if (paragraph.Items[i].GetType() == typeof(WTextRange))
                 {
                     WTextRange textRange = (WTextRange)paragraph.Items[i];
 
@@ -97,6 +98,47 @@ namespace GliToJiraImporter.Parsers
                         }
                     }
                     result += textRange.Text;
+                }
+                else if (paragraph.Items[i].GetType() == typeof(WField) && ((WField)paragraph.Items[i]).FieldType == Syncfusion.DocIO.FieldType.FieldHyperlink)
+                {
+                    WField field = (WField)paragraph.Items[i];
+                    string fieldValue = field.FieldValue.Replace("\"", "");
+                    if (field.Text.StartsWith(" "))
+                    {
+                        result += ' ';
+                    }
+
+                    if (LinkUtilities.IsValidWebLink(fieldValue) || LinkUtilities.IsValidEmailAddress(fieldValue))
+                    {
+                        if (field.Text.Equals(fieldValue))
+                        {
+                            result += $"[{fieldValue}]";
+                        }
+                        else
+                        {
+                            result += $"[{field.Text.Trim()}|{fieldValue}]";
+                        }
+                    }
+                    else
+                    {
+                        log.Info($"Link type is not accounted for");
+                        result += $"{field.Text.Trim()}";
+                    }
+
+                    if (field.Text.EndsWith(" "))
+                    {
+                        result += ' ';
+                    }
+
+                    // Skip all other field marks 
+                    for (int j = i + 1; j < paragraph.Items.Count; j++)
+                    {
+                        if (paragraph.Items[j].GetType() == typeof(WFieldMark) && ((WFieldMark)paragraph.Items[j]).Type == FieldMarkType.FieldEnd)
+                        {
+                            i = j;
+                            break;
+                        }
+                    }
                 }
             }
 
