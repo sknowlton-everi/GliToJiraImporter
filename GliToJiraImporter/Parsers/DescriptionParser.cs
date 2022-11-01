@@ -102,7 +102,9 @@ namespace GliToJiraImporter.Parsers
                 else if (paragraph.Items[i].GetType() == typeof(WField) && ((WField)paragraph.Items[i]).FieldType == Syncfusion.DocIO.FieldType.FieldHyperlink)
                 {
                     WField field = (WField)paragraph.Items[i];
-                    string fieldValue = field.FieldValue.Replace("\"", "");
+                    string fieldValue = field.FieldValue.Replace("\"", "").Trim();
+
+                    // Prevent the loss of any starting spaces
                     if (field.Text.StartsWith(" "))
                     {
                         result += ' ';
@@ -121,10 +123,11 @@ namespace GliToJiraImporter.Parsers
                     }
                     else
                     {
-                        log.Info($"Link type is not accounted for");
+                        log.Debug($"Link type is not accounted for. Field Text: \"{field.Text}\", Field Value: \"{field.FieldValue}\"");
                         result += $"{field.Text.Trim()}";
                     }
 
+                    // Prevent the loss of any ending spaces
                     if (field.Text.EndsWith(" "))
                     {
                         result += ' ';

@@ -1,7 +1,9 @@
 using Atlassian.Jira;
 using GliToJiraImporter.Models;
 using log4net;
+using log4net.Appender;
 using log4net.Config;
+using log4net.Core;
 using log4net.Repository;
 using System.Diagnostics;
 using System.Reflection;
@@ -20,12 +22,16 @@ namespace GliToJiraImporter.Testing.Tests
         private static readonly string checkoffPath = @"..\..\..\Public\TestCheckoffs\";
         private static readonly string expectedResultPath = @"..\..\..\Public\ExpectedResults\";
         IList<CategoryModel> expectedResult;
+        MemoryAppender memoryAppender;
 
         [SetUp]
         public void Setup()
         {
             ILoggerRepository logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
+
+            this.memoryAppender = new log4net.Appender.MemoryAppender();
+            BasicConfigurator.Configure(this.memoryAppender);
 
             log.Info(message: new StackFrame().GetMethod().Name);
 
@@ -226,8 +232,6 @@ namespace GliToJiraImporter.Testing.Tests
         {
             //given
             parameterModelStub.FilePath = $"{checkoffPath}LINKs-Australia-New-Zealand.docx";
-            //parameterModelStub.FilePath = $"{checkoffPath}NO-CATEGORY-New-South-Wales.docx";
-            //parameterModelStub.FilePath = $"\"{checkoffPath}extra-checkoffs-for-testing/New South Wales Communications Protocol Checkoff FM-TC-1229-AU.docx\"";
             expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserLinkTestExpectedResult.json"));
 
             //when
@@ -240,6 +244,7 @@ namespace GliToJiraImporter.Testing.Tests
 
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
+            this.checkForErrorsInLogs();
             Assert.NotNull(result);
             Assert.That(result.Count, Is.EqualTo(expectedResult.Count), $"The result count does not match the expected.");
             for (int i = 0; i < result.Count; i++)
@@ -261,6 +266,15 @@ namespace GliToJiraImporter.Testing.Tests
                         Assert.That(resultRegulation.AttachmentList[k].ImageBytes, Is.EqualTo(expectedResultRegulation.AttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseID} does not match the expected.");
                     }
                 }
+            }
+        }
+
+        private void checkForErrorsInLogs()
+        {
+            LoggingEvent[] logEvents = memoryAppender.GetEvents();
+            foreach (LoggingEvent logEvent in logEvents)
+            {
+                Assert.That(logEvent.Level == Level.Info || logEvent.Level == Level.Debug, $"There was an error in the logs. \"{logEvent.RenderedMessage}\"");
             }
         }
 
