@@ -1,4 +1,4 @@
-﻿This program is meant to read in company created GLI documents and parse them for use in Jira.
+﻿This program is meant to read in company created GLI documents and parse them for use in Jira. 
 
 Here are the expected fields and a brief description of each:
 	-f	(File Path)
