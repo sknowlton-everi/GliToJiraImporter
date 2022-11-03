@@ -1,4 +1,4 @@
-name: Start Build .NET
+name: Build Project
 
 on:
   push:
