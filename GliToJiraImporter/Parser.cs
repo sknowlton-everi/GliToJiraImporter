@@ -1,14 +1,12 @@
-﻿using GliToJiraImporter.Models;
-using Syncfusion.DocIO.DLS;
-using GliToJiraImporter.Types;
-using log4net;
-using System.Reflection;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
+﻿using Atlassian.Jira;
+using GliToJiraImporter.Models;
 using GliToJiraImporter.Parsers;
-using Atlassian.Jira;
+using GliToJiraImporter.Types;
 using GliToJiraImporter.Utilities;
-using System.Text.Json;
+using log4net;
+using Syncfusion.DocIO.DLS;
+using System.Diagnostics;
+using System.Reflection;
 
 namespace GliToJiraImporter
 {
@@ -62,10 +60,10 @@ namespace GliToJiraImporter
 
             // Iterates the tables of the section
             //TODO if i is set to anything below 4, the tests get the following error. When running it myself it seems to maybe be an infinite loop issue
-            //log4net:ERROR RollingFileAppender: INTERNAL ERROR. Append is False but OutputFile [C:\MForce\GliToJiraImporter\GliToJiraImporter.Testing\bin\Debug\net6.0\gliToJiraImporter.log] already exists.
+            //  log4net:ERROR RollingFileAppender: INTERNAL ERROR. Append is False but OutputFile [C:\MForce\GliToJiraImporter\GliToJiraImporter.Testing\bin\Debug\net6.0\gliToJiraImporter.log] already exists.
             for (int i = 4; i < section.Tables.Count; i++)
             {
-                // Iterates the tables of the section
+                // Iterates the rows of the table
                 for (int j = 0; j < section.Tables[i].Rows.Count; j++)
                 {
                     // Backup state and parse
@@ -111,8 +109,7 @@ namespace GliToJiraImporter
             return result;
         }
 
-
-        // Ignore. This is the previous way of parsing 
+        // Ignore. This is the previous way of parsing
         //private IList<CategoryModel> parseTable()
         //{
         //    IList<CategoryModel> result = new List<CategoryModel>();
@@ -199,7 +196,7 @@ namespace GliToJiraImporter
         //                                currentRegulation.Description += paragraph.Text;
         //                            }
         //                        }
-        //                        // Check for a picture within a table 
+        //                        // Check for a picture within a table
         //                        else if (paragraph.ChildEntities.Count != 0)
         //                        {
         //                            for (int j = 0; j < paragraph.ChildEntities.Count; j++)
@@ -212,7 +209,7 @@ namespace GliToJiraImporter
         //                                }
         //                            }
         //                        }
-        //                        // Check for a table within a table 
+        //                        // Check for a table within a table
         //                        if (cell.Tables.Count != 0 && paragraph.Text.Equals(string.Empty))
         //                        {
         //                            foreach (WTable subTable in cell.Tables)

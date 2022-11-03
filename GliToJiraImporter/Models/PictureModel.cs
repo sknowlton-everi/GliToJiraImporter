@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-
-namespace GliToJiraImporter.Models
+﻿namespace GliToJiraImporter.Models
 {
     public class PictureModel : IMemento
     {
         public string ImageName { get; set; } = string.Empty;
         public byte[] ImageBytes { get; set; } = new byte[] { };
 
-        public PictureModel() { }
+        public PictureModel()
+        { }
 
         public PictureModel(string imageName, byte[] imageBytes)
         {
