@@ -1,14 +1,9 @@
 ﻿using GliToJiraImporter.Models;
 using log4net;
 using Syncfusion.DocIO.DLS;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Parsers
 {
@@ -18,7 +13,8 @@ namespace GliToJiraImporter.Parsers
 
         private RegulationExtrasModel _state = new RegulationExtrasModel();
 
-        public ClauseIdParser() { }
+        public ClauseIdParser()
+        { }
 
         public ClauseIdParser(RegulationExtrasModel state)
         {
@@ -50,9 +46,8 @@ namespace GliToJiraImporter.Parsers
                 new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+(\d+)+([)]))"),
                 new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
                 new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([A-Za-z0-9]))"),
-
             };
-            for(int i = 0; i < clauseIdRegexs.Length; i++)
+            for (int i = 0; i < clauseIdRegexs.Length; i++)
             {
                 Match match = clauseIdRegexs[i].Match(paragraph.Text);
                 if (match.Success && match.Value.Equals(paragraph.Text.Trim()))

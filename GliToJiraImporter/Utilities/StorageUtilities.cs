@@ -28,13 +28,13 @@ namespace GliToJiraImporter.Utilities
         {
             try
             {
-                // Check if file already exists. If yes, delete it.     
+                // Check if file already exists. If yes, delete it.
                 if (File.Exists(fileName)) File.Delete(fileName);
 
-                // Create a new file     
+                // Create a new file
                 using (FileStream fs = File.Create(fileName))
                 {
-                    // Add some text to file    
+                    // Add some text to file
                     Byte[] textBytes = new UTF8Encoding(true).GetBytes(text);
                     fs.Write(textBytes, 0, textBytes.Length);
                 }
@@ -73,16 +73,15 @@ namespace GliToJiraImporter.Utilities
                 }
             }
 
-            string value;
             try
             {
-                // Check if file already exists. If yes, delete it.     
+                // Check if file already exists. If yes, delete it.
                 if (File.Exists(fileName)) File.Delete(fileName);
 
-                // Create a new file     
+                // Create a new file
                 using (FileStream fs = File.Create(fileName))
                 {
-                    // Add some text to file    
+                    // Add some text to file
                     Byte[] textBytes = new UTF8Encoding(true).GetBytes(csvHeaders + "\n" + csvRegulations);
                     fs.Write(textBytes, 0, textBytes.Length);
                 }
@@ -159,6 +158,7 @@ namespace GliToJiraImporter.Utilities
             issue[SUBCATEGORY] = regulationModel.Subcategory;
             issue.Description = $"{regulationModel.Description}";
             issue.SaveChanges();
+
             for (int i = 0; i < regulationModel.AttachmentList.Count; i++)
             {
                 if (regulationModel.AttachmentList[i].ImageName == string.Empty)
@@ -174,7 +174,7 @@ namespace GliToJiraImporter.Utilities
 
             return issue;
         }
-    
+
         private IDictionary<string, string> getExistingClauseIds()
         {
             IDictionary<string, string> existingClauseIdList = new Dictionary<string, string>();
