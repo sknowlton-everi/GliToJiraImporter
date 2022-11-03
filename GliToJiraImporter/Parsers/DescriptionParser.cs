@@ -1,4 +1,5 @@
 ﻿using GliToJiraImporter.Models;
+using GliToJiraImporter.Utilities;
 using log4net;
 using Syncfusion.DocIO.DLS;
 using System.Reflection;
@@ -93,6 +94,50 @@ namespace GliToJiraImporter.Parsers
                         }
                     }
                     result += textRange.Text;
+                }
+                else if (paragraph.Items[i].GetType() == typeof(WField) && ((WField)paragraph.Items[i]).FieldType == Syncfusion.DocIO.FieldType.FieldHyperlink)
+                {
+                    WField field = (WField)paragraph.Items[i];
+                    string fieldValue = field.FieldValue.Replace("\"", "").Trim();
+
+                    // Prevent the loss of any starting spaces
+                    if (field.Text.StartsWith(" "))
+                    {
+                        result += ' ';
+                    }
+
+                    if (LinkUtilities.IsValidWebLink(fieldValue) || LinkUtilities.IsValidEmailAddress(fieldValue))
+                    {
+                        if (field.Text.Equals(fieldValue))
+                        {
+                            result += $"[{fieldValue}]";
+                        }
+                        else
+                        {
+                            result += $"[{field.Text.Trim()}|{fieldValue}]";
+                        }
+                    }
+                    else
+                    {
+                        log.Debug($"Link type is not accounted for. Field Text: \"{field.Text}\", Field Value: \"{field.FieldValue}\"");
+                        result += $"{field.Text.Trim()}";
+                    }
+
+                    // Prevent the loss of any ending spaces
+                    if (field.Text.EndsWith(" "))
+                    {
+                        result += ' ';
+                    }
+
+                    // Skip all other field marks 
+                    for (int j = i + 1; j < paragraph.Items.Count; j++)
+                    {
+                        if (paragraph.Items[j].GetType() == typeof(WFieldMark) && ((WFieldMark)paragraph.Items[j]).Type == FieldMarkType.FieldEnd)
+                        {
+                            i = j;
+                            break;
+                        }
+                    }
                 }
                 else
                 {
