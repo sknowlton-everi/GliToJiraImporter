@@ -239,7 +239,7 @@ namespace GliToJiraImporter.Testing.Tests
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             Assert.NotNull(result);
-            Assert.That(result.Count, Is.EqualTo(expectedResult.Count), $"The result count does not match the expected.");
+            Assert.That(result.Count, Is.EqualTo(expectedResult.Count), $"The result count of categories does not match the expected.");
             for (int i = 0; i < result.Count; i++)
             {
                 Assert.That(result[i].Category, Is.EqualTo(expectedResult[i].Category), $"The Category of {result[i].Category} does not match the expected.");
