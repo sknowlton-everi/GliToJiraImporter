@@ -11,7 +11,7 @@ namespace GliToJiraImporter.Utilities
     {
         public static bool IsValidWebLink(string text)
         {
-            Uri uriResult;
+            Uri? uriResult;
             return Uri.TryCreate(text.Trim(), UriKind.Absolute, out uriResult)
                 && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
