@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CommandLine;
+﻿using CommandLine;
 using System.Text.Json;
 
 namespace GliToJiraImporter.Models
@@ -42,6 +37,5 @@ namespace GliToJiraImporter.Models
         {
             return JsonSerializer.Serialize(this);
         }
-
     }
 }

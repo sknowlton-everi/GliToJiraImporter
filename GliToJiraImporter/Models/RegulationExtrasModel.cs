@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using System.Text.RegularExpressions;
 
 namespace GliToJiraImporter.Models
 {
@@ -11,7 +6,8 @@ namespace GliToJiraImporter.Models
     {
         public string State { get; set; } = string.Empty;
 
-        public RegulationExtrasModel() { }
+        public RegulationExtrasModel()
+        { }
 
         public RegulationExtrasModel(string state)
         {

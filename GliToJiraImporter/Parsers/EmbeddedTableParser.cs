@@ -1,13 +1,8 @@
 ﻿using GliToJiraImporter.Models;
 using log4net;
 using Syncfusion.DocIO.DLS;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace GliToJiraImporter.Parsers
 {
@@ -17,7 +12,8 @@ namespace GliToJiraImporter.Parsers
 
         private RegulationExtrasModel _state = new RegulationExtrasModel();
 
-        public EmbeddedTableParser() { }
+        public EmbeddedTableParser()
+        { }
 
         public EmbeddedTableParser(RegulationExtrasModel state)
         {
@@ -28,6 +24,7 @@ namespace GliToJiraImporter.Parsers
                 this._state = new RegulationExtrasModel();
             }
         }
+
         public void Parse(WTableCell cell)
         {
             foreach (WTable subTable in cell.Tables)

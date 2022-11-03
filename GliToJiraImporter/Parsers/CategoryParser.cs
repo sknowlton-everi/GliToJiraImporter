@@ -121,7 +121,6 @@ namespace GliToJiraImporter.Parsers
                         }
                     }
                 }
-
             }
 
             if (regulationParser.Save().IsValid() && (categoryModel.RegulationList.Count == 0 || !((RegulationModel)regulationParser.Save()).Equals(categoryModel.RegulationList.Last())))
@@ -131,7 +130,6 @@ namespace GliToJiraImporter.Parsers
             this._state = (CategoryModel)categoryModel.GetState();
             return categoryComplete;
         }
-
 
         // Saves the current state inside a memento.
         public IMemento Save()

@@ -57,6 +57,5 @@ namespace GliToJiraImporter
                 log.Info(memento.GetState());
             }
         }
-
     }
 }

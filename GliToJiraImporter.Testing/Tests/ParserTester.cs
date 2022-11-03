@@ -16,10 +16,10 @@ namespace GliToJiraImporter.Testing.Tests
         private Parser sut;
         private ParameterModel parameterModelStub;
         private Jira jiraConnectionStub;
-        Project jiraProjectStub;
+        private Project jiraProjectStub;
         private static readonly string checkoffPath = @"..\..\..\Public\TestCheckoffs\";
         private static readonly string expectedResultPath = @"..\..\..\Public\ExpectedResults\";
-        IList<CategoryModel> expectedResult = new List<CategoryModel>();
+        private IList<CategoryModel> expectedResult = new List<CategoryModel>();
 
         [SetUp]
         public void Setup()
@@ -40,7 +40,7 @@ namespace GliToJiraImporter.Testing.Tests
             //    ProjectKey = "STP",
             //    UserName = "JiraBot"
             //};
-            //ParameterModel 
+            //ParameterModel
             parameterModelStub = new()
             {
                 FilePath = $"{checkoffPath}Australia-New-Zealand.docx",

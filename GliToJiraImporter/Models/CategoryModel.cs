@@ -10,7 +10,8 @@ namespace GliToJiraImporter.Models
         //public IList<IMemento> RegulationList { get; set; } = (IList<IMemento>)new List<RegulationModel>();
         //TODO Should ln:8 be IMemento instead, like ln:9^?
 
-        public CategoryModel() { }
+        public CategoryModel()
+        { }
 
         public CategoryModel(string state)
         {
@@ -58,6 +59,7 @@ namespace GliToJiraImporter.Models
         {
             return this;
         }
+
         public string GetName()
         {
             return this.Category;
