@@ -19,7 +19,7 @@ namespace GliToJiraImporter.Testing.Tests
         Project jiraProjectStub;
         private static readonly string checkoffPath = @"..\..\..\Public\TestCheckoffs\";
         private static readonly string expectedResultPath = @"..\..\..\Public\ExpectedResults\";
-        IList<CategoryModel> expectedResult;
+        IList<CategoryModel> expectedResult = new List<CategoryModel>();
 
         [SetUp]
         public void Setup()

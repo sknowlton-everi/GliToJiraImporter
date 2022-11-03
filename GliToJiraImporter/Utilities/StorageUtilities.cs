@@ -73,7 +73,6 @@ namespace GliToJiraImporter.Utilities
                 }
             }
 
-            string value;
             try
             {
                 // Check if file already exists. If yes, delete it.     
