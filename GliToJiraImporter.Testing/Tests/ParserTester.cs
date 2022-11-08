@@ -31,29 +31,33 @@ namespace GliToJiraImporter.Testing.Tests
 
             //parameterModelStub = new()
             //{
-            //    FilePath = $"{path}Australia-New-Zealand.docx",
-            //    Type = 1,
+            //    FilePath = $"{checkoffPath}Australia-New-Zealand.docx",
+            //    JiraUrl = "http://localhost:8080/",
+            //    UserName = "",
+            //    Password = "",
+            //    IssueType = "Test Plan",
             //    SleepTime = 0,
-            //    IssueType = "Task",
-            //    JiraUrl = "http://jira.austin.mgam/",
-            //    Password = "Password#1",
-            //    ProjectKey = "STP",
-            //    UserName = "JiraBot"
+            //    ProjectKey = "SAM",
+            //    Type = 1,
             //};
-            //ParameterModel
+
             parameterModelStub = new()
             {
                 FilePath = $"{checkoffPath}Australia-New-Zealand.docx",
-                JiraUrl = "http://localhost:8080/",
+                JiraUrl = "https://gre-team.atlassian.net/",
                 UserName = "",
                 Password = "",
                 IssueType = "Test Plan",
                 SleepTime = 0,
-                ProjectKey = "SAM",
-                Type = 1,
+                ProjectKey = "EGRE",
+                Type = 1,                
             };
 
-            this.jiraConnectionStub = Jira.CreateRestClient(parameterModelStub.JiraUrl, parameterModelStub.UserName, parameterModelStub.Password);
+            string oAuthAccessToken = "6eW02mKsvcGNM1EN33dYAAAA";
+
+
+            //this.jiraConnectionStub = Jira.CreateRestClient(parameterModelStub.JiraUrl, parameterModelStub.UserName, parameterModelStub.Password);
+            this.jiraConnectionStub = Jira.CreateOAuthRestClient(parameterModelStub.JiraUrl, "", "", oAuthAccessToken, "");
             this.jiraProjectStub = jiraConnectionStub.Projects.GetProjectAsync(parameterModelStub.ProjectKey).Result;
 
             sut = new Parser(this.parameterModelStub, this.jiraConnectionStub);
