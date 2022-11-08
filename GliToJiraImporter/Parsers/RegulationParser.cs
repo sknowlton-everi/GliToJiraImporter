@@ -2,7 +2,6 @@
 using log4net;
 using Syncfusion.DocIO.DLS;
 using System.Reflection;
-using System.Text;
 using System.Text.Json;
 
 namespace GliToJiraImporter.Parsers
@@ -20,12 +19,15 @@ namespace GliToJiraImporter.Parsers
 
         public RegulationParser(IMemento state)
         {
-            this._state = (RegulationModel?)state;
-            log.Debug("RegulationParser: My initial state is: " + JsonSerializer.Serialize(this._state));
-            if (this._state == null)
+            if (state == null)
             {
                 this._state = new RegulationModel();
             }
+            else
+            {
+                this._state = (RegulationModel)state;
+            }
+            log.Debug("RegulationParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
         public bool Parse(WTableRow row)
@@ -91,7 +93,7 @@ namespace GliToJiraImporter.Parsers
                             }
                         }
                     }
-                    // Checks for a picture within a cell 
+                    // Checks for a picture within a cell
                     else if (paragraph.ChildEntities.Count != 0)
                     {
                         pictureCaretaker.Backup();
@@ -105,7 +107,7 @@ namespace GliToJiraImporter.Parsers
                             regulationModel.AttachmentList.Add((PictureModel)pictureParser.Save());
                         }
                     }
-                    // Checks for a table within a cell 
+                    // Checks for a table within a cell
                     if (row.Cells[i].Tables.Count != 0 && paragraph.Text.Equals(string.Empty))
                     {
                         embeddedTableCaretaker.Backup();

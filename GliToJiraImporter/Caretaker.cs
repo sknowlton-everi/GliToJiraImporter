@@ -13,7 +13,7 @@ namespace GliToJiraImporter
 
         private List<IMemento> _mementos = new List<IMemento>();
 
-        private IOriginator _originator = null;
+        private IOriginator _originator;
 
         public Caretaker(IOriginator originator)
         {
@@ -57,6 +57,5 @@ namespace GliToJiraImporter
                 log.Info(memento.GetState());
             }
         }
-
     }
 }
