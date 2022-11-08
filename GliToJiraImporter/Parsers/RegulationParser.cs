@@ -57,8 +57,14 @@ namespace GliToJiraImporter.Parsers
                         {
                             clauseIdParser.Parse(paragraph);
                         }
+
+                        // Check for additions to clauseId
+                        if (i == 0 && clauseIdParser.Save().GetState().Equals(string.Empty) && !regulationModel.ClauseID.Equals(string.Empty))
+                        {
+                            regulationModel.ClauseID += $" {paragraph.Text}";
+                        }
                         // If a clauseId was parsed and that the current models clauseId is empty, then save it if so
-                        if (!clauseIdParser.Save().GetState().Equals(string.Empty) && regulationModel.ClauseID.Equals(string.Empty))
+                        else if (!clauseIdParser.Save().GetState().Equals(string.Empty) && regulationModel.ClauseID.Equals(string.Empty))
                         {
                             regulationModel.ClauseID = clauseIdParser.Save().GetName();
                             clauseIdParser = new ClauseIdParser();
