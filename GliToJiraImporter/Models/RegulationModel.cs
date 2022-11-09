@@ -12,19 +12,7 @@ namespace GliToJiraImporter.Models
         public string Description { get; set; } = string.Empty;
         public IList<PictureModel> AttachmentList { get; set; } = new List<PictureModel>();
 
-        public RegulationModel()
-        { }
-
-        public RegulationModel(string state)
-        {
-            if (!state.Equals(string.Empty))
-            {
-                string[] splitState = state.Split("///");
-                ClauseID = splitState[0];
-                Subcategory = splitState[1];
-                Description = splitState[2];
-            }
-        }
+        public RegulationModel() { }
 
         public string GetName()
         {
@@ -38,7 +26,7 @@ namespace GliToJiraImporter.Models
 
         public bool IsValid()
         {
-            return !ClauseID.Equals(string.Empty) && !Description.Equals(string.Empty);
+            return !this.IsEmpty() && !ClauseID.Equals(string.Empty) && !Description.Equals(string.Empty);
         }
 
         public bool IsEmpty()

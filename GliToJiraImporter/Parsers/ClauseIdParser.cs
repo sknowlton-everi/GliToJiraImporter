@@ -1,4 +1,6 @@
-﻿using GliToJiraImporter.Models;
+﻿using Aspose.Words;
+using Aspose.Words.Tables;
+using GliToJiraImporter.Models;
 using log4net;
 using Syncfusion.DocIO.DLS;
 using System.Reflection;
