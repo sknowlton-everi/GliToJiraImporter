@@ -272,14 +272,18 @@ namespace GliToJiraImporter.Testing.Tests
                 {
                     RegulationModel resultRegulation = (RegulationModel)result[i].RegulationList[j];
                     RegulationModel expectedResultRegulation = (RegulationModel)expectedResult[i].RegulationList[j];
-                    Assert.That(resultRegulation.ClauseID, Is.EqualTo(expectedResultRegulation.ClauseID), $"The ClauseId of {resultRegulation.ClauseID} does not match the expected.");
-                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory), $"The Subcategory of {resultRegulation.ClauseID} does not match the expected.");
-                    Assert.That(resultRegulation.Description, Is.EqualTo(expectedResultRegulation.Description), $"The Description of {resultRegulation.ClauseID} does not match the expected.");
-                    Assert.That(resultRegulation.AttachmentList.Count, Is.EqualTo(expectedResultRegulation.AttachmentList.Count), $"The AttachmentList of {resultRegulation.ClauseID} does not match the expected.");
-                    for (int k = 0; k < resultRegulation.AttachmentList.Count; k++)
+                    Assert.That(resultRegulation.ClauseID.BaseClauseId, Is.EqualTo(expectedResultRegulation.ClauseID.BaseClauseId), $"The BaseClauseId of {resultRegulation.ClauseID.BaseClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.ClauseID.FullClauseId, Is.EqualTo(expectedResultRegulation.ClauseID.FullClauseId), $"The FullClauseId of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory), $"The Subcategory of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.Description.Text, Is.EqualTo(expectedResultRegulation.Description.Text), $"The Description Text of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+
+                    IList<PictureModel> resultAttachmentList = ((DescriptionModel)resultRegulation.Description).AttachmentList;
+                    IList<PictureModel> expectedResultAttachmentList = ((DescriptionModel)expectedResultRegulation.Description).AttachmentList;
+                    Assert.That(resultAttachmentList.Count, Is.EqualTo(expectedResultAttachmentList.Count), $"The AttachmentList of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                    for (int k = 0; k < resultAttachmentList.Count; k++)
                     {
-                        Assert.That(resultRegulation.AttachmentList[k].ImageName, Is.EqualTo(expectedResultRegulation.AttachmentList[k].ImageName), $"ImageName at position {k} of {resultRegulation.ClauseID} does not match the expected.");
-                        Assert.That(resultRegulation.AttachmentList[k].ImageBytes, Is.EqualTo(expectedResultRegulation.AttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseID} does not match the expected.");
+                        Assert.That(resultAttachmentList[k].ImageName, Is.EqualTo(expectedResultAttachmentList[k].ImageName), $"ImageName at position {k} of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                        Assert.That(resultAttachmentList[k].ImageBytes, Is.EqualTo(expectedResultAttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
                     }
                 }
             }

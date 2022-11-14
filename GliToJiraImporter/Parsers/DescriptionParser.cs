@@ -1,4 +1,6 @@
-﻿using GliToJiraImporter.Models;
+using Aspose.Words;
+using Aspose.Words.Tables;
+using GliToJiraImporter.Models;
 using GliToJiraImporter.Utilities;
 using log4net;
 using Syncfusion.DocIO.DLS;
@@ -14,8 +16,7 @@ namespace GliToJiraImporter.Parsers
 
         private DescriptionModel _state = new DescriptionModel();
 
-        public DescriptionParser()
-        { }
+        public DescriptionParser() { }
 
         public DescriptionParser(IMemento state)
         {
@@ -39,15 +40,10 @@ namespace GliToJiraImporter.Parsers
             EmbeddedTableParser embeddedTableParser = new EmbeddedTableParser();
             Caretaker embeddedTableCaretaker = new Caretaker(embeddedTableParser);
 
-            if (!this._state.Text.Equals(string.Empty))
-            {
-                this._state.Text += '\n';
-            }
-
             // Iterates through the paragraphs of the cell
             for (int i = 0; i < cell.Paragraphs.Count; i++) // j < cell.Paragraphs.Count && !regulationComplete; //TODO cleanup
             {
-                if (!result.Equals(string.Empty))
+                if (!result.Trim().Equals(string.Empty))
                 {
                     result += '\n';
                 }
@@ -56,9 +52,8 @@ namespace GliToJiraImporter.Parsers
                 {
                     result += this.parseParagraph(cell.Paragraphs[i]);
                 }
-
                 // Checks for a picture within a cell 
-                if (cell.Paragraphs[i].ChildEntities.Count != 0)
+                else if (cell.Paragraphs[i].ChildEntities.Count != 0)
                 {
                     pictureCaretaker.Backup();
                     pictureParser.Parse(cell.Paragraphs[i]);
@@ -72,9 +67,8 @@ namespace GliToJiraImporter.Parsers
                         result += $"(Image included below, Name: {((PictureModel)pictureParser.Save()).ImageName})";
                     }
                 }
-
                 // Checks for a table within a cell 
-                if (cell.Tables.Count != 0 && cell.Paragraphs[i].Text.Equals(string.Empty))
+                else if (cell.Tables.Count != 0)// && cell.Paragraphs[i].Text.Equals(string.Empty))
                 {
                     embeddedTableCaretaker.Backup();
                     embeddedTableParser.Parse(cell);
@@ -93,16 +87,17 @@ namespace GliToJiraImporter.Parsers
             // Checking for what I guess are dashes, as Jira doesn't know how to read them
             result = result.Replace('\u001E', '-');
 
+            if (!this._state.Text.Equals(string.Empty) && !result.Trim('\n').Equals(string.Empty))
+            {
+                this._state.Text += '\n';
+            }
+
             this._state.Text += result;
         }
 
         private string parseParagraph(WParagraph paragraph)
         {
             string result = string.Empty;
-            if (!this._state.Text.Equals(string.Empty))
-            {
-                this._state.Text += '\n';
-            }
 
             // Check for different paragraph item types
             for (int i = 0; i < paragraph.Items.Count; i++)
@@ -243,7 +238,7 @@ namespace GliToJiraImporter.Parsers
         // Saves the current state inside a memento.
         public IMemento Save()
         {
-            return this._state;
+            return new DescriptionModel(this._state);
         }
 
         // Restores the Originator's state from a memento object.

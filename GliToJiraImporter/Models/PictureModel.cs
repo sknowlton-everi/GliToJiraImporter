@@ -3,7 +3,7 @@
     public class PictureModel : IMemento
     {
         public string ImageName { get; set; } = string.Empty;
-        public byte[] ImageBytes { get; set; } = new byte[] { };
+        public byte[] ImageBytes { get; set; } = Array.Empty<byte>();
 
         public PictureModel()
         { }
@@ -12,6 +12,12 @@
         {
             this.ImageName = imageName;
             this.ImageBytes = imageBytes;
+        }
+
+        public PictureModel(PictureModel state)
+        {
+            this.ImageName = state.ImageName;
+            this.ImageBytes = state.ImageBytes;
         }
 
         public string GetName()
@@ -31,7 +37,8 @@
 
         public bool IsValid()
         {
-            return !this.IsEmpty(); //TODO Could I add something to this?
+            //TODO Should I add something to this?
+            return !this.IsEmpty();
         }
     }
 }

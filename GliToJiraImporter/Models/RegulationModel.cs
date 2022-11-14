@@ -7,12 +7,19 @@ namespace GliToJiraImporter.Models
     public class RegulationModel : IMemento
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        public string ClauseID { get; set; } = string.Empty;
+        public ClauseIdModel ClauseID { get; set; } = new ClauseIdModel();
         public string Subcategory { get; set; } = string.Empty;
-        public string Description { get; set; } = string.Empty;
-        public IList<PictureModel> AttachmentList { get; set; } = new List<PictureModel>();
+        public DescriptionModel Description { get; set; } = new DescriptionModel();
+        //public IList<PictureModel> AttachmentList { get; set; } = new List<PictureModel>(); //TODO Cleanup
 
         public RegulationModel() { }
+
+        public RegulationModel(RegulationModel state)
+        {
+            this.ClauseID = state.ClauseID;
+            this.Subcategory = state.Subcategory;
+            this.Description = state.Description;
+        }
 
         public string GetName()
         {
@@ -26,12 +33,12 @@ namespace GliToJiraImporter.Models
 
         public bool IsValid()
         {
-            return !this.IsEmpty() && !ClauseID.Equals(string.Empty) && !Description.Equals(string.Empty);
+            return !this.IsEmpty() && ClauseID.IsValid() && Description.IsValid();
         }
 
         public bool IsEmpty()
         {
-            return ClauseID.Equals(string.Empty) && Description.Equals(string.Empty) && Subcategory.Equals(string.Empty) && AttachmentList.Count == 0;
+            return ClauseID.IsEmpty() && Description.IsEmpty() && Subcategory.Trim().Equals(string.Empty);// && AttachmentList.Count == 0; //TODO Cleanup
         }
 
         public string ToJson()
@@ -50,11 +57,11 @@ namespace GliToJiraImporter.Models
                     result = this.ClauseID.Equals(inputModel.ClauseID);
                     result = result && this.Subcategory.Equals(inputModel.Subcategory);
                     result = result && this.Description.Equals(inputModel.Description);
-                    result = result && this.AttachmentList.Count == inputModel.AttachmentList.Count;
-                    for (int i = 0; i < this.AttachmentList.Count && result; i++)
-                    {
-                        result = result && this.AttachmentList[i].Equals(inputModel.AttachmentList[i]);
-                    }
+                    //result = result && this.AttachmentList.Count == inputModel.AttachmentList.Count; //TODO Cleanup
+                    //for (int i = 0; i < this.AttachmentList.Count && result; i++)
+                    //{
+                    //    result = result && this.AttachmentList[i].Equals(inputModel.AttachmentList[i]);
+                    //}
                 }
             }
             catch (InvalidCastException)

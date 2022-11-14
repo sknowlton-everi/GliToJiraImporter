@@ -10,18 +10,13 @@ namespace GliToJiraImporter.Models
         //public IList<IMemento> RegulationList { get; set; } = (IList<IMemento>)new List<RegulationModel>();
         //TODO Should ln:8 be IMemento instead, like ln:9^?
 
-        public CategoryModel()
-        { }
+        public CategoryModel() { }
 
-        public CategoryModel(string state)
+        public CategoryModel(CategoryModel state)
         {
-            string[] splitState = state.Split("|||");
-            this.Category = splitState[0];
-            this.RegulationList.Clear();
-            for (int i = 1; i < splitState.Length; i++)
-            {
-                this.RegulationList.Add(new RegulationModel(splitState[i]));
-            }
+            this.Category = state.Category;
+            this.RegulationList = state.RegulationList;
+            this.NoCategory = state.NoCategory;
         }
 
         public bool IsValid()
@@ -39,7 +34,7 @@ namespace GliToJiraImporter.Models
 
         public bool IsEmpty()
         {
-            bool result = Category.Equals(string.Empty) && RegulationList.Count == 0;
+            bool result = Category.Trim().Equals(string.Empty) && RegulationList.Count == 0;
             if (result)
             {
                 for (int i = 0; i < RegulationList.Count && result; i++)

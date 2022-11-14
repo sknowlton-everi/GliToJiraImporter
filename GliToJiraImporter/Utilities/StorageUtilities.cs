@@ -60,7 +60,7 @@ namespace GliToJiraImporter.Utilities
             {
                 foreach (RegulationModel regulationModel in categoryModel.RegulationList)
                 {
-                    csvRegulations += $"\"{categoryModel.Category}\",\"{regulationModel.Subcategory}\",\"{regulationModel.ClauseID}\",\"{regulationModel.Description.Replace('\"', '\'')}\"";
+                    csvRegulations += $"\"{categoryModel.Category}\",\"{regulationModel.Subcategory}\",\"{regulationModel.ClauseID.FullClauseId}\",\"{regulationModel.Description.GetName().Replace('\"', '\'')}\"";
                     //csvWriter.WriteRecord($"{categoryModel.Category},{regulationModel.Subcategory},{regulationModel.ClauseID},{regulationModel.Description},");
                     //foreach (byte[] image in regulationModel.AttachmentList)
                     //{
@@ -125,7 +125,7 @@ namespace GliToJiraImporter.Utilities
             {
                 foreach (RegulationModel regulationModel in categoryModel.RegulationList)
                 {
-                    if (jiraExistingClauseIdList.ContainsKey(regulationModel.ClauseID))
+                    if (jiraExistingClauseIdList.ContainsKey(regulationModel.ClauseID.GetName()))
                     {
                         log.Debug($"Skipping clauseId {regulationModel.ClauseID} because it already exists in the project {parameterModel.ProjectKey}");
                         log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
@@ -152,22 +152,25 @@ namespace GliToJiraImporter.Utilities
             log.Debug("Creating Issue");
             Issue issue = jiraConnection.CreateIssue(parameterModel.ProjectKey);
             issue.Type = parameterModel.IssueType;
-            issue.Summary = $"{regulationModel.ClauseID}";
-            issue[CLAUSE_ID] = regulationModel.ClauseID.ToString();
+            issue.Summary = $"{regulationModel.ClauseID.FullClauseId}";
+            issue[CLAUSE_ID] = regulationModel.ClauseID.FullClauseId;
             issue[CATEGORY] = categoryName;
             issue[SUBCATEGORY] = regulationModel.Subcategory;
-            issue.Description = $"{regulationModel.Description}";
+            issue.Description = $"{regulationModel.Description.Text}";
             issue.SaveChanges();
 
-            for (int i = 0; i < regulationModel.AttachmentList.Count; i++)
+            IList<PictureModel> attachmentList = ((DescriptionModel)regulationModel.Description).AttachmentList;
+            for (int i = 0; i < attachmentList.Count; i++)
             {
-                if (regulationModel.AttachmentList[i].ImageName == string.Empty)
+                if (attachmentList[i].ImageName == string.Empty)
                 {
-                    issue.AddAttachment($"{regulationModel.ClauseID} attachment #{i}.png", regulationModel.AttachmentList[i].ImageBytes);
+                    string attachmentName = $"{regulationModel.ClauseID} attachment #{i}.png";
+                    issue.AddAttachment(attachmentName, attachmentList[i].ImageBytes);
+                    issue.Description.Replace("(Image included below, Name: )", $"(Image included below, Name: {attachmentName})");
                 }
                 else
                 {
-                    issue.AddAttachment($"{regulationModel.AttachmentList[i].ImageName}.png", regulationModel.AttachmentList[i].ImageBytes);
+                    issue.AddAttachment($"{attachmentList[i].ImageName}", attachmentList[i].ImageBytes);
                 }
             }
             issue.SaveChanges();

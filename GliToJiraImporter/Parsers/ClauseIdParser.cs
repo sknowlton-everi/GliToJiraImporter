@@ -1,11 +1,8 @@
-﻿using Aspose.Words;
-using Aspose.Words.Tables;
-using GliToJiraImporter.Models;
+﻿using GliToJiraImporter.Models;
 using log4net;
 using Syncfusion.DocIO.DLS;
 using System.Reflection;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 
 namespace GliToJiraImporter.Parsers
 {
@@ -13,49 +10,41 @@ namespace GliToJiraImporter.Parsers
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private RegulationExtrasModel _state = new RegulationExtrasModel();
+        private ClauseIdModel _state = new ClauseIdModel();
 
-        public ClauseIdParser()
-        { }
+        public ClauseIdParser() { }
 
-        public ClauseIdParser(RegulationExtrasModel state)
+        public ClauseIdParser(IMemento state)
         {
-            this._state = state;
-            log.Debug("ClauseIdParser: My initial state is: " + JsonSerializer.Serialize(this._state));
-            if (this._state == null)
+            if (state == null)
             {
-                this._state = new RegulationExtrasModel();
+                this._state = new ClauseIdModel();
             }
+            else
+            {
+                this._state = (ClauseIdModel)state;
+            }
+            log.Debug("ClauseIdParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
-        public void Parse(WParagraph paragraph)
+        public void Parse(WTableCell cell)
         {
-            Regex[] clauseIdRegexs = new Regex[]
+            // Iterates through the paragraphs of the cell
+            for (int i = 0; i < cell.Paragraphs.Count; i++) // i < cell.Paragraphs.Count && !regulationComplete; //TODO cleanup
             {
-                // 3 sets of numbers
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([(])+(\d+)+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([A-Za-z0-9]))"),
-                // 2 sets of numbers
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([(])+(\d+)+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([A-Za-z0-9]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+(\d+)+([)])+([(])+([A-Za-z0-9])+([)]))"),
-                // 1 set of numbers
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+(\d+)+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([A-Za-z0-9]))"),
-            };
-            for (int i = 0; i < clauseIdRegexs.Length; i++)
-            {
-                Match match = clauseIdRegexs[i].Match(paragraph.Text);
-                if (match.Success && match.Value.Equals(paragraph.Text.Trim()))
+                WParagraph paragraph = cell.Paragraphs[i];
+                if (!paragraph.Text.Equals(string.Empty))
                 {
-                    this._state.State = paragraph.Text.Trim();
-                    break;
+                    if (this._state.BaseClauseId.Equals(string.Empty) && this._state.ContainsClauseId(paragraph.Text))
+                    {
+                        this._state.BaseClauseId = paragraph.Text.Trim();
+                        this._state.FullClauseId = paragraph.Text.Trim();
+                    }
+                    // Check for additions to clauseId
+                    else
+                    {
+                        this._state.FullClauseId += $" --- {paragraph.Text.Trim()}"; //TODO Not sure if this will work. It's supposed to produce a symbol that looks like a line //TODO cleanup
+                    }
                 }
             }
         }
@@ -63,18 +52,18 @@ namespace GliToJiraImporter.Parsers
         // Saves the current state inside a memento.
         public IMemento Save()
         {
-            return this._state;
+            return new ClauseIdModel(this._state);
         }
 
         // Restores the Originator's state from a memento object.
         public void Restore(IMemento memento)
         {
-            if (!(memento is RegulationExtrasModel))
+            if (memento is not ClauseIdModel)
             {
                 throw new Exception("Unknown memento class " + memento.ToString());
             }
 
-            this._state = (RegulationExtrasModel)memento.GetState();
+            this._state = (ClauseIdModel)memento.GetState();
             log.Debug($"ClauseIdParser: My state has changed to: {JsonSerializer.Serialize(this._state)}");
         }
     }
