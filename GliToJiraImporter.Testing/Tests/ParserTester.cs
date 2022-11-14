@@ -258,6 +258,26 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
+        [Ignore("Can only run locally with a local Jira.")]
+        [Test]
+        public void ParserSingleDuplicateTest()
+        {
+            //given
+            parameterModelStub.FilePath = $"{checkoffPath}SINGLE-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserSingleTestExpectedResult.json"));
+
+            //when
+            IList<CategoryModel> result = sut.Parse();
+            result = sut.Parse();
+
+            //then
+            memoryAppender.GetEvents().First(logEvent => logEvent.Level == Level.Debug 
+            && logEvent.RenderedMessage.Equals($"Skipping clauseId {expectedResult[0].RegulationList[0].ClauseID.BaseClauseId} because it already exists in the project {parameterModelStub.ProjectKey}"));
+            Assert.IsTrue(result.Any());
+            Assert.NotNull(expectedResult);
+            this.testAssertModel(expectedResult, result);
+        }
+
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             this.checkForErrorsInLogs();

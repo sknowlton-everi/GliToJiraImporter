@@ -127,13 +127,13 @@ namespace GliToJiraImporter.Utilities
                 {
                     if (jiraExistingClauseIdList.ContainsKey(regulationModel.ClauseID.GetName()))
                     {
-                        log.Debug($"Skipping clauseId {regulationModel.ClauseID} because it already exists in the project {parameterModel.ProjectKey}");
+                        log.Debug($"Skipping clauseId {regulationModel.ClauseID.FullClauseId} because it already exists in the project {parameterModel.ProjectKey}");
                         log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
                         continue;
                     }
                     Issue issue = this.createIssue(regulationModel, categoryModel.Category);
 
-                    log.Debug($"Created issue with GLI ClauseID {regulationModel.ClauseID}");
+                    log.Debug($"Created issue with GLI ClauseID {regulationModel.ClauseID.FullClauseId}");
                     log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
 
                     Thread.Sleep(parameterModel.SleepTime);
@@ -164,7 +164,7 @@ namespace GliToJiraImporter.Utilities
             {
                 if (attachmentList[i].ImageName == string.Empty)
                 {
-                    string attachmentName = $"{regulationModel.ClauseID} attachment #{i}.png";
+                    string attachmentName = $"{regulationModel.ClauseID.BaseClauseId}-attachment-#{i}.png";
                     issue.AddAttachment(attachmentName, attachmentList[i].ImageBytes);
                     issue.Description.Replace("(Image included below, Name: )", $"(Image included below, Name: {attachmentName})");
                 }

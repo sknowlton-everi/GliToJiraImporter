@@ -72,5 +72,30 @@ namespace GliToJiraImporter.Models
             }
             return result;
         }
+
+        public override bool Equals(object? obj)
+        {
+            bool result = false;
+            try
+            {
+                if (obj != null)
+                {
+                    ClauseIdModel inputModel = (ClauseIdModel)obj;
+                    result = this.BaseClauseId.Equals(inputModel.BaseClauseId);
+                    result = result && this.FullClauseId.Equals(inputModel.FullClauseId);
+                }
+            }
+            catch (InvalidCastException)
+            {
+                log.Error("The passed in object is not of type ClauseIdModel");
+                return false;
+            }
+            return result;
+        }
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }
