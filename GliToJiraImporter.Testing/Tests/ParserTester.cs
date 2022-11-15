@@ -55,6 +55,7 @@ namespace GliToJiraImporter.Testing.Tests
             //};
             //ParameterModel
 
+            //TODO Samantha, change user email below and also the verify the API token
             string userName = "richard.henry@everi.com";
             string token = "fCCOc3rtz6qxzXdC0p9h30E0";
             string userNameToken = $"{userName}:{token}";
