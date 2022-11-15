@@ -20,7 +20,7 @@ Here is an example of how each field can look:
 	-k <name of jira project>
 	-t 1
 
-To run an example XSD file through it, run the app with one of the following links:
+To run an example XSD file through it, you can run the app with one of the following links:
 
 	-f ..\..\..\..\GliToJiraImporter.Testing\Public\TestCheckoffs\<name of gli document> -j http://jira.austin.mgam/ -u JiraBot -p Password#1 -i Technical Requirement -s 100 -k <name of jira project> -t 1
 	-f ..\..\..\..\GliToJiraImporter.Testing\Public\TestCheckoffs\<name of gli document> -i Technical Requirement -s 100 -t 1
