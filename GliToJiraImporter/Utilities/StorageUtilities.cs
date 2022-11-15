@@ -5,18 +5,18 @@ using log4net;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using Issue = Atlassian.Jira.Issue;
 
 namespace GliToJiraImporter.Utilities
 {
     public class StorageUtilities
     {
-        private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private readonly Jira jiraConnection;
-        private ParameterModel parameterModel;
-
         private const string CLAUSE_ID = "GLIClauseId";
         private const string CATEGORY = "GLICategory";
         private const string SUBCATEGORY = "GLISubCategory";
+        private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private readonly Jira jiraConnection;
+        private ParameterModel parameterModel;
 
         public StorageUtilities(ParameterModel parameterModel, Jira jiraConnection)
         {

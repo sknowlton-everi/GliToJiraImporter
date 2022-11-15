@@ -33,6 +33,8 @@ namespace GliToJiraImporter.Models
         [Option('t', "type", Required = true, HelpText = "Type of document being uploaded")]
         public int Type { get; set; }
 
+        public HttpMethod Method { get; set; } = new HttpMethod("GET");
+
         public override string ToString()
         {
             return JsonSerializer.Serialize(this);

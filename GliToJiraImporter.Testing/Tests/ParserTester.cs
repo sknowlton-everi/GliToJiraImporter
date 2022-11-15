@@ -5,9 +5,16 @@ using log4net.Appender;
 using log4net.Config;
 using log4net.Core;
 using log4net.Repository;
+using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Net;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using Issue = Atlassian.Jira.Issue;
+using JsonSerializer = System.Text.Json.JsonSerializer;
+using Project = Atlassian.Jira.Project;
 
 namespace GliToJiraImporter.Testing.Tests
 {
@@ -15,12 +22,12 @@ namespace GliToJiraImporter.Testing.Tests
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
+        private static readonly string checkoffPath = @"..\..\..\Public\TestCheckoffs\";
+        private static readonly string expectedResultPath = @"..\..\..\Public\ExpectedResults\";
         private Parser sut;
         private ParameterModel parameterModelStub;
         private Jira jiraConnectionStub;
         private Project jiraProjectStub;
-        private static readonly string checkoffPath = @"..\..\..\Public\TestCheckoffs\";
-        private static readonly string expectedResultPath = @"..\..\..\Public\ExpectedResults\";
         private IList<CategoryModel> expectedResult = new List<CategoryModel>();
         private MemoryAppender memoryAppender;
 
@@ -47,22 +54,57 @@ namespace GliToJiraImporter.Testing.Tests
             //    UserName = "JiraBot"
             //};
             //ParameterModel
+
+            string userName = "richard.henry@everi.com";
+            string token = "fCCOc3rtz6qxzXdC0p9h30E0";
+            string userNameToken = $"{userName}:{token}";
+
             parameterModelStub = new()
             {
                 FilePath = $"{checkoffPath}Australia-New-Zealand.docx",
-                JiraUrl = "http://localhost:8080/",
-                UserName = "",
-                Password = "",
+                Method = new HttpMethod("GET"),
+                JiraUrl = "https://gre-team.atlassian.net/rest/api/3/search?jql=project=EGRE&maxResults=10",
+                UserName = userNameToken,
+                Password = String.Empty,
                 IssueType = "Test Plan",
                 SleepTime = 0,
-                ProjectKey = "SAM",
+                ProjectKey = "EGRE",
                 Type = 1,
             };
 
-            this.jiraConnectionStub = Jira.CreateRestClient(parameterModelStub.JiraUrl, parameterModelStub.UserName, parameterModelStub.Password);
-            this.jiraProjectStub = jiraConnectionStub.Projects.GetProjectAsync(parameterModelStub.ProjectKey).Result;
+            try
+            {
+                using HttpClient httpClient = new();
+                using HttpRequestMessage request = new(parameterModelStub.Method, parameterModelStub.JiraUrl);
+                string base64authorization =
+                    Convert.ToBase64String(Encoding.ASCII.GetBytes(parameterModelStub.UserName));
+                request.Headers.TryAddWithoutValidation("Authorization", $"Basic {base64authorization}");
 
-            sut = new Parser(this.parameterModelStub, this.jiraConnectionStub);
+                HttpResponseMessage response = httpClient.Send(request);
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    string jsonString = response.Content.ReadAsStringAsync().Result;
+                    GliToJiraImporter.Models.Issue jsonObject = JsonConvert.DeserializeObject<GliToJiraImporter.Models.Issue>(jsonString);
+                    log.Debug(jsonObject.ToString());
+                }
+                else
+                {
+                    string jsonString = response.Content.ReadAsStringAsync().Result;
+                    ErrorRoot jsonObject = JsonConvert.DeserializeObject<ErrorRoot>(jsonString);
+                    log.Debug(jsonObject.errorMessages);
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Error(ex);
+            }
+
+            //RH not longer needed this.jiraConnectionStub = Jira.CreateRestClient(parameterModelStub.JiraUrl, parameterModelStub.UserName, parameterModelStub.Password);
+            //RH not longer needed this.jiraProjectStub = jiraConnectionStub.Projects.GetProjectAsync(parameterModelStub.ProjectKey).Result;
+
+            //TODO Samantha, see Jira URL above, change for each request, once you have the correct request, then update the Parser (sut) parameters below to
+            //match what you get back from the above jira calls
+            //sut = new Parser(this.parameterModelStub, this.jiraConnectionStub);
         }
 
         //[TearDown] //TODO This doesn't work yet
@@ -152,7 +194,6 @@ namespace GliToJiraImporter.Testing.Tests
         }
 
         [Test]
-        [Ignore("Work in progress")]
         public void ParserFullTest()
         {
             //given
