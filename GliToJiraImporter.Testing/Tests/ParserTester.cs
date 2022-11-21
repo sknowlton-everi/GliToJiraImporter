@@ -61,7 +61,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             string userName = "samantha.knowlton@everi.com";
             string token = Environment.GetEnvironmentVariable("JIRA_API_TOKEN");
-            string userNameToken = $"{userName}:6eW02mKsvcGNM1EN33dYAAAA";
+            string userNameToken = $"{userName}:{token}";
 
             parameterModelStub = new()
             {
