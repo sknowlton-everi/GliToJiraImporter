@@ -296,7 +296,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserLinkTest()
         {
@@ -312,7 +312,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleDuplicateTest()
         {
