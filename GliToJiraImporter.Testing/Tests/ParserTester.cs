@@ -143,7 +143,7 @@ namespace GliToJiraImporter.Testing.Tests
             checkForErrorsInLogs();
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleTest()
         {
@@ -158,7 +158,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleMultiDescTest()
         {
@@ -173,7 +173,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserPicturesTest()
         {
@@ -189,7 +189,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Does not work do to more then 50 tasks")]
+        [Ignore("Does not work due to more then 50 tasks")]
         [Test]
         public void ParserSpecialsTest()
         {
@@ -248,7 +248,7 @@ namespace GliToJiraImporter.Testing.Tests
             }
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserCharFormatTest()
         {
@@ -264,7 +264,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserClauseIdVarietiesTest()
         {
@@ -280,7 +280,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserNoCategoryTest()
         {
