@@ -13,7 +13,7 @@ Here are the expected fields and a brief description of each:
 Here is an example of how each field can look:
 	-f ..\..\..\..\GliToJiraImporter.Testing\Public\TestCheckoffs\<name of gli document>
 	-j http://jira.austin.mgam/ 
-	-u JiraBot 
+	-u JiraBot
 	-p Password#1 
 	-i Technical Requirement
 	-s 100 

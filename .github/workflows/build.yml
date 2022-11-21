@@ -20,6 +20,8 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
+      env:
+        JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
       run: dotnet build --no-restore
     - name: Test
       run: dotnet test --no-build --verbosity normal
