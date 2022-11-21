@@ -1,5 +1,6 @@
 using Atlassian.Jira;
 using GliToJiraImporter.Models;
+using GliToJiraImporter.Utilities;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
@@ -24,10 +25,13 @@ namespace GliToJiraImporter.Testing.Tests
 
         private static readonly string checkoffPath = @"..\..\..\Public\TestCheckoffs\";
         private static readonly string expectedResultPath = @"..\..\..\Public\ExpectedResults\";
+        private const string CLAUSE_ID = "customfield_10046";
+        private const string CATEGORY = "customfield_10044";
+        private const string SUBCATEGORY = "customfield_10045";
         private Parser sut;
         private ParameterModel parameterModelStub;
-        private Jira jiraConnectionStub;
-        private Project jiraProjectStub;
+        //private Jira jiraConnectionStub;
+        //private Project jiraProjectStub;
         private IList<CategoryModel> expectedResult = new List<CategoryModel>();
         private MemoryAppender memoryAppender;
 
@@ -55,84 +59,91 @@ namespace GliToJiraImporter.Testing.Tests
             //};
             //ParameterModel
 
-            //TODO Samantha, change user email below and also the verify the API token matches
-            string userName = "richard.henry@everi.com";
-            string token = "fCCOc3rtz6qxzXdC0p9h30E0";
+            string userName = "samantha.knowlton@everi.com";
+            string token = Environment.GetEnvironmentVariable("JIRA_API_TOKEN");
             string userNameToken = $"{userName}:{token}";
 
             parameterModelStub = new()
             {
                 FilePath = $"{checkoffPath}Australia-New-Zealand.docx",
                 Method = new HttpMethod("GET"),
-                JiraUrl = "https://gre-team.atlassian.net/rest/api/3/search?jql=project=EGRE&maxResults=10",
+                JiraUrl = "https://gre-team.atlassian.net/rest/api/2",//search?jql=project=EGRE&maxResults=10",
                 UserName = userNameToken,
-                Password = String.Empty,
+                //Password = string.Empty,
                 IssueType = "Test Plan",
-                SleepTime = 0,
+                SleepTime = 1000,
                 ProjectKey = "EGRE",
                 Type = 1,
             };
 
-            try
-            {
-                using HttpClient httpClient = new();
-                using HttpRequestMessage request = new(parameterModelStub.Method, parameterModelStub.JiraUrl);
-                string base64authorization =
-                    Convert.ToBase64String(Encoding.ASCII.GetBytes(parameterModelStub.UserName));
-                request.Headers.TryAddWithoutValidation("Authorization", $"Basic {base64authorization}");
 
-                HttpResponseMessage response = httpClient.Send(request);
-                if (response.StatusCode == HttpStatusCode.OK)
-                {
-                    string jsonString = response.Content.ReadAsStringAsync().Result;
-                    GliToJiraImporter.Models.Issue jsonObject = JsonConvert.DeserializeObject<GliToJiraImporter.Models.Issue>(jsonString);
-                    log.Debug(jsonObject.ToString());
-                }
-                else
-                {
-                    string jsonString = response.Content.ReadAsStringAsync().Result;
-                    ErrorRoot jsonObject = JsonConvert.DeserializeObject<ErrorRoot>(jsonString);
-                    log.Debug(jsonObject.errorMessages);
-                }
-            }
-            catch (Exception ex)
-            {
-                log.Error(ex);
-            }
+            //try
+            //{
+            //    using HttpClient httpClient = new();
+            //    using HttpRequestMessage request = new(parameterModelStub.Method, parameterModelStub.JiraUrl);
+            //    string base64authorization =
+            //        Convert.ToBase64String(Encoding.ASCII.GetBytes(parameterModelStub.UserName));
+            //    request.Headers.TryAddWithoutValidation("Authorization", $"Basic {base64authorization}");
 
-            //RH not longer needed this.jiraConnectionStub = Jira.CreateRestClient(parameterModelStub.JiraUrl, parameterModelStub.UserName, parameterModelStub.Password);
-            //RH not longer needed this.jiraProjectStub = jiraConnectionStub.Projects.GetProjectAsync(parameterModelStub.ProjectKey).Result;
+            //    HttpResponseMessage response = httpClient.Send(request);
+            //    if (response.StatusCode == HttpStatusCode.OK)
+            //    {
+            //        string jsonString = response.Content.ReadAsStringAsync().Result;
+            //        Models.Issue jsonObject = JsonConvert.DeserializeObject<Models.Issue>(jsonString);
+            //        log.Debug(jsonObject.ToString());
+            //    }
+            //    else
+            //    {
+            //        string jsonString = response.Content.ReadAsStringAsync().Result;
+            //        //ErrorRoot jsonObject = JsonConvert.DeserializeObject<ErrorRoot>(jsonString);
+            //        log.Debug(jsonString);
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    log.Error(ex);
+            //}
 
             //TODO Samantha, see Jira URL above, change for each request, once you have the correct request, then update the Parser (sut) parameters below to
             //match what you get back from the above jira calls
-            //sut = new Parser(this.parameterModelStub, this.jiraConnectionStub);
+            sut = new Parser(this.parameterModelStub);//, this.jiraConnectionStub);
         }
 
-        //[TearDown] //TODO This doesn't work yet
+        [TearDown] //TODO This doesn't work yet
         public void TearDown()
         {
-            int index = 0;
-            int itemsPerPage = 50;
-            string queryString = string.Format("project = {0}", parameterModelStub.ProjectKey);
-            IPagedQueryResult<Issue> jiraExistingIssueList = this.jiraConnectionStub.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
-            //IList<string> ClauseIds = expectedResult.Select(cat => cat.RegulationList.Select(reg => reg.ClauseID).ToList).ToList;
-            IList<string> categories = expectedResult.Select(cat => cat.Category).ToList();
+            JiraRequestUtilities jiraRequestUtilities = new JiraRequestUtilities(this.parameterModelStub);
+            //int index = 0;
+            //int itemsPerPage = 50;
+            //string queryString = string.Format("project = {0}", parameterModelStub.ProjectKey);
+            //IPagedQueryResult<Issue> jiraExistingIssueList = this.jiraConnectionStub.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
+            IList<Models.Issue> jiraExistingIssueList = jiraRequestUtilities.GetAllIssuesWithAClauseId();
+            //IList<string> clauseIds = (IList<string>)expectedResult.Select(category => category.RegulationList.Select(regulation => regulation.ClauseID).ToList()).ToList();
+            //IList<string> categories = expectedResult.Select(cat => cat.Category).ToList();
             //Dictionary<string, Issue> issues = (Dictionary<string, Issue>)this.jiraConnectionStub.Issues.GetIssuesAsync().Result;
-            foreach (Issue issue in jiraExistingIssueList)
+            //foreach (Models.Issue issue in jiraExistingIssueList)
+            for (int i = 0; i < this.expectedResult.Count; i++)
             {
-                if (issue["GLICategory"] != null && categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not a good enough check
+                for (int j = 0; j < this.expectedResult[i].RegulationList.Count; j++)
                 {
-                    bool success = this.deleteIssueByKey(issue.Key.Value);
-                    if (success != true)
+                    //Models.Issue issue = jiraExistingIssueList[i];
+                    Models.Issue issue = jiraExistingIssueList.First(issue => issue.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseID));
+                    if (issue.fields.customfield_10046 != null && issue.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseID))//categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not a good enough check
                     {
-                        log.Error($"Issue failed to delete. {issue.Key.Value}");
+                        bool success = jiraRequestUtilities.DeleteIssueByKey(issue.key);//this.deleteIssueByKey(issue.Key.Value);
+                        if (success != true)
+                        {
+                            log.Error($"Issue failed to delete. {issue.key}");
+                        }
                     }
+                    Thread.Sleep(this.parameterModelStub.SleepTime);
                 }
+                expectedResult.Clear();
             }
-            expectedResult.Clear();
+            checkForErrorsInLogs();
         }
 
-        [Ignore("Can only run locally with a local Jira.")]
+        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleTest()
         {
@@ -147,7 +158,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Can only run locally with a local Jira.")]
+        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleMultiDescTest()
         {
@@ -162,7 +173,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Can only run locally with a local Jira.")]
+        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserPicturesTest()
         {
@@ -178,7 +189,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Can only run locally with a local Jira.")]
+        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSpecialsTest()
         {
@@ -194,6 +205,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
+        [Ignore("This test is very large and takes a long time to complete.")]
         [Test]
         public void ParserFullTest()
         {
@@ -215,7 +227,7 @@ namespace GliToJiraImporter.Testing.Tests
             //this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Can only run locally with a local Jira.")]
+        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserUnknownDocTypeTest()
         {
@@ -236,7 +248,7 @@ namespace GliToJiraImporter.Testing.Tests
             }
         }
 
-        [Ignore("Can only run locally with a local Jira.")]
+        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserCharFormatTest()
         {
@@ -252,7 +264,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Can only run locally with a local Jira.")]
+        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserClauseIdVarietiesTest()
         {
@@ -268,7 +280,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Can only run locally with a local Jira.")]
+        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserNoCategoryTest()
         {
@@ -284,7 +296,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Can only run locally with a local Jira.")]
+        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserLinkTest()
         {
@@ -336,21 +348,21 @@ namespace GliToJiraImporter.Testing.Tests
             }
         }
 
-        private bool deleteIssueByKey(string issueKey)
-        {
-            bool success = false;
+        //private bool deleteIssueByKey(string issueKey)
+        //{
+        //    bool success = false;
 
-            Task t = this.jiraConnectionStub.Issues.DeleteIssueAsync(issueKey);
+        //    Task t = this.jiraConnectionStub.Issues.DeleteIssueAsync(issueKey);
 
-            while (t.Status == TaskStatus.Running || t.Status == TaskStatus.WaitingForChildrenToComplete || t.Status == TaskStatus.WaitingToRun)
-            {
-                log.Debug($"Waiting on issue {issueKey} to finish running. Status: {t.Status}");
-            }
+        //    while (t.Status == TaskStatus.Running || t.Status == TaskStatus.WaitingForChildrenToComplete || t.Status == TaskStatus.WaitingToRun)
+        //    {
+        //        log.Debug($"Waiting on issue {issueKey} to finish running. Status: {t.Status}");
+        //    }
 
-            success = (t.Status == TaskStatus.RanToCompletion);
-            log.Debug($"Task complete. Status: {t.Status}");
+        //    success = (t.Status == TaskStatus.RanToCompletion);
+        //    log.Debug($"Task complete. Status: {t.Status}");
 
-            return success;
-        }
+        //    return success;
+        //}
     }
 }

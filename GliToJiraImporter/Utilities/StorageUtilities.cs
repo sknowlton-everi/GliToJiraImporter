@@ -1,8 +1,11 @@
 ﻿using Atlassian.Jira;
+using Azure;
 using CsvHelper.Configuration;
 using GliToJiraImporter.Models;
 using log4net;
+using Newtonsoft.Json;
 using System.Globalization;
+using System.Net;
 using System.Reflection;
 using System.Text;
 using Issue = Atlassian.Jira.Issue;
@@ -11,17 +14,23 @@ namespace GliToJiraImporter.Utilities
 {
     public class StorageUtilities
     {
-        private const string CLAUSE_ID = "GLIClauseId";
-        private const string CATEGORY = "GLICategory";
-        private const string SUBCATEGORY = "GLISubCategory";
+        //TODO Cleanup
+        //private const string CLAUSE_ID = "GLIClauseId";
+        //private const string CATEGORY = "GLICategory";
+        //private const string SUBCATEGORY = "GLISubCategory";
         private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private readonly Jira jiraConnection;
+        //TODO Cleanup
+        //private readonly Jira jiraConnection;
         private ParameterModel parameterModel;
+        private JiraRequestUtilities jiraRequestUtilities = new JiraRequestUtilities();
 
-        public StorageUtilities(ParameterModel parameterModel, Jira jiraConnection)
+        //TODO Cleanup
+        public StorageUtilities(ParameterModel parameterModel)//, Jira jiraConnection)
         {
             this.parameterModel = parameterModel;
-            this.jiraConnection = jiraConnection;
+            //TODO Cleanup
+            //this.jiraConnection = jiraConnection;
+            this.jiraRequestUtilities = new JiraRequestUtilities(parameterModel);
         }
 
         public void SaveText(string fileName, string text)
@@ -105,7 +114,7 @@ namespace GliToJiraImporter.Utilities
                         //{
                         //TODO Add the above if-statement, if we change the list type of RegulationList from "IList<RegulationModel>" to "IList<IMemento>"
                         RegulationModel regulationModel = (RegulationModel)categoryModel.RegulationList[j];
-                        Issue issue = this.createIssue(regulationModel, categoryModel.Category);
+                        this.createIssue(regulationModel, categoryModel.Category);
                         //}
                     }
                 }
@@ -131,12 +140,12 @@ namespace GliToJiraImporter.Utilities
                         log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
                         continue;
                     }
-                    Issue issue = this.createIssue(regulationModel, categoryModel.Category);
+                    this.createIssue(regulationModel, categoryModel.Category);
 
-                    log.Debug($"Created issue with GLI ClauseID {regulationModel.ClauseID}");
+                    log.Debug($"Completed issue creation attempt for GLI ClauseID {regulationModel.ClauseID}");
                     log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
 
-                    Thread.Sleep(parameterModel.SleepTime);
+                    Thread.Sleep(this.parameterModel.SleepTime);
                 }
             }
             log.Debug("Regulations upload ended");
@@ -147,32 +156,60 @@ namespace GliToJiraImporter.Utilities
             return typeof(IMemento).Equals(expectedType);
         }
 
-        private Issue createIssue(RegulationModel regulationModel, string categoryName)
+        private void createIssue(RegulationModel regulationModel, string categoryName)
         {
             log.Debug("Creating Issue");
-            Issue issue = jiraConnection.CreateIssue(parameterModel.ProjectKey);
-            issue.Type = parameterModel.IssueType;
-            issue.Summary = $"{regulationModel.ClauseID}";
-            issue[CLAUSE_ID] = regulationModel.ClauseID.ToString();
-            issue[CATEGORY] = categoryName;
-            issue[SUBCATEGORY] = regulationModel.Subcategory;
-            issue.Description = $"{regulationModel.Description}";
-            issue.SaveChanges();
+            JiraIssue jiraIssue = new JiraIssue(this.parameterModel.ProjectKey, "Test Plan", regulationModel.ClauseID, regulationModel.ClauseID, categoryName,
+                regulationModel.Subcategory, regulationModel.Description);
+            //string jsonData = "{\"fields\": {\"project\": {\"key\": \"" + parameterModel.ProjectKey + "\"},";
+            //jsonData += "\"issuetype\": {\"name\": \"" + parameterModel.IssueType + "\"},";
+            //jsonData += "\"summary\": \"" + regulationModel.ClauseID + "\",";
+            //jsonData += "\"customfield_10046\": \"" + regulationModel.ClauseID + "\",";
+            //jsonData += "\"customfield_10044\": \"" + categoryName + "\",";
+            //jsonData += "\"customfield_10045\": \"" + regulationModel.Subcategory + "\",";
+            //jsonData += "\"description\": \"" + regulationModel.Description + "\"";
+            //jsonData += "}}";
+            //jsonData = jsonData.Replace('\'', '"');
+            //log.Debug(jsonData);
+            ////Models.Issue issue = new Models.Issue();
+            ////issue.fields.issuetype = parameterModel.IssueType;
+            ////issue.fields.summary = $"{regulationModel.ClauseID}";
+            ////issue.fields.customfield_10046 = regulationModel.ClauseID.ToString();
+            ////issue.fields.customfield_10044 = categoryName;
+            ////issue.fields.customfield_10045 = regulationModel.Subcategory;
+            ////issue.fields.description = $"{regulationModel.Description}";
+            bool status = this.jiraRequestUtilities.PostIssue(jiraIssue, string.Empty);
+            string appDataPath = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
-            for (int i = 0; i < regulationModel.AttachmentList.Count; i++)
+            if (status)
             {
-                if (regulationModel.AttachmentList[i].ImageName == string.Empty)
-                {
-                    issue.AddAttachment($"{regulationModel.ClauseID} attachment #{i}.png", regulationModel.AttachmentList[i].ImageBytes);
-                }
-                else
-                {
-                    issue.AddAttachment($"{regulationModel.AttachmentList[i].ImageName}.png", regulationModel.AttachmentList[i].ImageBytes);
-                }
-            }
-            issue.SaveChanges();
+                //for (int i = 0; i < regulationModel.AttachmentList.Count && status; i++)
+                //{
+                //    if (regulationModel.AttachmentList[i].ImageName == string.Empty)
+                //    {
+                //        regulationModel.AttachmentList[i].ImageName = $"{regulationModel.ClauseID} attachment #{i}.png";
+                //    }
+                //    else
+                //    {
+                //        regulationModel.AttachmentList[i].ImageName = $"{regulationModel.AttachmentList[i].ImageName}.png";
+                //    }
 
-            return issue;
+                //    regulationModel.AttachmentList[i].ImageName = regulationModel.AttachmentList[i].ImageName.Replace(" ", "-");
+
+                //    File.Create(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName).Close();
+                //    File.WriteAllBytes(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName, regulationModel.AttachmentList[i].ImageBytes);
+                //    status = this.jiraRequestUtilities.PutIssueByKey(jiraIssue, appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName, jiraIssue.fields.GliClauseId);
+                //    File.Delete(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName);
+                //}
+                //if (!status)
+                //{
+                //    log.Error("Attachments could not be added.");
+                //}
+            }
+            else
+            {
+                log.Error("Issue could not be created.");
+            }
         }
 
         private IDictionary<string, string> getExistingClauseIds()
@@ -180,22 +217,23 @@ namespace GliToJiraImporter.Utilities
             IDictionary<string, string> existingClauseIdList = new Dictionary<string, string>();
 
             // build out our list of GLIClauseIds - this will prevent us from duplicating already added GLI requirements when someone re-runs the tool
-            int index = 0;
-            int itemsPerPage = 50;
-            string queryString = string.Format("project = {0}", parameterModel.ProjectKey);
-            IPagedQueryResult<Issue> jiraExistingIssueList = this.jiraConnection.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
-            while (index < jiraExistingIssueList.TotalItems)
+            //int index = 0;
+            //int itemsPerPage = 50;
+            //string queryString = string.Format("project = {0}", parameterModel.ProjectKey);
+            //IPagedQueryResult<Issue> jiraExistingIssueList = this.jiraConnection.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
+            IList<Models.Issue> jiraExistingIssueList = this.jiraRequestUtilities.GetAllIssuesWithAClauseId();
+            //while (index < jiraExistingIssueList.TotalItems)
+            //{
+            //    index += itemsPerPage;
+            foreach (GliToJiraImporter.Models.Issue issue in jiraExistingIssueList)
             {
-                index += itemsPerPage;
-                foreach (Issue issue in jiraExistingIssueList)
+                if (issue.fields.customfield_10000 != null)
                 {
-                    if (issue[CLAUSE_ID] != null)
-                    {
-                        existingClauseIdList.Add(issue[CLAUSE_ID].Value, issue.JiraIdentifier);
-                    }
+                    existingClauseIdList.Add((string)issue.fields.customfield_10046, issue.id);
                 }
-                jiraExistingIssueList = jiraConnection.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
             }
+            //jiraExistingIssueList = jiraConnection.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
+            //}
 
             return existingClauseIdList;
         }

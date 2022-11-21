@@ -115,7 +115,7 @@ namespace GliToJiraImporter.Models
         public Status status { get; set; }
         public List<object> components { get; set; }
         public object timeoriginalestimate { get; set; }
-        public Description description { get; set; }
+        public string description { get; set; }
         public object customfield_10010 { get; set; }
         public object customfield_10014 { get; set; }
         public object customfield_10015 { get; set; }

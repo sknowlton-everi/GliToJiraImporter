@@ -23,8 +23,9 @@ namespace GliToJiraImporter
             try
             {
                 ParameterModel parameterModel = parseCommandLine(args);
-                Jira jiraConnection = Jira.CreateRestClient(parameterModel.JiraUrl, parameterModel.UserName, parameterModel.Password);
-                Parser parser = new(parameterModel, jiraConnection);
+                //Jira jiraConnection = Jira.CreateRestClient(parameterModel.JiraUrl, parameterModel.UserName, parameterModel.Password);
+                parameterModel.UserName = $"{parameterModel.UserName}:{Environment.GetEnvironmentVariable("JIRA_API_TOKEN")}";
+                Parser parser = new(parameterModel);//, jiraConnection);//TODO Cleanup
                 parser.Parse();
             }
             catch (Exception e)

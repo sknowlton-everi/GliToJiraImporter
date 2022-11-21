@@ -16,11 +16,12 @@ namespace GliToJiraImporter
         private ParameterModel parameterModel;
         private StorageUtilities storageUtilities;
 
-        public Parser(ParameterModel parameterModel, Jira jiraConnection)
+        //TODO Cleanup
+        public Parser(ParameterModel parameterModel)//, Jira jiraConnection)
         {
             log.Info(new StackFrame().GetMethod().Name);
             this.parameterModel = parameterModel;
-            this.storageUtilities = new StorageUtilities(this.parameterModel, jiraConnection);
+            this.storageUtilities = new StorageUtilities(this.parameterModel);//, jiraConnection); //TODO CLeanup
         }
 
         public IList<CategoryModel> Parse()
