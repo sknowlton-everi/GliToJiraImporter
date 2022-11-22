@@ -205,7 +205,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("This test is very large and takes a long time to complete.")]
+        [Ignore("This test is very large and takes a long time to complete.")]
         [Test]
         public void ParserFullTest()
         {
