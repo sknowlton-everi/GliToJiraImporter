@@ -34,7 +34,7 @@
             isValid = isValid && formattedTableRows[0].Trim().StartsWith("||") && formattedTableRows[0].Trim().EndsWith("||");
             isValid = isValid && formattedTableRows.Length >= 2;
 
-            string[] headers = formattedTableRows[0].Substring(2, formattedTableRows[0].Length - 4).Split("||"); //.Remove(0, 2).Remove(rows[0].Length - 3, 2).Split("||"); //TODO cleanup
+            string[] headers = formattedTableRows[0].Substring(2, formattedTableRows[0].Length - 4).Split("||");
             for (int i = 0; i < this.Headers.Count && isValid; i++)
             {
                 isValid = isValid && !this.Headers[i].Trim().Equals(string.Empty);

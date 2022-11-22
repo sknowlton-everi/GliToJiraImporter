@@ -1,5 +1,3 @@
-using Aspose.Words;
-using Aspose.Words.Tables;
 using GliToJiraImporter.Models;
 using GliToJiraImporter.Utilities;
 using log4net;
@@ -41,7 +39,7 @@ namespace GliToJiraImporter.Parsers
             Caretaker embeddedTableCaretaker = new Caretaker(embeddedTableParser);
 
             // Iterates through the paragraphs of the cell
-            for (int i = 0; i < cell.Paragraphs.Count; i++) // j < cell.Paragraphs.Count && !regulationComplete; //TODO cleanup
+            for (int i = 0; i < cell.Paragraphs.Count; i++)
             {
                 if (!result.Trim().Equals(string.Empty))
                 {
@@ -68,7 +66,7 @@ namespace GliToJiraImporter.Parsers
                     }
                 }
                 // Checks for a table within a cell 
-                else if (cell.Tables.Count != 0)// && cell.Paragraphs[i].Text.Equals(string.Empty))
+                else if (cell.Tables.Count != 0)
                 {
                     embeddedTableCaretaker.Backup();
                     embeddedTableParser.Parse(cell);

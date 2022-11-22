@@ -39,38 +39,8 @@ namespace GliToJiraImporter.Models
 
         public bool IsValid()
         {
-            return !this.IsEmpty();// this.IsValidEmbeddedTable()); //TODO Cleanup //TODO add attachment validating
+            return !this.IsEmpty();//TODO add attachment validating
         }
-
-        //TODO cleanup
-        //public bool IsValidEmbeddedTable()
-        //{
-        //    bool isValid = true;
-        //    if (this.IsEmpty())
-        //    {
-        //        isValid = false;
-        //    }
-        //    else
-        //    {
-        //        string[] lines = this.Text.Split('\n');
-        //        // Check for the column headers and that there is at least one row
-        //        isValid = isValid && lines[0].Trim().StartsWith("||") && lines[0].Trim().EndsWith("||");
-        //        isValid = isValid && lines.Length >= 2;
-        //        int numOfColumns = lines[0].Split("||").Length;
-
-        //        // Check that every row is formated correctly and the number of columns match
-        //        for (int i = 1; i < lines.Length; i++)
-        //        {
-        //            if (lines[i].Trim().Equals(string.Empty))
-        //            {
-        //                isValid = false;
-        //            }
-        //            isValid = isValid && lines[i].Trim().StartsWith("|") && lines[i].Trim().EndsWith("|");
-        //            isValid = isValid && numOfColumns == lines[0].Split("|").Length;
-        //        }
-        //    }
-        //    return isValid;
-        //}
 
         public override bool Equals(object? obj)
         {

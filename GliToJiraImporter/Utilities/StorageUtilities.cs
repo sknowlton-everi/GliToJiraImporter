@@ -69,7 +69,7 @@ namespace GliToJiraImporter.Utilities
             {
                 foreach (RegulationModel regulationModel in categoryModel.RegulationList)
                 {
-                    csvRegulations += $"\"{categoryModel.Category}\",\"{regulationModel.Subcategory}\",\"{regulationModel.ClauseID.FullClauseId}\",\"{regulationModel.Description.GetName().Replace('\"', '\'')}\"";
+                    csvRegulations += $"\"{categoryModel.Category}\",\"{regulationModel.Subcategory}\",\"{regulationModel.ClauseID.FullClauseId}\",\"{regulationModel.Description.Text.Replace('\"', '\'')}\"";
                     //csvWriter.WriteRecord($"{categoryModel.Category},{regulationModel.Subcategory},{regulationModel.ClauseID},{regulationModel.Description},");
                     //foreach (byte[] image in regulationModel.AttachmentList)
                     //{
@@ -134,7 +134,7 @@ namespace GliToJiraImporter.Utilities
             {
                 foreach (RegulationModel regulationModel in categoryModel.RegulationList)
                 {
-                    if (jiraExistingClauseIdList.ContainsKey(regulationModel.ClauseID.GetName()))
+                    if (jiraExistingClauseIdList.ContainsKey(regulationModel.ClauseID.FullClauseId))
                     {
                         log.Debug($"Skipping clauseId {regulationModel.ClauseID.FullClauseId} because it already exists in the project {parameterModel.ProjectKey}");
                         log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
@@ -196,18 +196,18 @@ namespace GliToJiraImporter.Utilities
                 //    {
                 //        regulationModel.AttachmentList[i].ImageName = $"{regulationModel.AttachmentList[i].ImageName}.png";
                 //    }
-            //    regulationModel.AttachmentList[i].ImageName = regulationModel.AttachmentList[i].ImageName.Replace(" ", "-");
+                //    regulationModel.AttachmentList[i].ImageName = regulationModel.AttachmentList[i].ImageName.Replace(" ", "-");
 
-            //    File.Create(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName).Close();
-            //    File.WriteAllBytes(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName, regulationModel.AttachmentList[i].ImageBytes);
-            //    status = this.jiraRequestUtilities.PutIssueByKey(jiraIssue, appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName, jiraIssue.fields.GliClauseId);
-            //    File.Delete(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName);
-            //}
-            //if (!status)
-            //{
-            //    log.Error("Attachments could not be added.");
-            //}
-        }
+                //    File.Create(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName).Close();
+                //    File.WriteAllBytes(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName, regulationModel.AttachmentList[i].ImageBytes);
+                //    status = this.jiraRequestUtilities.PutIssueByKey(jiraIssue, appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName, jiraIssue.fields.GliClauseId);
+                //    File.Delete(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName);
+                //}
+                //if (!status)
+                //{
+                //    log.Error("Attachments could not be added.");
+                //}
+            }
             else
             {
                 log.Error("Issue could not be created.");
