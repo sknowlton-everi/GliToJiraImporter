@@ -30,7 +30,7 @@ namespace GliToJiraImporter.Parsers
         public void Parse(WTableCell cell)
         {
             // Iterates through the paragraphs of the cell
-            for (int i = 0; i < cell.Paragraphs.Count; i++) // i < cell.Paragraphs.Count && !regulationComplete; //TODO cleanup
+            for (int i = 0; i < cell.Paragraphs.Count; i++)
             {
                 WParagraph paragraph = cell.Paragraphs[i];
                 if (!paragraph.Text.Equals(string.Empty))
@@ -43,7 +43,7 @@ namespace GliToJiraImporter.Parsers
                     // Check for additions to clauseId
                     else
                     {
-                        this._state.FullClauseId += $" --- {paragraph.Text.Trim()}"; //TODO Not sure if this will work. It's supposed to produce a symbol that looks like a line //TODO cleanup
+                        this._state.FullClauseId += $" --- {paragraph.Text.Trim()}";
                     }
                 }
             }
