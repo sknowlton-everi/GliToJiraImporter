@@ -185,7 +185,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
@@ -201,7 +201,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
@@ -217,7 +217,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotZero(result.Count);
+            Assert.That(result.Count, !Is.EqualTo(0));
             int totalRegs = 0;
             foreach (CategoryModel categoryModel in result)
             {
@@ -260,7 +260,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
@@ -276,7 +276,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
@@ -292,7 +292,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
@@ -308,7 +308,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
@@ -327,15 +327,15 @@ namespace GliToJiraImporter.Testing.Tests
             //then
             memoryAppender.GetEvents().First(logEvent => logEvent.Level == Level.Debug
             && logEvent.RenderedMessage.Equals($"Skipping clauseId {expectedResult[0].RegulationList[0].ClauseID.BaseClauseId} because it already exists in the project {parameterModelStub.ProjectKey}"));
-            Assert.IsTrue(result.Any());
-            Assert.NotNull(expectedResult);
+            Assert.That(result.Any(), Is.True);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             this.checkForErrorsInLogs();
-            Assert.NotNull(result);
+            Assert.That(result, !Is.Null);
             Assert.That(result.Count, Is.EqualTo(expectedResult.Count), $"The result count of categories does not match the expected.");
             for (int i = 0; i < result.Count; i++)
             {
