@@ -36,7 +36,6 @@ namespace GliToJiraImporter.Parsers
             PictureParser pictureParser = new PictureParser();
             Caretaker pictureCaretaker = new Caretaker(pictureParser);
             EmbeddedTableParser embeddedTableParser = new EmbeddedTableParser();
-            Caretaker embeddedTableCaretaker = new Caretaker(embeddedTableParser);
 
             // Iterates through the paragraphs of the cell
             for (int i = 0; i < cell.Paragraphs.Count; i++)
@@ -68,16 +67,16 @@ namespace GliToJiraImporter.Parsers
                 // Checks for a table within a cell 
                 else if (cell.Tables.Count != 0)
                 {
-                    embeddedTableCaretaker.Backup();
+                    string embeddedTableParserBackup = embeddedTableParser.Save();
                     embeddedTableParser.Parse(cell);
-                    if (!embeddedTableParser.Save().IsValid())
+                    if (!embeddedTableParser.IsValid())
                     {
-                        embeddedTableCaretaker.Undo();
+                        embeddedTableParser = new EmbeddedTableParser(embeddedTableParserBackup);
                     }
                     else
                     {
                         // Add the embedded table to the end of the description
-                        result += embeddedTableParser.Save().GetName();
+                        result += embeddedTableParser.Save();
                     }
                 }
             }
