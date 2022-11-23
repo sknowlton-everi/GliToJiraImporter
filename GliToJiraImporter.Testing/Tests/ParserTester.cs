@@ -127,13 +127,13 @@ namespace GliToJiraImporter.Testing.Tests
                 for (int j = 0; j < this.expectedResult[i].RegulationList.Count; j++)
                 {
                     //Models.Issue issue = jiraExistingIssueList[i];
-                    Models.Issue issue = jiraExistingIssueList.First(issue => issue.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseID));
-                    if (issue.fields.customfield_10046 != null && issue.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseID))//categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not a good enough check
+                    Models.Issue issueFound = jiraExistingIssueList.First(issue => issue.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseID.FullClauseId));
+                    if (issueFound.fields.customfield_10046 != null && issueFound.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseID.FullClauseId))//categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not a good enough check
                     {
-                        bool success = jiraRequestUtilities.DeleteIssueByKey(issue.key);//this.deleteIssueByKey(issue.Key.Value);
+                        bool success = jiraRequestUtilities.DeleteIssueByKey(issueFound.key);//this.deleteIssueByKey(issue.Key.Value);
                         if (success != true)
                         {
-                            log.Error($"Issue failed to delete. {issue.key}");
+                            log.Error($"Issue failed to delete. {issueFound.key}");
                         }
                     }
                     Thread.Sleep(this.parameterModelStub.SleepTime);
@@ -143,7 +143,7 @@ namespace GliToJiraImporter.Testing.Tests
             checkForErrorsInLogs();
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleTest()
         {
@@ -158,7 +158,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleMultiDescTest()
         {
@@ -173,7 +173,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserPicturesTest()
         {
@@ -185,11 +185,11 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Does not work due to more then 50 tasks")]
         [Test]
         public void ParserSpecialsTest()
         {
@@ -201,7 +201,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
@@ -217,7 +217,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotZero(result.Count);
+            Assert.That(result.Count, !Is.EqualTo(0));
             int totalRegs = 0;
             foreach (CategoryModel categoryModel in result)
             {
@@ -227,7 +227,7 @@ namespace GliToJiraImporter.Testing.Tests
             //this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserUnknownDocTypeTest()
         {
@@ -248,7 +248,7 @@ namespace GliToJiraImporter.Testing.Tests
             }
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserCharFormatTest()
         {
@@ -260,11 +260,11 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserClauseIdVarietiesTest()
         {
@@ -276,11 +276,11 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserNoCategoryTest()
         {
@@ -292,11 +292,11 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
+        [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserLinkTest()
         {
@@ -308,14 +308,34 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.NotNull(expectedResult);
+            Assert.That(expectedResult, !Is.Null);
+            this.testAssertModel(expectedResult, result);
+        }
+
+        [Ignore("Can only run locally with a local Jira.")]
+        [Test]
+        public void ParserSingleDuplicateTest()
+        {
+            //given
+            parameterModelStub.FilePath = $"{checkoffPath}SINGLE-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultPath}ParserSingleTestExpectedResult.json"));
+
+            //when
+            IList<CategoryModel> result = sut.Parse();
+            result = sut.Parse();
+
+            //then
+            memoryAppender.GetEvents().First(logEvent => logEvent.Level == Level.Debug
+            && logEvent.RenderedMessage.Equals($"Skipping clauseId {expectedResult[0].RegulationList[0].ClauseID.BaseClauseId} because it already exists in the project {parameterModelStub.ProjectKey}"));
+            Assert.That(result.Any(), Is.True);
+            Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }
 
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
             this.checkForErrorsInLogs();
-            Assert.NotNull(result);
+            Assert.That(result, !Is.Null);
             Assert.That(result.Count, Is.EqualTo(expectedResult.Count), $"The result count of categories does not match the expected.");
             for (int i = 0; i < result.Count; i++)
             {
@@ -326,14 +346,18 @@ namespace GliToJiraImporter.Testing.Tests
                 {
                     RegulationModel resultRegulation = (RegulationModel)result[i].RegulationList[j];
                     RegulationModel expectedResultRegulation = (RegulationModel)expectedResult[i].RegulationList[j];
-                    Assert.That(resultRegulation.ClauseID, Is.EqualTo(expectedResultRegulation.ClauseID), $"The ClauseId of {resultRegulation.ClauseID} does not match the expected.");
-                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory), $"The Subcategory of {resultRegulation.ClauseID} does not match the expected.");
-                    Assert.That(resultRegulation.Description, Is.EqualTo(expectedResultRegulation.Description), $"The Description of {resultRegulation.ClauseID} does not match the expected.");
-                    Assert.That(resultRegulation.AttachmentList.Count, Is.EqualTo(expectedResultRegulation.AttachmentList.Count), $"The AttachmentList of {resultRegulation.ClauseID} does not match the expected.");
-                    for (int k = 0; k < resultRegulation.AttachmentList.Count; k++)
+                    Assert.That(resultRegulation.ClauseID.BaseClauseId, Is.EqualTo(expectedResultRegulation.ClauseID.BaseClauseId), $"The BaseClauseId of {resultRegulation.ClauseID.BaseClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.ClauseID.FullClauseId, Is.EqualTo(expectedResultRegulation.ClauseID.FullClauseId), $"The FullClauseId of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory), $"The Subcategory of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.Description.Text, Is.EqualTo(expectedResultRegulation.Description.Text), $"The Description Text of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+
+                    IList<PictureModel> resultAttachmentList = ((DescriptionModel)resultRegulation.Description).AttachmentList;
+                    IList<PictureModel> expectedResultAttachmentList = ((DescriptionModel)expectedResultRegulation.Description).AttachmentList;
+                    Assert.That(resultAttachmentList.Count, Is.EqualTo(expectedResultAttachmentList.Count), $"The AttachmentList of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                    for (int k = 0; k < resultAttachmentList.Count; k++)
                     {
-                        Assert.That(resultRegulation.AttachmentList[k].ImageName, Is.EqualTo(expectedResultRegulation.AttachmentList[k].ImageName), $"ImageName at position {k} of {resultRegulation.ClauseID} does not match the expected.");
-                        Assert.That(resultRegulation.AttachmentList[k].ImageBytes, Is.EqualTo(expectedResultRegulation.AttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseID} does not match the expected.");
+                        Assert.That(resultAttachmentList[k].ImageName, Is.EqualTo(expectedResultAttachmentList[k].ImageName), $"ImageName at position {k} of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                        Assert.That(resultAttachmentList[k].ImageBytes, Is.EqualTo(expectedResultAttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
                     }
                 }
             }

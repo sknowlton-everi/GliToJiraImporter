@@ -10,21 +10,21 @@ namespace GliToJiraImporter.Parsers
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private CategoryModel _state;
+        private CategoryModel _state = new CategoryModel();
 
-        public CategoryParser()
-        {
-            _state = new CategoryModel();
-        }
+        public CategoryParser() { }
 
         public CategoryParser(CategoryModel state)
         {
-            this._state = state;
-            log.Debug("CategoryParser: My initial state is: " + JsonSerializer.Serialize(this._state));
-            if (this._state == null)
+            if (state == null)
             {
                 this._state = new CategoryModel();
             }
+            else
+            {
+                this._state = state;
+            }
+            log.Debug("CategoryParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
         public bool Parse(IWTable table, ref int rowIndex)
@@ -78,7 +78,7 @@ namespace GliToJiraImporter.Parsers
                         this._state = (CategoryModel)categoryModel.GetState();
                         categoryComplete = true;
                     }
-                    else //This row is a subcategory header
+                    else // This row is a subcategory header
                     {
                         RegulationModel newRegulation = new RegulationModel();
 
@@ -134,7 +134,7 @@ namespace GliToJiraImporter.Parsers
         // Saves the current state inside a memento.
         public IMemento Save()
         {
-            return this._state;
+            return new CategoryModel(this._state);
         }
 
         // Restores the Originator's state from a memento object.

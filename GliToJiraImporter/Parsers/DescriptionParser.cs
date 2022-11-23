@@ -1,4 +1,4 @@
-﻿using GliToJiraImporter.Models;
+using GliToJiraImporter.Models;
 using GliToJiraImporter.Utilities;
 using log4net;
 using Syncfusion.DocIO.DLS;
@@ -12,30 +12,91 @@ namespace GliToJiraImporter.Parsers
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private RegulationExtrasModel _state = new RegulationExtrasModel();
+        private DescriptionModel _state = new DescriptionModel();
 
-        public DescriptionParser()
-        { }
+        public DescriptionParser() { }
 
-        public DescriptionParser(RegulationExtrasModel state)
+        public DescriptionParser(IMemento state)
         {
-            this._state = state;
-            log.Debug("DescriptionParser: My initial state is: " + JsonSerializer.Serialize(this._state));
-            if (this._state == null)
+            if (state == null)
             {
-                this._state = new RegulationExtrasModel();
+                this._state = new DescriptionModel();
             }
+            else
+            {
+                this._state = (DescriptionModel)state;
+            }
+            log.Debug("DescriptionParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
-        public void Parse(WParagraph paragraph)
+        public void Parse(WTableCell cell)
         {
             string result = string.Empty;
-            if (!this._state.State.Equals(string.Empty))
+
+            PictureParser pictureParser = new PictureParser();
+            Caretaker pictureCaretaker = new Caretaker(pictureParser);
+            EmbeddedTableParser embeddedTableParser = new EmbeddedTableParser();
+
+            // Iterates through the paragraphs of the cell
+            for (int i = 0; i < cell.Paragraphs.Count; i++)
             {
-                this._state.State += "\n";
+                if (!result.Trim().Equals(string.Empty))
+                {
+                    result += '\n';
+                }
+
+                if (!cell.Paragraphs[i].Text.Equals(string.Empty) && !cell.Paragraphs[i].Text.Contains("Choose an item"))
+                {
+                    result += this.parseParagraph(cell.Paragraphs[i]);
+                }
+                // Checks for a picture within a cell 
+                else if (cell.Paragraphs[i].ChildEntities.Count != 0)
+                {
+                    pictureCaretaker.Backup();
+                    pictureParser.Parse(cell.Paragraphs[i]);
+                    if (!pictureParser.Save().IsValid())
+                    {
+                        pictureCaretaker.Undo();
+                    }
+                    else
+                    {
+                        this._state.AttachmentList.Add((PictureModel)pictureParser.Save());
+                        result += $"(Image included below, Name: {((PictureModel)pictureParser.Save()).ImageName})";
+                    }
+                }
+                // Checks for a table within a cell 
+                else if (cell.Tables.Count != 0)
+                {
+                    string embeddedTableParserBackup = embeddedTableParser.Save();
+                    embeddedTableParser.Parse(cell);
+                    if (!embeddedTableParser.IsValid())
+                    {
+                        embeddedTableParser = new EmbeddedTableParser(embeddedTableParserBackup);
+                    }
+                    else
+                    {
+                        // Add the embedded table to the end of the description
+                        result += embeddedTableParser.Save();
+                    }
+                }
             }
 
-            // Check for different text styling
+            // Checking for what I guess are dashes, as Jira doesn't know how to read them
+            result = result.Replace('\u001E', '-');
+
+            if (!this._state.Text.Equals(string.Empty) && !result.Trim('\n').Equals(string.Empty))
+            {
+                this._state.Text += '\n';
+            }
+
+            this._state.Text += result;
+        }
+
+        private string parseParagraph(WParagraph paragraph)
+        {
+            string result = string.Empty;
+
+            // Check for different paragraph item types
             for (int i = 0; i < paragraph.Items.Count; i++)
             {
                 if (paragraph.Items[i].GetType() == typeof(Break))
@@ -49,50 +110,9 @@ namespace GliToJiraImporter.Parsers
                     // Checking for certain characters in front of and behind a word, then added spaces to avoid Jira confusing them for formating
                     textRange = this.ignoreUnintendedFormating(textRange);
 
-                    if (textRange.CharacterFormat.Bold)
-                    {
-                        if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Bold))
-                        {
-                            textRange.Text = textRange.Text.Replace(textRange.Text, $"*{textRange.Text}");
-                        }
-                        if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Bold))
-                        {
-                            textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}*");
-                        }
-                    }
-                    if (textRange.CharacterFormat.Italic)
-                    {
-                        if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Italic))
-                        {
-                            textRange.Text = textRange.Text.Replace(textRange.Text, $"_{textRange.Text}");
-                        }
-                        if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Italic))
-                        {
-                            textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}_");
-                        }
-                    }
-                    if (textRange.CharacterFormat.Strikeout)
-                    {
-                        if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Strikeout))
-                        {
-                            textRange.Text = textRange.Text.Replace(textRange.Text, $"-{textRange.Text}");
-                        }
-                        if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Strikeout))
-                        {
-                            textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}-");
-                        }
-                    }
-                    if (textRange.CharacterFormat.UnderlineStyle == UnderlineStyle.Single)
-                    {
-                        if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && ((WTextRange)textRange.PreviousSibling).CharacterFormat.UnderlineStyle != UnderlineStyle.Single))
-                        {
-                            textRange.Text = textRange.Text.Replace(textRange.Text, $"+{textRange.Text}");
-                        }
-                        if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && ((WTextRange)textRange.NextSibling).CharacterFormat.UnderlineStyle != UnderlineStyle.Single))
-                        {
-                            textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}+");
-                        }
-                    }
+                    // Checking for formatting like bolding, and adding the characters needed for Jira to know about it
+                    textRange = this.checkForIntendedFormatting(textRange);
+
                     result += textRange.Text;
                 }
                 else if (paragraph.Items[i].GetType() == typeof(WField) && ((WField)paragraph.Items[i]).FieldType == Syncfusion.DocIO.FieldType.FieldHyperlink)
@@ -146,10 +166,7 @@ namespace GliToJiraImporter.Parsers
                 }
             }
 
-            // Checking for what I guess are dashes, as Jira doesn't know how to read them
-            result = result.Replace('\u001E', '-');
-
-            this._state.State += result;
+            return result;
         }
 
         private WTextRange ignoreUnintendedFormating(WTextRange textRange)
@@ -165,21 +182,71 @@ namespace GliToJiraImporter.Parsers
             return textRange;
         }
 
+        private WTextRange checkForIntendedFormatting(WTextRange textRange)
+        {
+            if (textRange.CharacterFormat.Bold)
+            {
+                if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Bold))
+                {
+                    textRange.Text = textRange.Text.Replace(textRange.Text, $"*{textRange.Text}");
+                }
+                if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Bold))
+                {
+                    textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}*");
+                }
+            }
+            if (textRange.CharacterFormat.Italic)
+            {
+                if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Italic))
+                {
+                    textRange.Text = textRange.Text.Replace(textRange.Text, $"_{textRange.Text}");
+                }
+                if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Italic))
+                {
+                    textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}_");
+                }
+            }
+            if (textRange.CharacterFormat.Strikeout)
+            {
+                if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.PreviousSibling).CharacterFormat.Strikeout))
+                {
+                    textRange.Text = textRange.Text.Replace(textRange.Text, $"-{textRange.Text}");
+                }
+                if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && !((WTextRange)textRange.NextSibling).CharacterFormat.Strikeout))
+                {
+                    textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}-");
+                }
+            }
+            if (textRange.CharacterFormat.UnderlineStyle != UnderlineStyle.None)
+            {
+                if (textRange.PreviousSibling == null || (textRange.PreviousSibling.GetType() == typeof(WTextRange) && ((WTextRange)textRange.PreviousSibling).CharacterFormat.UnderlineStyle != UnderlineStyle.Single))
+                {
+                    textRange.Text = textRange.Text.Replace(textRange.Text, $"+{textRange.Text}");
+                }
+                if (textRange.NextSibling == null || (textRange.NextSibling.GetType() == typeof(WTextRange) && ((WTextRange)textRange.NextSibling).CharacterFormat.UnderlineStyle != UnderlineStyle.Single))
+                {
+                    textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}+");
+                }
+            }
+
+            return textRange;
+        }
+
         // Saves the current state inside a memento.
         public IMemento Save()
         {
-            return this._state;
+            return new DescriptionModel(this._state);
         }
 
         // Restores the Originator's state from a memento object.
         public void Restore(IMemento memento)
         {
-            if (!(memento is RegulationExtrasModel))
+            if (!(memento is DescriptionModel))
             {
                 throw new Exception("Unknown memento class " + memento.ToString());
             }
 
-            this._state = (RegulationExtrasModel)memento.GetState();
+            this._state = (DescriptionModel)memento.GetState();
             log.Debug($"DescriptionParser: My state has changed to: {JsonSerializer.Serialize(this._state)}");
         }
     }

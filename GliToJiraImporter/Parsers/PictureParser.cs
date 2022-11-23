@@ -12,17 +12,19 @@ namespace GliToJiraImporter.Parsers
 
         private PictureModel _state = new PictureModel();
 
-        public PictureParser()
-        { }
+        public PictureParser() { }
 
         public PictureParser(PictureModel state)
         {
-            this._state = state;
-            log.Debug("PictureParser: My initial state is: " + JsonSerializer.Serialize(this._state));
-            if (this._state == null)
+            if (state == null)
             {
                 this._state = new PictureModel();
             }
+            else
+            {
+                this._state = state;
+            }
+            log.Debug("PictureParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
         public void Parse(WParagraph paragraph)
@@ -32,7 +34,7 @@ namespace GliToJiraImporter.Parsers
                 if (paragraph.ChildEntities[i].GetType().Equals(typeof(WPicture)))
                 {
                     WPicture picture = (WPicture)paragraph.ChildEntities[i];
-                    this._state = new PictureModel(picture.Name, picture.ImageBytes);
+                    this._state = new PictureModel($"{picture.Name.Replace(' ', '-')}.png", picture.ImageBytes);
                 }
             }
         }
@@ -40,10 +42,10 @@ namespace GliToJiraImporter.Parsers
         // Saves the current state inside a memento.
         public IMemento Save()
         {
-            return this._state;
+            return new PictureModel(this._state);
         }
 
-        //Restores the Originator's state from a memento object.
+        // Restores the Originator's state from a memento object.
         public void Restore(IMemento memento)
         {
             if (!(memento is PictureModel))

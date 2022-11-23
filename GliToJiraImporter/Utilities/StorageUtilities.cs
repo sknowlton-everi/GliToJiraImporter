@@ -69,7 +69,7 @@ namespace GliToJiraImporter.Utilities
             {
                 foreach (RegulationModel regulationModel in categoryModel.RegulationList)
                 {
-                    csvRegulations += $"\"{categoryModel.Category}\",\"{regulationModel.Subcategory}\",\"{regulationModel.ClauseID}\",\"{regulationModel.Description.Replace('\"', '\'')}\"";
+                    csvRegulations += $"\"{categoryModel.Category}\",\"{regulationModel.Subcategory}\",\"{regulationModel.ClauseID.FullClauseId}\",\"{regulationModel.Description.Text.Replace('\"', '\'')}\"";
                     //csvWriter.WriteRecord($"{categoryModel.Category},{regulationModel.Subcategory},{regulationModel.ClauseID},{regulationModel.Description},");
                     //foreach (byte[] image in regulationModel.AttachmentList)
                     //{
@@ -134,15 +134,16 @@ namespace GliToJiraImporter.Utilities
             {
                 foreach (RegulationModel regulationModel in categoryModel.RegulationList)
                 {
-                    if (jiraExistingClauseIdList.ContainsKey(regulationModel.ClauseID))
+                    if (jiraExistingClauseIdList.ContainsKey(regulationModel.ClauseID.FullClauseId))
                     {
-                        log.Debug($"Skipping clauseId {regulationModel.ClauseID} because it already exists in the project {parameterModel.ProjectKey}");
+                        log.Debug($"Skipping clauseId {regulationModel.ClauseID.FullClauseId} because it already exists in the project {parameterModel.ProjectKey}");
                         log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
                         continue;
                     }
                     this.createIssue(regulationModel, categoryModel.Category);
 
-                    log.Debug($"Completed issue creation attempt for GLI ClauseID {regulationModel.ClauseID}");
+
+                    log.Debug($"Completed issue creation attempt for GLI ClauseID {regulationModel.ClauseID.FullClauseId}");
                     log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
 
                     Thread.Sleep(this.parameterModel.SleepTime);
@@ -159,8 +160,8 @@ namespace GliToJiraImporter.Utilities
         private void createIssue(RegulationModel regulationModel, string categoryName)
         {
             log.Debug("Creating Issue");
-            JiraIssue jiraIssue = new JiraIssue(this.parameterModel.ProjectKey, "Test Plan", regulationModel.ClauseID, regulationModel.ClauseID, categoryName,
-                regulationModel.Subcategory, regulationModel.Description);
+            JiraIssue jiraIssue = new JiraIssue(this.parameterModel.ProjectKey, "Test Plan", regulationModel.ClauseID.FullClauseId, regulationModel.ClauseID.FullClauseId, categoryName,
+                regulationModel.Subcategory, regulationModel.Description.Text);
             //string jsonData = "{\"fields\": {\"project\": {\"key\": \"" + parameterModel.ProjectKey + "\"},";
             //jsonData += "\"issuetype\": {\"name\": \"" + parameterModel.IssueType + "\"},";
             //jsonData += "\"summary\": \"" + regulationModel.ClauseID + "\",";
@@ -187,13 +188,14 @@ namespace GliToJiraImporter.Utilities
                 //{
                 //    if (regulationModel.AttachmentList[i].ImageName == string.Empty)
                 //    {
-                //        regulationModel.AttachmentList[i].ImageName = $"{regulationModel.ClauseID} attachment #{i}.png";
+                //        regulationModel.AttachmentList[i].ImageName = $"{regulationModel.ClauseID.BaseClauseId}-attachment-#{i}.png";
+                //          issue.AddAttachment(attachmentName, attachmentList[i].ImageBytes);
+                //          issue.Description.Replace("(Image included below, Name: )", $"(Image included below, Name: {attachmentName})");
                 //    }
                 //    else
                 //    {
                 //        regulationModel.AttachmentList[i].ImageName = $"{regulationModel.AttachmentList[i].ImageName}.png";
                 //    }
-
                 //    regulationModel.AttachmentList[i].ImageName = regulationModel.AttachmentList[i].ImageName.Replace(" ", "-");
 
                 //    File.Create(appDataPath + @"\TempImages\" + regulationModel.AttachmentList[i].ImageName).Close();
