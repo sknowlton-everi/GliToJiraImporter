@@ -65,18 +65,19 @@ namespace GliToJiraImporter.Parsers
                 return false;
             }
 
-            const int ZERO = 0;
+            const int HEADER_ROW = 0;
+            const int HEADER_ROW_EXTRAS = 2;
             bool result = true;
             string[] formattedTableRows = this._state.Split('\n');
 
             // Check for the column headers and that there is at least one row
-            result = formattedTableRows[ZERO].IsValidHeaderRowFormatting();
+            result = formattedTableRows[HEADER_ROW].IsValidHeaderRowFormatting();
             if (!result)
             {
                 return false;
             }
 
-            string[] headers = formattedTableRows[ZERO].Substring(2, formattedTableRows[ZERO].Length - 4).Split("||");
+            string[] headers = formattedTableRows[HEADER_ROW].Substring(HEADER_ROW_EXTRAS, formattedTableRows[HEADER_ROW].Length - (HEADER_ROW_EXTRAS * 2)).Split("||");
             for (int i = 0; i < headers.Length && result; i++)
             {
                 result = !headers[i].Trim().Equals(string.Empty);
