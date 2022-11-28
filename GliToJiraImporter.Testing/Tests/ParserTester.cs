@@ -397,8 +397,12 @@ namespace GliToJiraImporter.Testing.Tests
             var currentAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase).Replace(@"file:/", string.Empty);
             currentAssemblyPath = currentAssemblyPath.Replace(@"bin/Debug/net6.0", string.Empty);
             var relativePath = Path.Combine(currentAssemblyPath, folderName);
+            log.Debug("PATHS");
+            log.Debug(currentAssemblyPath);
+            log.Debug(relativePath);
+            log.Debug(currentAssemblyPath + folderName);
             //return Path.GetFullPath(relativePath);
-            return relativePath;
+            return currentAssemblyPath + folderName;
         }
     }
 }
