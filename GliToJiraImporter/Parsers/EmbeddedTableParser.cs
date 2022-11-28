@@ -1,6 +1,8 @@
 ﻿using log4net;
+using GliToJiraImporter.Extensions;
 using Syncfusion.DocIO.DLS;
 using System.Reflection;
+using Microsoft.SqlServer.Management.HadrModel;
 
 namespace GliToJiraImporter.Parsers
 {
@@ -10,7 +12,8 @@ namespace GliToJiraImporter.Parsers
 
         private string _state = string.Empty;
 
-        public EmbeddedTableParser() { }
+        public EmbeddedTableParser()
+        { }
 
         public EmbeddedTableParser(string state)
         {
@@ -57,28 +60,30 @@ namespace GliToJiraImporter.Parsers
 
         public bool IsValid()
         {
-            bool isValid = !this._state.Equals(string.Empty);
+            bool result = !this._state.Equals(string.Empty);
             string[] formattedTableRows = this._state.Split('\n');
 
             // Check for the column headers and that there is at least one row
-            isValid = isValid && formattedTableRows[0].Trim().StartsWith("||") && formattedTableRows[0].Trim().EndsWith("||");
-            isValid = isValid && formattedTableRows.Length >= 2;
+            result = result && formattedTableRows[0].Trim().StartsWith("||") && formattedTableRows[0].Trim().EndsWith("||");
+            result = result && formattedTableRows.Length >= 2;
 
             string[] headers = formattedTableRows[0].Substring(2, formattedTableRows[0].Length - 4).Split("||");
-            for (int i = 0; i < headers.Length && isValid; i++)
+            for (int i = 0; i < headers.Length && result; i++)
             {
-                isValid = isValid && !headers[i].Trim().Equals(string.Empty);
+                result = result && !headers[i].Trim().Equals(string.Empty);
             }
 
             // Check that every row is formated correctly and the number of columns match
-            for (int i = 1; i < formattedTableRows.Length && isValid; i++)
+            for (int i = 1; i < formattedTableRows.Length && result; i++)
             {
-                isValid = isValid && !formattedTableRows[i].Trim().Equals(string.Empty);
-
-                isValid = isValid && formattedTableRows[i].Trim().StartsWith("|") && formattedTableRows[i].Trim().EndsWith("|");
-                isValid = isValid && headers.Length == formattedTableRows[i].Substring(1, formattedTableRows[i].Length - 2).Split("|").Length;
+                result = formattedTableRows[i].CheckRowFormatting(headers.Length);
+                if (result)
+                {
+                    break;
+                }
             }
-            return isValid;
+
+            return result;
         }
 
         public string Save()
