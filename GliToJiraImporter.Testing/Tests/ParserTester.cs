@@ -153,7 +153,7 @@ namespace GliToJiraImporter.Testing.Tests
             //given
             parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}SINGLE-Australia-New-Zealand.docx";
             log.Debug(parameterModelStub.FilePath);
-            string expectedResultPath = $"{GetFolderPath(expectedResultFolderName)}ParserSingleMultiDescTestExpectedResult.json";
+            string expectedResultPath = $"{GetFolderPath(expectedResultFolderName)}ParserSingleTestExpectedResult.json";
             log.Debug(expectedResultPath);
             expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
 
