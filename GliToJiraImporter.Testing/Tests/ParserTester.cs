@@ -153,7 +153,9 @@ namespace GliToJiraImporter.Testing.Tests
             //given
             parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}SINGLE-Australia-New-Zealand.docx";
             log.Debug(parameterModelStub.FilePath);
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}ParserSingleTestExpectedResult.json"));
+            string expectedResultPath = $"{GetFolderPath(expectedResultFolderName)}ParserSingleMultiDescTestExpectedResult.json";
+            log.Debug(expectedResultPath);
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -168,7 +170,8 @@ namespace GliToJiraImporter.Testing.Tests
         {
             //given
             parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}SINGLE-MULTIDESC-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}ParserSingleMultiDescTestExpectedResult.json"));
+            string expectedResultPath = $"{GetFolderPath(expectedResultFolderName)}ParserSingleMultiDescTestExpectedResult.json";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
 
             //when
             IList<CategoryModel> result = sut.Parse();
