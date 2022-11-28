@@ -76,7 +76,7 @@ namespace GliToJiraImporter.Parsers
                 return false;
             }
 
-            string[] headers = formattedTableRows[ZERO].Substring(2, formattedTableRows[0].Length - 4).Split("||");
+            string[] headers = formattedTableRows[ZERO].Substring(2, formattedTableRows[ZERO].Length - 4).Split("||");
             for (int i = 0; i < headers.Length && result; i++)
             {
                 result = !headers[i].Trim().Equals(string.Empty);
