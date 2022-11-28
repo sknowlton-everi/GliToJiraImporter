@@ -9,7 +9,7 @@ namespace GliToJiraImporter.Extensions
 {
     public static class JiraStringExtensions
     {
-        public static bool CheckRowFormatting(this string value, int headerLength)
+        public static bool IsValidRowFormatting(this string value, int headerLength)
         {
             string trimmedValue = value.Trim();
             if (trimmedValue.Equals(string.Empty))
@@ -30,7 +30,7 @@ namespace GliToJiraImporter.Extensions
             return true;
         }
 
-        public static bool CheckHeaderRowFormatting(this string value)
+        public static bool IsValidHeaderRowFormatting(this string value)
         {
             string trimmedValue = value.Trim();
             if (trimmedValue.Equals(string.Empty))

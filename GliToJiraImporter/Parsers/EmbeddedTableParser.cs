@@ -66,7 +66,7 @@ namespace GliToJiraImporter.Parsers
                 string[] formattedTableRows = this._state.Split('\n');
 
                 // Check for the column headers and that there is at least one row
-                result = formattedTableRows[0].CheckHeaderRowFormatting();
+                result = formattedTableRows[0].IsValidHeaderRowFormatting();
                 if (!result)
                 {
                     return false;
@@ -81,7 +81,7 @@ namespace GliToJiraImporter.Parsers
                 // Check that every row is formated correctly and the number of columns match
                 for (int i = 1; i < formattedTableRows.Length && result; i++)
                 {
-                    result = formattedTableRows[i].CheckRowFormatting(headers.Length);
+                    result = formattedTableRows[i].IsValidRowFormatting(headers.Length);
                     if (!result)
                     {
                         break;
