@@ -60,30 +60,37 @@ namespace GliToJiraImporter.Parsers
 
         public bool IsValid()
         {
-            bool result = !this._state.Equals(string.Empty);
-            string[] formattedTableRows = this._state.Split('\n');
-
-            // Check for the column headers and that there is at least one row
-            result = result && formattedTableRows[0].Trim().StartsWith("||") && formattedTableRows[0].Trim().EndsWith("||");
-            result = result && formattedTableRows.Length >= 2;
-
-            string[] headers = formattedTableRows[0].Substring(2, formattedTableRows[0].Length - 4).Split("||");
-            for (int i = 0; i < headers.Length && result; i++)
+            if (!this._state.Equals(string.Empty))
             {
-                result = result && !headers[i].Trim().Equals(string.Empty);
-            }
+                bool result = true;
+                string[] formattedTableRows = this._state.Split('\n');
 
-            // Check that every row is formated correctly and the number of columns match
-            for (int i = 1; i < formattedTableRows.Length && result; i++)
-            {
-                result = formattedTableRows[i].CheckRowFormatting(headers.Length);
-                if (result)
+                // Check for the column headers and that there is at least one row
+                result = formattedTableRows[0].CheckHeaderRowFormatting();
+                if (!result)
                 {
-                    break;
+                    return false;
                 }
-            }
 
-            return result;
+                string[] headers = formattedTableRows[0].Substring(2, formattedTableRows[0].Length - 4).Split("||");
+                for (int i = 0; i < headers.Length && result; i++)
+                {
+                    result = !headers[i].Trim().Equals(string.Empty);
+                }
+
+                // Check that every row is formated correctly and the number of columns match
+                for (int i = 1; i < formattedTableRows.Length && result; i++)
+                {
+                    result = formattedTableRows[i].CheckRowFormatting(headers.Length);
+                    if (!result)
+                    {
+                        break;
+                    }
+                }
+
+                return result;
+            }
+            return false;
         }
 
         public string Save()

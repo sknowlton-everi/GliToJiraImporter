@@ -22,7 +22,28 @@ namespace GliToJiraImporter.Extensions
                 return false;
             }
 
-            if (headerLength != value.Substring(1, value.Length - 2).Split("|").Length)
+            if (headerLength != trimmedValue.Substring(1, trimmedValue.Length - 2).Split("|").Length)
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public static bool CheckHeaderRowFormatting(this string value)
+        {
+            string trimmedValue = value.Trim();
+            if (trimmedValue.Equals(string.Empty))
+            {
+                return false;
+            }
+
+            if (!trimmedValue.StartsWith("||") && !trimmedValue.EndsWith("||"))
+            {
+                return false;
+            }
+
+            if (!(trimmedValue.Length >= 2))
             {
                 return false;
             }
