@@ -169,8 +169,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserSingleMultiDescTest()
         {
             //given
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}SINGLE-MULTIDESC-Australia-New-Zealand.docx";
-            string expectedResultPath = $"{GetFolderPath(expectedResultFolderName)}ParserSingleMultiDescTestExpectedResult.json";
+            parameterModelStub.FilePath = $"{checkoffFolderName}SINGLE-MULTIDESC-Australia-New-Zealand.docx";
+            string expectedResultPath = $"{expectedResultFolderName}ParserSingleMultiDescTestExpectedResult.json";
             expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
 
             //when
@@ -185,8 +185,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserPicturesTest()
         {
             //given
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}PICTURES-SHORT-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}PicturesTestExpectedResult.json"));
+            parameterModelStub.FilePath = $"{checkoffFolderName}PICTURES-SHORT-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}PicturesTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -201,8 +201,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserSpecialsTest()
         {
             //given
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}SPECIALS-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}ParserSpecialsTestExpectedResult.json"));
+            parameterModelStub.FilePath = $"{checkoffFolderName}SPECIALS-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserSpecialsTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -217,8 +217,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserFullTest()
         {
             //given
-            //expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}FullTestSearchExpectedResult.json"));
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}Australia-New-Zealand.docx";
+            //expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}FullTestSearchExpectedResult.json"));
+            parameterModelStub.FilePath = $"{checkoffFolderName}Australia-New-Zealand.docx";
             int expectedCount = 633;
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -239,7 +239,7 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserUnknownDocTypeTest()
         {
             //given
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}SINGLE-Australia-New-Zealand.docx";
+            parameterModelStub.FilePath = $"{checkoffFolderName}SINGLE-Australia-New-Zealand.docx";
             parameterModelStub.Type = 0;
             IList<CategoryModel> result = new List<CategoryModel>();
             //when
@@ -260,8 +260,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserCharFormatTest()
         {
             //given
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}CHARFORMAT-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}ParserCharFormatTestExpectedResult.json"));
+            parameterModelStub.FilePath = $"{checkoffFolderName}CHARFORMAT-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserCharFormatTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -276,8 +276,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserClauseIdVarietiesTest()
         {
             //given
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}CLAUSEID-VARIETIES.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}ParserClauseIdVarietiesTestExpectedResult.json"));
+            parameterModelStub.FilePath = $"{checkoffFolderName}CLAUSEID-VARIETIES.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserClauseIdVarietiesTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -292,8 +292,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserNoCategoryTest()
         {
             //given
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}NO-CATEGORY-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}ParserNoCategoryTestExpectedResult.json"));
+            parameterModelStub.FilePath = $"{checkoffFolderName}NO-CATEGORY-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserNoCategoryTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -308,8 +308,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserLinkTest()
         {
             //given
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}LINKs-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}ParserLinkTestExpectedResult.json"));
+            parameterModelStub.FilePath = $"{checkoffFolderName}LINKs-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserLinkTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -324,8 +324,8 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserSingleDuplicateTest()
         {
             //given
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}SINGLE-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{GetFolderPath(expectedResultFolderName)}ParserSingleTestExpectedResult.json"));
+            parameterModelStub.FilePath = $"{checkoffFolderName}SINGLE-Australia-New-Zealand.docx";
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserSingleTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -395,19 +395,5 @@ namespace GliToJiraImporter.Testing.Tests
 
         //    return success;
         //}
-
-        private string GetFolderPath(string folderName)
-        {
-            log.Debug("PATHS");
-            var currentAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase).Replace(@"file:/", string.Empty);
-            log.Debug($"currentAssemblyPath: {currentAssemblyPath}");
-            currentAssemblyPath = currentAssemblyPath.Replace(@"bin/Debug/net6.0", string.Empty);
-            var relativePath = Path.Combine(currentAssemblyPath, folderName);
-            log.Debug($"currentAssemblyPath: {currentAssemblyPath}");
-            log.Debug($"relativePath: {relativePath}");
-            log.Debug($"Path.GetFullPath(relativePath): {Path.GetFullPath(relativePath)}");
-            //return Path.GetFullPath(relativePath);
-            return relativePath;
-        }
     }
 }
