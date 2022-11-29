@@ -164,6 +164,26 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
+        [Test]
+        public void ParserSingleTest2()
+        {
+            //given
+            log.Debug("FilePath - Basic");
+            parameterModelStub.FilePath = $"../../../Public/TestCheckoffs/SINGLE-Australia-New-Zealand.docx";
+            log.Debug(parameterModelStub.FilePath);
+            log.Debug("ExpectedResultPath - Basic");
+            string expectedResultPath = $"../../../Public/ExpectedResults/ParserSingleTestExpectedResult.json";
+            log.Debug(expectedResultPath);
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
+
+
+            //when
+            IList<CategoryModel> result = sut.Parse();
+
+            //then
+            this.testAssertModel(expectedResult, result);
+        }
+
         [Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleMultiDescTest()
