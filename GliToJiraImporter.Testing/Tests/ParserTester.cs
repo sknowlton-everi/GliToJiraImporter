@@ -23,8 +23,8 @@ namespace GliToJiraImporter.Testing.Tests
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private static readonly string checkoffFolderName = @"Public/TestCheckoffs/";
-        private static readonly string expectedResultFolderName = @"Public/ExpectedResults/";
+        private static readonly string checkoffFolderName = @"../../../Public/TestCheckoffs/";
+        private static readonly string expectedResultFolderName = @"../../../Public/ExpectedResults/";
         private const string CLAUSE_ID = "customfield_10046";
         private const string CATEGORY = "customfield_10044";
         private const string SUBCATEGORY = "customfield_10045";
@@ -153,53 +153,9 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserSingleTest()
         {
             //given
-            log.Debug("FilePath - GetFolderPath(checkoffFolderName)");
-            parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}SINGLE-Australia-New-Zealand.docx";
-            log.Debug(parameterModelStub.FilePath);
-            log.Debug("ExpectedResultPath - GetFolderPath(expectedResultFolderName)");
-            string expectedResultPath = $"{GetFolderPath(expectedResultFolderName)}ParserSingleTestExpectedResult.json";
-            log.Debug(expectedResultPath);
+            parameterModelStub.FilePath = $"{checkoffFolderName}SINGLE-Australia-New-Zealand.docx";
+            string expectedResultPath = $"{expectedResultFolderName}ParserSingleTestExpectedResult.json";
             expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
-
-            //when
-            IList<CategoryModel> result = sut.Parse();
-
-            //then
-            this.testAssertModel(expectedResult, result);
-        }
-
-        [Test]
-        public void ParserSingleTest2()
-        {
-            //given
-            log.Debug("FilePath - Manual");
-            parameterModelStub.FilePath = $"../../../Public/TestCheckoffs/SINGLE-Australia-New-Zealand.docx";
-            log.Debug(parameterModelStub.FilePath);
-            log.Debug("ExpectedResultPath - Manual");
-            string expectedResultPath = $"../../../Public/ExpectedResults/ParserSingleTestExpectedResult.json";
-            log.Debug(expectedResultPath);
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
-
-
-            //when
-            IList<CategoryModel> result = sut.Parse();
-
-            //then
-            this.testAssertModel(expectedResult, result);
-        }
-
-        [Test]
-        public void ParserSingleTest3()
-        {
-            //given
-            log.Debug("FilePath - GetFolderPath(\"../../../\" + checkoffFolderName)");
-            parameterModelStub.FilePath = $"{GetFolderPath("../../../" + checkoffFolderName)}SINGLE-Australia-New-Zealand.docx";
-            log.Debug(parameterModelStub.FilePath);
-            log.Debug("ExpectedResultPath - GetFolderPath(\"../../../\" + expectedResultFolderName)");
-            string expectedResultPath = $"{GetFolderPath("../../../" + expectedResultFolderName)}ParserSingleTestExpectedResult.json";
-            log.Debug(expectedResultPath);
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
-
 
             //when
             IList<CategoryModel> result = sut.Parse();
