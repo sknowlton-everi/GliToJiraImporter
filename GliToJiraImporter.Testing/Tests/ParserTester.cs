@@ -112,6 +112,7 @@ namespace GliToJiraImporter.Testing.Tests
         [TearDown] //TODO This doesn't work yet
         public void TearDown()
         {
+            log.Debug("Teardown start");
             JiraRequestUtilities jiraRequestUtilities = new JiraRequestUtilities(this.parameterModelStub);
             //int index = 0;
             //int itemsPerPage = 50;
@@ -144,6 +145,7 @@ namespace GliToJiraImporter.Testing.Tests
                 }
                 checkForErrorsInLogs();
             }
+            log.Debug("Teardown end");
         }
 
         //[Ignore("Can only run locally with a local Jira.")]
@@ -151,8 +153,10 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserSingleTest()
         {
             //given
+            log.Debug("FilePath - GetFolderPath(checkoffFolderName)");
             parameterModelStub.FilePath = $"{GetFolderPath(checkoffFolderName)}SINGLE-Australia-New-Zealand.docx";
             log.Debug(parameterModelStub.FilePath);
+            log.Debug("ExpectedResultPath - GetFolderPath(expectedResultFolderName)");
             string expectedResultPath = $"{GetFolderPath(expectedResultFolderName)}ParserSingleTestExpectedResult.json";
             log.Debug(expectedResultPath);
             expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
@@ -168,11 +172,31 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserSingleTest2()
         {
             //given
-            log.Debug("FilePath - Basic");
+            log.Debug("FilePath - Manual");
             parameterModelStub.FilePath = $"../../../Public/TestCheckoffs/SINGLE-Australia-New-Zealand.docx";
             log.Debug(parameterModelStub.FilePath);
-            log.Debug("ExpectedResultPath - Basic");
+            log.Debug("ExpectedResultPath - Manual");
             string expectedResultPath = $"../../../Public/ExpectedResults/ParserSingleTestExpectedResult.json";
+            log.Debug(expectedResultPath);
+            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
+
+
+            //when
+            IList<CategoryModel> result = sut.Parse();
+
+            //then
+            this.testAssertModel(expectedResult, result);
+        }
+
+        [Test]
+        public void ParserSingleTest3()
+        {
+            //given
+            log.Debug("FilePath - GetFolderPath(\"../../../\" + checkoffFolderName)");
+            parameterModelStub.FilePath = $"{GetFolderPath("../../../" + checkoffFolderName)}SINGLE-Australia-New-Zealand.docx";
+            log.Debug(parameterModelStub.FilePath);
+            log.Debug("ExpectedResultPath - GetFolderPath(\"../../../\" + expectedResultFolderName)");
+            string expectedResultPath = $"{GetFolderPath("../../../" + expectedResultFolderName)}ParserSingleTestExpectedResult.json";
             log.Debug(expectedResultPath);
             expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
 
@@ -418,13 +442,14 @@ namespace GliToJiraImporter.Testing.Tests
 
         private string GetFolderPath(string folderName)
         {
+            log.Debug("PATHS");
             var currentAssemblyPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().CodeBase).Replace(@"file:/", string.Empty);
+            log.Debug($"currentAssemblyPath: {currentAssemblyPath}");
             currentAssemblyPath = currentAssemblyPath.Replace(@"bin/Debug/net6.0", string.Empty);
             var relativePath = Path.Combine(currentAssemblyPath, folderName);
-            log.Debug("PATHS");
-            log.Debug(currentAssemblyPath);
-            log.Debug(relativePath);
-            log.Debug(Path.GetFullPath(relativePath));
+            log.Debug($"currentAssemblyPath: {currentAssemblyPath}");
+            log.Debug($"relativePath: {relativePath}");
+            log.Debug($"Path.GetFullPath(relativePath): {Path.GetFullPath(relativePath)}");
             //return Path.GetFullPath(relativePath);
             return relativePath;
         }
