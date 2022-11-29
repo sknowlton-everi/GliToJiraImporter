@@ -173,10 +173,10 @@ namespace GliToJiraImporter.Testing.Tests
         {
             //given
             log.Debug("FilePath - Manual");
-            parameterModelStub.FilePath = $"../../../Public/TestCheckoffs/SINGLE-Australia-New-Zealand.docx";
+            parameterModelStub.FilePath = $"/home/runner/work/GliToJiraImporter/GliToJiraImporter/GliToJiraImporter.Testing/Public/TestCheckoffs/SINGLE-Australia-New-Zealand.docx";
             log.Debug(parameterModelStub.FilePath);
             log.Debug("ExpectedResultPath - Manual");
-            string expectedResultPath = $"../../../Public/ExpectedResults/ParserSingleTestExpectedResult.json";
+            string expectedResultPath = $"/home/runner/work/GliToJiraImporter/GliToJiraImporter/GliToJiraImporter.Testing/Public/ExpectedResults/ParserSingleTestExpectedResult.json";
             log.Debug(expectedResultPath);
             expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
 
