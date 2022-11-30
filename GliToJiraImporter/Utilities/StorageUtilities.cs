@@ -14,22 +14,13 @@ namespace GliToJiraImporter.Utilities
 {
     public class StorageUtilities
     {
-        //TODO Cleanup
-        //private const string CLAUSE_ID = "GLIClauseId";
-        //private const string CATEGORY = "GLICategory";
-        //private const string SUBCATEGORY = "GLISubCategory";
         private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        //TODO Cleanup
-        //private readonly Jira jiraConnection;
         private ParameterModel parameterModel;
         private JiraRequestUtilities jiraRequestUtilities = new JiraRequestUtilities();
 
-        //TODO Cleanup
-        public StorageUtilities(ParameterModel parameterModel)//, Jira jiraConnection)
+        public StorageUtilities(ParameterModel parameterModel)
         {
             this.parameterModel = parameterModel;
-            //TODO Cleanup
-            //this.jiraConnection = jiraConnection;
             this.jiraRequestUtilities = new JiraRequestUtilities(parameterModel);
         }
 

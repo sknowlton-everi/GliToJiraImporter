@@ -1,4 +1,3 @@
-using Atlassian.Jira;
 using GliToJiraImporter.Models;
 using GliToJiraImporter.Utilities;
 using log4net;
@@ -6,16 +5,9 @@ using log4net.Appender;
 using log4net.Config;
 using log4net.Core;
 using log4net.Repository;
-using Newtonsoft.Json;
 using System.Diagnostics;
-using System.Net;
 using System.Reflection;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using Issue = Atlassian.Jira.Issue;
 using JsonSerializer = System.Text.Json.JsonSerializer;
-using Project = Atlassian.Jira.Project;
 
 namespace GliToJiraImporter.Testing.Tests
 {
@@ -45,19 +37,6 @@ namespace GliToJiraImporter.Testing.Tests
             BasicConfigurator.Configure(this.memoryAppender);
 
             log.Info(message: new StackFrame().GetMethod().Name);
-
-            //parameterModelStub = new()
-            //{
-            //    FilePath = $"{path}Australia-New-Zealand.docx",
-            //    Type = 1,
-            //    SleepTime = 0,
-            //    IssueType = "Task",
-            //    JiraUrl = "http://jira.austin.mgam/",
-            //    Password = "Password#1",
-            //    ProjectKey = "STP",
-            //    UserName = "JiraBot"
-            //};
-            //ParameterModel
 
             string userName = "samantha.knowlton@everi.com";
             string token = Environment.GetEnvironmentVariable("JIRA_API_TOKEN");
@@ -106,7 +85,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //TODO Samantha, see Jira URL above, change for each request, once you have the correct request, then update the Parser (sut) parameters below to
             //match what you get back from the above jira calls
-            sut = new Parser(this.parameterModelStub);//, this.jiraConnectionStub);
+            sut = new Parser(this.parameterModelStub);
         }
 
         [TearDown] //TODO This doesn't work yet
@@ -378,22 +357,5 @@ namespace GliToJiraImporter.Testing.Tests
                 Assert.That(logEvent.Level == Level.Info || logEvent.Level == Level.Debug, $"There was an error in the logs. \"{logEvent.RenderedMessage}\"");
             }
         }
-
-        //private bool deleteIssueByKey(string issueKey)
-        //{
-        //    bool success = false;
-
-        //    Task t = this.jiraConnectionStub.Issues.DeleteIssueAsync(issueKey);
-
-        //    while (t.Status == TaskStatus.Running || t.Status == TaskStatus.WaitingForChildrenToComplete || t.Status == TaskStatus.WaitingToRun)
-        //    {
-        //        log.Debug($"Waiting on issue {issueKey} to finish running. Status: {t.Status}");
-        //    }
-
-        //    success = (t.Status == TaskStatus.RanToCompletion);
-        //    log.Debug($"Task complete. Status: {t.Status}");
-
-        //    return success;
-        //}
     }
 }

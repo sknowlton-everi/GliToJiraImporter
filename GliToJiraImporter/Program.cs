@@ -1,5 +1,4 @@
-﻿using Atlassian.Jira;
-using GliToJiraImporter.Models;
+﻿using GliToJiraImporter.Models;
 using log4net;
 using log4net.Config;
 using log4net.Repository;
@@ -23,9 +22,8 @@ namespace GliToJiraImporter
             try
             {
                 ParameterModel parameterModel = parseCommandLine(args);
-                //Jira jiraConnection = Jira.CreateRestClient(parameterModel.JiraUrl, parameterModel.UserName, parameterModel.Password);
                 parameterModel.UserName = $"{parameterModel.UserName}:{Environment.GetEnvironmentVariable("JIRA_API_TOKEN")}";
-                Parser parser = new(parameterModel);//, jiraConnection);//TODO Cleanup
+                Parser parser = new(parameterModel);
                 parser.Parse();
             }
             catch (Exception e)

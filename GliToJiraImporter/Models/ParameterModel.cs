@@ -18,9 +18,6 @@ namespace GliToJiraImporter.Models
         [Option('u', "username", Required = true, HelpText = "Jira login username")]
         public string UserName { get; set; } = string.Empty;
 
-        //[Option('p', "password", Required = true, HelpText = "Password for the Jira user")]
-        //public string Password { get; set; } = string.Empty;
-
         [Option('j', "jiraurl", Required = true, HelpText = "URL of the Jira instance")]
         public string JiraUrl { get; set; } = string.Empty;
 
