@@ -57,7 +57,7 @@ namespace GliToJiraImporter
             Caretaker caretaker = new Caretaker(categoryoriginator);
 
             // Creates an instance of WordDocument class
-            WSection section = new WordDocument(parameterModel.FilePath).Sections[0];
+            WSection section = GetDocumentFromPath(parameterModel.FilePath).Sections[0];
 
             // Iterates the tables of the section
             //TODO if i is set to anything below 4, the tests get the following error. When running it myself it seems to maybe be an infinite loop issue
@@ -257,5 +257,14 @@ namespace GliToJiraImporter
 
         //    return result;
         //}
+        private WordDocument GetDocumentFromPath(string filePath)
+        {
+            WordDocument result = null;
+            using (FileStream fs = File.Open(parameterModel.FilePath, FileMode.Open))
+            {
+                result = new WordDocument(fs);
+            }
+            return result;
+        }
     }
 }

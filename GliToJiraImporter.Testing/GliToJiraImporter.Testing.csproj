@@ -21,4 +21,8 @@
     <ProjectReference Include="..\GliToJiraImporter\GliToJiraImporter.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+	<RuntimeHostConfigurationOption Include="System.Drawing.EnableUnixSupport" Value="true" />
+  </ItemGroup>
+
 </Project>
