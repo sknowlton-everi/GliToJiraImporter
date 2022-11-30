@@ -308,7 +308,7 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserLinkTest()
         {
             //given
-            parameterModelStub.FilePath = $"{checkoffFolderName}LINKs-Australia-New-Zealand.docx";
+            parameterModelStub.FilePath = $"{checkoffFolderName}LINKS-Australia-New-Zealand.docx";
             expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserLinkTestExpectedResult.json"));
 
             //when
