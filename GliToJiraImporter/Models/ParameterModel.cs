@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using RestSharp;
 using System.Text.Json;
 
 namespace GliToJiraImporter.Models
@@ -30,7 +31,7 @@ namespace GliToJiraImporter.Models
         [Option('t', "type", Required = true, HelpText = "Type of document being uploaded")]
         public int Type { get; set; }
 
-        public HttpMethod Method { get; set; } = new HttpMethod("GET");
+        public Method Method { get; set; } = Method.GET;
 
         public override string ToString()
         {
