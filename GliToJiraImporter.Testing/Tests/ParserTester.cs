@@ -5,6 +5,7 @@ using log4net.Appender;
 using log4net.Config;
 using log4net.Core;
 using log4net.Repository;
+using RestSharp;
 using System.Diagnostics;
 using System.Reflection;
 using JsonSerializer = System.Text.Json.JsonSerializer;
@@ -45,10 +46,9 @@ namespace GliToJiraImporter.Testing.Tests
             parameterModelStub = new()
             {
                 FilePath = $"{checkoffFolderName}Australia-New-Zealand.docx",
-                Method = new HttpMethod("GET"),
+                Method = Method.GET,
                 JiraUrl = "https://gre-team.atlassian.net/rest/api/2",//search?jql=project=EGRE&maxResults=10",
                 UserName = userNameToken,
-                //Password = string.Empty,
                 IssueType = "Test Plan",
                 SleepTime = 1000,
                 ProjectKey = "EGRE",
@@ -98,6 +98,11 @@ namespace GliToJiraImporter.Testing.Tests
             //string queryString = string.Format("project = {0}", parameterModelStub.ProjectKey);
             //IPagedQueryResult<Issue> jiraExistingIssueList = this.jiraConnectionStub.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
             IList<Models.Issue> jiraExistingIssueList = jiraRequestUtilities.GetAllIssuesWithAClauseId();
+            if (jiraExistingIssueList == null)
+            {
+                log.Error("JiraRequestUtilities.GetAllIssuesWithAClauseId returned null, and therefore failed");
+                return;
+            }
             //IList<string> clauseIds = (IList<string>)expectedResult.Select(category => category.RegulationList.Select(regulation => regulation.ClauseID).ToList()).ToList();
             //IList<string> categories = expectedResult.Select(cat => cat.Category).ToList();
             //Dictionary<string, Issue> issues = (Dictionary<string, Issue>)this.jiraConnectionStub.Issues.GetIssuesAsync().Result;
@@ -127,7 +132,6 @@ namespace GliToJiraImporter.Testing.Tests
             log.Debug("Teardown end");
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleTest()
         {
@@ -143,7 +147,6 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleMultiDescTest()
         {
@@ -159,7 +162,6 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserPicturesTest()
         {
@@ -175,7 +177,7 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Does not work due to more then 50 tasks")]
+        [Ignore("Does not work due to more then 50 tasks")]
         [Test]
         public void ParserSpecialsTest()
         {
@@ -213,7 +215,6 @@ namespace GliToJiraImporter.Testing.Tests
             //this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserUnknownDocTypeTest()
         {
@@ -234,7 +235,6 @@ namespace GliToJiraImporter.Testing.Tests
             }
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserCharFormatTest()
         {
@@ -250,7 +250,6 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserClauseIdVarietiesTest()
         {
@@ -266,7 +265,6 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserNoCategoryTest()
         {
@@ -282,7 +280,6 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserLinkTest()
         {
@@ -298,7 +295,6 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        //[Ignore("Can only run locally with a local Jira.")]
         [Test]
         public void ParserSingleDuplicateTest()
         {

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-
-namespace GliToJiraImporter.Models
+﻿namespace GliToJiraImporter.Models
 {
     public struct JiraIssue
     {
@@ -21,54 +14,45 @@ namespace GliToJiraImporter.Models
 
     public struct JiraIssueFields
     {
-        [JsonPropertyName("project")]
-        public JiraProject Project { get; set; } = new JiraProject();
-        [JsonPropertyName("issuetype")]
-        public JiraIssueType IssueType { get; set; } = new JiraIssueType();
-        [JsonPropertyName("summary")]
-        public string Summary { get; set; } = string.Empty;
-        [JsonPropertyName("customfield_10046")]
-        public string GliClauseId { get; set; } = string.Empty;
-        [JsonPropertyName("customfield_10044")]
-        public string GliCategory { get; set; } = string.Empty;
-        [JsonPropertyName("customfield_10045")]
-        public string GliSubcategory { get; set; } = string.Empty;
-        [JsonPropertyName("description")]
-        public string Description { get; set; } = string.Empty;
+        public JiraProject project { get; set; } = new JiraProject();
+        public JiraIssueType issuetype { get; set; } = new JiraIssueType();
+        public string summary { get; set; } = string.Empty;
+        public string customfield_10046 { get; set; } = string.Empty;
+        public string customfield_10044 { get; set; } = string.Empty;
+        public string customfield_10045 { get; set; } = string.Empty;
+        public string description { get; set; } = string.Empty;
 
         public JiraIssueFields() { }
 
         public JiraIssueFields(string projectKey, string issueTypeName, string summary, string gliClauseId, string gliCategory, string gliSubcategory, string description)
         {
-            this.Project = new JiraProject(projectKey);
-            IssueType = new JiraIssueType(issueTypeName);
-            Summary = summary;
-            GliClauseId = gliClauseId;
-            GliCategory = gliCategory;
-            GliSubcategory = gliSubcategory;
-            Description = description;
+            this.project = new JiraProject(projectKey);
+            issuetype = new JiraIssueType(issueTypeName);
+            this.summary = summary;
+            this.customfield_10046 = gliClauseId;
+            this.customfield_10044 = gliCategory;
+            this.customfield_10045 = gliSubcategory;
+            this.description = description;
         }
     }
 
     public struct JiraProject
     {
-        [JsonPropertyName("key")]
-        public string Key { get; set; } = string.Empty;
+        public string key { get; set; } = string.Empty;
 
         public JiraProject(string key)
         {
-            this.Key = key;
+            this.key = key;
         }
     }
 
     public struct JiraIssueType
     {
-        [JsonPropertyName("name")]
-        public string Name { get; set; } = string.Empty;
+        public string name { get; set; } = string.Empty;
 
         public JiraIssueType(string name)
         {
-            this.Name = name;
+            this.name = name;
         }
     }
 }
