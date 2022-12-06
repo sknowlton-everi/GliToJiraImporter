@@ -27,7 +27,7 @@ namespace GliToJiraImporter.Utilities
 
             string requestUri = $"{parameterModel.JiraUrl}/issue";
 
-            RestRequest request = createHttpRequestMessage(Method.POST, requestUri, jiraIssue, string.Empty, string.Empty);
+            RestRequest request = createRestRequest(Method.POST, requestUri, jiraIssue);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -48,6 +48,39 @@ namespace GliToJiraImporter.Utilities
             return requestSucceeded;
         }
 
+        // Update
+        public bool PostAttachmentToIssueByKey(JiraIssue jiraIssue, string attachmentPath, string issueKey)
+        {
+            bool requestSucceeded = false;
+
+            string requestUri = $"{parameterModel.JiraUrl}/issue/{issueKey}";
+            if (!attachmentPath.Equals(string.Empty))
+            {
+                requestUri += "/attachments";
+            }
+
+            RestRequest request = createRestRequest(Method.POST, requestUri, jiraIssue, attachmentPath);
+            if (request == null)
+            {
+                log.Error("Failed to create request. Result returned as null.");
+                return false;
+            }
+
+            object response = this.runQuery(request, requestUri);
+
+            if (response.GetType().Equals(typeof(bool)))
+            {
+                requestSucceeded = (bool)response;
+            }
+            else if (response.GetType().Equals(typeof(ErrorRoot)) || response.GetType().Equals(typeof(string)))
+            {
+                requestSucceeded = false;
+            }
+
+            return requestSucceeded;
+        }
+
+
         // Read
         public IList<Models.Issue> GetAllIssuesWithAClauseId()
         {
@@ -55,7 +88,7 @@ namespace GliToJiraImporter.Utilities
 
             string requestUri = $"{parameterModel.JiraUrl}/search";
 
-            RestRequest request = createHttpRequestMessage(Method.GET, requestUri, new(), string.Empty, string.Empty);
+            RestRequest request = createRestRequest(Method.GET, requestUri);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -87,14 +120,13 @@ namespace GliToJiraImporter.Utilities
             return result;
         }
 
-        // Read
         public Models.Issue GetIssueByClauseId(string clauseId)
         {
             Models.Issue result = new Models.Issue();
 
             string requestUri = $"{parameterModel.JiraUrl}/search?jql=GLIClauseId~{clauseId}";
 
-            RestRequest request = createHttpRequestMessage(Method.GET, requestUri, new(), string.Empty, string.Empty);
+            RestRequest request = createRestRequest(Method.GET, requestUri);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -119,38 +151,6 @@ namespace GliToJiraImporter.Utilities
             return result;
         }
 
-        // Update
-        public bool PutIssueByKey(JiraIssue jiraIssue, string attachmentName, string attachmentPath, string issueKey)
-        {
-            bool requestSucceeded = false;
-
-            string requestUri = $"{parameterModel.JiraUrl}/issue/{issueKey}";
-            if (!attachmentPath.Equals(string.Empty))
-            {
-                requestUri += "/attachments";
-            }
-
-            RestRequest request = createHttpRequestMessage(Method.POST, requestUri, jiraIssue, attachmentName, attachmentPath);
-            if (request == null)
-            {
-                log.Error("Failed to create request. Result returned as null.");
-                return false;
-            }
-
-            object response = this.runQuery(request, requestUri);
-
-            if (response.GetType().Equals(typeof(bool)))
-            {
-                requestSucceeded = (bool)response;
-            }
-            else if (response.GetType().Equals(typeof(ErrorRoot)) || response.GetType().Equals(typeof(string)))
-            {
-                requestSucceeded = false;
-            }
-
-            return requestSucceeded;
-        }
-
         // Delete
         public bool DeleteIssueByKey(string issueKey)
         {
@@ -158,7 +158,7 @@ namespace GliToJiraImporter.Utilities
 
             string requestUri = $"{parameterModel.JiraUrl}/issue/{issueKey}";
 
-            RestRequest request = createHttpRequestMessage(Method.DELETE, requestUri, new(), string.Empty, string.Empty);
+            RestRequest request = createRestRequest(Method.DELETE, requestUri);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -179,7 +179,17 @@ namespace GliToJiraImporter.Utilities
             return requestSucceeded;
         }
 
-        private RestRequest createHttpRequestMessage(Method method, string requestUri, JiraIssue jiraIssue, string fileName, string filePath)
+        private RestRequest createRestRequest(Method method, string requestUri)
+        {
+            return createRestRequest(method, requestUri, new());
+        }
+
+        private RestRequest createRestRequest(Method method, string requestUri, JiraIssue jiraIssue)
+        {
+            return createRestRequest(method, requestUri, jiraIssue, string.Empty);
+        }
+
+        private RestRequest createRestRequest(Method method, string requestUri, JiraIssue jiraIssue, string filePath)
         {
             RestRequest result = new RestRequest(requestUri, method);
 
@@ -194,25 +204,26 @@ namespace GliToJiraImporter.Utilities
             if (result.AddHeader("Authorization", $"Basic {base64authorization}") == null)
             {
                 log.Error("Authorization header could not be added.");
-            }
-
-            if (!method.Equals(Method.GET) && !method.Equals(Method.DELETE)
-                && (jiraIssue.fields.project.key == null || jiraIssue.fields.project.key.Equals(string.Empty)))
-            {
-                log.Error("Issue project key was null or empty.");
                 return null;
             }
 
-            // If it's an attachment upload, set the content type to "multipart/form-data". If it's not, set it to "application/json"
-            if (!fileName.Equals(string.Empty))
+            if (method.Equals(Method.POST))
             {
-                result.AddHeader("X-Atlassian-Token", "no-check");
-                result.AddFile("file", filePath);
-            }
-            else if (!method.Equals(Method.GET))
-            {
-                result.AddJsonBody(jiraIssue, "application/json");
-                result.AddHeader("Content-Type", "application/json");
+                if (!filePath.Equals(string.Empty))
+                {
+                    result.AddHeader("X-Atlassian-Token", "no-check");
+                    result.AddFile("file", filePath);
+                }
+                else if (filePath.Equals(string.Empty) && (jiraIssue.fields.project.key == null || jiraIssue.fields.project.key.Equals(string.Empty)))
+                {
+                    log.Error("Issue project key was null or empty.");
+                    return null;
+                }
+                else
+                {
+                    result.AddJsonBody(jiraIssue, "application/json");
+                    result.AddHeader("Content-Type", "application/json");
+                }
             }
 
             return result;
