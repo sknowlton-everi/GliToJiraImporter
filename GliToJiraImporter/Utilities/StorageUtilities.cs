@@ -173,7 +173,7 @@ namespace GliToJiraImporter.Utilities
                     File.Create(appDataPath + @"\TempImages\" + regulationModel.Description.AttachmentList[i].ImageName).Close();
                     File.WriteAllBytes(appDataPath + @"\TempImages\" + regulationModel.Description.AttachmentList[i].ImageName, regulationModel.Description.AttachmentList[i].ImageBytes);
                     status = this.jiraRequestUtilities.PutIssueByKey(jiraIssue, regulationModel.Description.AttachmentList[i].ImageName, appDataPath + @"\TempImages\" + regulationModel.Description.AttachmentList[i].ImageName, issueKey);
-                    File.Delete(appDataPath + @"\TempImages\" + regulationModel.Description.AttachmentList[i].ImageName);
+                    File.Delete(appDataPath + @"\TempImages");
                 }
                 if (!status)
                 {
