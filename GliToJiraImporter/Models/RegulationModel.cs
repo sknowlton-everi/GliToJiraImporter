@@ -10,6 +10,7 @@ namespace GliToJiraImporter.Models
         public ClauseIdModel ClauseID { get; set; } = new ClauseIdModel();
         public string Subcategory { get; set; } = string.Empty;
         public DescriptionModel Description { get; set; } = new DescriptionModel();
+        public IList<string> GovernmentRegulationDocs { get; set; } = new List<string>();
 
         public RegulationModel() { }
 
