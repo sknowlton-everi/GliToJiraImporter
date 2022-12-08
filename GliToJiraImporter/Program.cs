@@ -9,7 +9,7 @@ namespace GliToJiraImporter
 {
     public class Program
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
         public static void Main(string[] args)
         {
@@ -17,7 +17,7 @@ namespace GliToJiraImporter
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
 
             log.Debug("Starting Application");
-            log.Info(new StackFrame().GetMethod().Name);
+            log.Info(new StackFrame().GetMethod()?.Name);
 
             try
             {
@@ -35,7 +35,7 @@ namespace GliToJiraImporter
             Console.ReadKey();
         }
 
-        private static ParameterModel parseCommandLine(string[] args)
+        private static ParameterModel parseCommandLine(IEnumerable<string> args)
         {
             CommandLine.ParserResult<ParameterModel> commandLineArgs = CommandLine.Parser.Default.ParseArguments<ParameterModel>(args);
 

@@ -11,13 +11,13 @@ namespace GliToJiraImporter
 {
     public class Parser
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private ParameterModel parameterModel;
-        private StorageUtilities storageUtilities;
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
+        private readonly ParameterModel parameterModel;
+        private readonly StorageUtilities storageUtilities;
 
         public Parser(ParameterModel parameterModel)
         {
-            log.Info(new StackFrame().GetMethod().Name);
+            log.Info(new StackFrame().GetMethod()?.Name);
             this.parameterModel = parameterModel;
             this.storageUtilities = new StorageUtilities(this.parameterModel);
         }
@@ -51,11 +51,11 @@ namespace GliToJiraImporter
             IList<CategoryModel> result = new List<CategoryModel>();
 
             // Originator and Caretaker instantiation
-            CategoryParser categoryoriginator = new CategoryParser();
-            Caretaker caretaker = new Caretaker(categoryoriginator);
+            CategoryParser categoryOriginator = new();
+            Caretaker caretaker = new(categoryOriginator);
 
             // Creates an instance of WordDocument class
-            WSection section = GetDocumentFromPath(parameterModel.FilePath).Sections[0];
+            WSection section = getDocumentFromPath().Sections[0];
 
             // Iterates the tables of the section
             //TODO if i is set to anything below 4, the tests get the following error. When running it myself it seems to maybe be an infinite loop issue
@@ -68,54 +68,51 @@ namespace GliToJiraImporter
                     // Backup state and parse
                     log.Debug("Backing up and parsing...");
                     caretaker.Backup();
-                    bool isCategoryComplete = categoryoriginator.Parse(section.Tables[i], ref j);
+                    bool isCategoryComplete = categoryOriginator.Parse(section.Tables[i], ref j);
 
-                    if (isCategoryComplete)
+                    if (!isCategoryComplete) continue;
+
+                    j--;
+                    // Validate the parse and undo if invalid
+                    if (!categoryOriginator.Save().IsValid())
                     {
-                        j--;
-                        // Validate the parse and undo if invalid
-                        if (!categoryoriginator.Save().IsValid())
-                        {
-                            log.Debug("Category Parsing invalid, undoing");
-                            caretaker.Undo();
-                        }
-                        else if (categoryoriginator.Save().IsValid())
-                        {
-                            log.Debug("Category Parsing valid");
-                            result.Add((CategoryModel)categoryoriginator.Save());
-                            categoryoriginator = new CategoryParser();
-                        }
+                        log.Debug("Category Parsing invalid, undoing");
+                        caretaker.Undo();
+                    }
+                    else if (categoryOriginator.Save().IsValid())
+                    {
+                        log.Debug("Category Parsing valid");
+                        result.Add((CategoryModel)categoryOriginator.Save());
+                        categoryOriginator = new CategoryParser();
                     }
                 }
             }
 
-            if (categoryoriginator.Save().IsValid())
+            if (categoryOriginator.Save().IsValid())
             {
-                result.Add((CategoryModel)categoryoriginator.Save());
+                result.Add((CategoryModel)categoryOriginator.Save());
             }
             else
             {
-                CategoryModel x = (CategoryModel)categoryoriginator.Save();
-                if (x.RegulationList.Any())
+                CategoryModel x = (CategoryModel)categoryOriginator.Save();
+
+                if (!x.RegulationList.Any()) return result;
+
+                x.RegulationList.RemoveAt(x.RegulationList.Count - 1);
+                if (x.IsValid())
                 {
-                    x.RegulationList.RemoveAt(x.RegulationList.Count - 1);
-                    if (x.IsValid())
-                    {
-                        result.Add(x);
-                    }
+                    result.Add(x);
                 }
             }
             return result;
         }
 
-        private WordDocument GetDocumentFromPath(string filePath)
+        private WordDocument getDocumentFromPath()
         {
-            WordDocument result = null;
             using (FileStream fs = File.Open(parameterModel.FilePath, FileMode.Open))
             {
-                result = new WordDocument(fs);
+                return new WordDocument(fs);
             }
-            return result;
         }
     }
 }

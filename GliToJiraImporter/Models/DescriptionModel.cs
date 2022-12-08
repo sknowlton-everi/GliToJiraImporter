@@ -5,7 +5,7 @@ namespace GliToJiraImporter.Models
 {
     public class DescriptionModel : IMemento
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
         public string Text { get; set; } = string.Empty;
         public IList<PictureModel> AttachmentList { get; set; } = new List<PictureModel>();
 

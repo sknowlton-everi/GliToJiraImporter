@@ -5,7 +5,7 @@ Here are the expected fields and a brief description of each:
 	-j	(Jira URL)
 	-u	(Username)
 	-i	(Jira Issue type)
-	-s	(Sleeptime between issues)
+	-s	(Sleep time between issues)
 	-k	(Jira project name)
 	-t	(Document Type Index. Checkoff is 1)
 

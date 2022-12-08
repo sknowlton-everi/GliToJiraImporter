@@ -263,7 +263,7 @@ namespace GliToJiraImporter.Utilities
                     {
                         ErrorRoot jsonObject = JsonConvert.DeserializeObject<ErrorRoot>(jsonString);
                         string errorMsg = $"Request failed. Request: {requestUri}, Status: {response.StatusCode}, ErrorMessages: ";
-                        jsonObject.errorMessages.ForEach(err => errorMsg += err + ",");
+                        jsonObject.ErrorMessages.ForEach(err => errorMsg += err + ",");
                         log.Debug(errorMsg);
                         result = jsonObject;
                     }

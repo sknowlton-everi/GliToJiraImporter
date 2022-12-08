@@ -114,8 +114,8 @@ namespace GliToJiraImporter.Testing.Tests
                     for (int j = 0; j < this.expectedResult[i].RegulationList.Count; j++)
                     {
                         //Models.Issue issue = jiraExistingIssueList[i];
-                        Models.Issue issueFound = jiraExistingIssueList.First(issue => issue.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseID.FullClauseId));
-                        if (issueFound.fields.customfield_10046 != null && issueFound.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseID.FullClauseId))//categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not a good enough check
+                        Models.Issue issueFound = jiraExistingIssueList.First(issue => issue.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseId.FullClauseId));
+                        if (issueFound.fields.customfield_10046 != null && issueFound.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseId.FullClauseId))//categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not a good enough check
                         {
                             bool success = jiraRequestUtilities.DeleteIssueByKey(issueFound.key);//this.deleteIssueByKey(issue.Key.Value);
                             if (success != true)
@@ -308,7 +308,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //then
             memoryAppender.GetEvents().First(logEvent => logEvent.Level == Level.Debug
-            && logEvent.RenderedMessage.Equals($"Skipping clauseId {expectedResult[0].RegulationList[0].ClauseID.BaseClauseId} because it already exists in the project {parameterModelStub.ProjectKey}"));
+            && logEvent.RenderedMessage.Equals($"Skipping clauseId {expectedResult[0].RegulationList[0].ClauseId.BaseClauseId} because it already exists in the project {parameterModelStub.ProjectKey}"));
             Assert.That(result.Any(), Is.True);
             Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
@@ -328,18 +328,18 @@ namespace GliToJiraImporter.Testing.Tests
                 {
                     RegulationModel resultRegulation = (RegulationModel)result[i].RegulationList[j];
                     RegulationModel expectedResultRegulation = (RegulationModel)expectedResult[i].RegulationList[j];
-                    Assert.That(resultRegulation.ClauseID.BaseClauseId, Is.EqualTo(expectedResultRegulation.ClauseID.BaseClauseId), $"The BaseClauseId of {resultRegulation.ClauseID.BaseClauseId} does not match the expected.");
-                    Assert.That(resultRegulation.ClauseID.FullClauseId, Is.EqualTo(expectedResultRegulation.ClauseID.FullClauseId), $"The FullClauseId of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
-                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory), $"The Subcategory of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
-                    Assert.That(resultRegulation.Description.Text, Is.EqualTo(expectedResultRegulation.Description.Text), $"The Description Text of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.ClauseId.BaseClauseId, Is.EqualTo(expectedResultRegulation.ClauseId.BaseClauseId), $"The BaseClauseId of {resultRegulation.ClauseId.BaseClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.ClauseId.FullClauseId, Is.EqualTo(expectedResultRegulation.ClauseId.FullClauseId), $"The FullClauseId of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory), $"The Subcategory of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
+                    Assert.That(resultRegulation.Description.Text, Is.EqualTo(expectedResultRegulation.Description.Text), $"The Description Text of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
 
                     IList<PictureModel> resultAttachmentList = ((DescriptionModel)resultRegulation.Description).AttachmentList;
                     IList<PictureModel> expectedResultAttachmentList = ((DescriptionModel)expectedResultRegulation.Description).AttachmentList;
-                    Assert.That(resultAttachmentList.Count, Is.EqualTo(expectedResultAttachmentList.Count), $"The AttachmentList of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                    Assert.That(resultAttachmentList.Count, Is.EqualTo(expectedResultAttachmentList.Count), $"The AttachmentList of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
                     for (int k = 0; k < resultAttachmentList.Count; k++)
                     {
-                        Assert.That(resultAttachmentList[k].ImageName, Is.EqualTo(expectedResultAttachmentList[k].ImageName), $"ImageName at position {k} of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
-                        Assert.That(resultAttachmentList[k].ImageBytes, Is.EqualTo(expectedResultAttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseID.FullClauseId} does not match the expected.");
+                        Assert.That(resultAttachmentList[k].ImageName, Is.EqualTo(expectedResultAttachmentList[k].ImageName), $"ImageName at position {k} of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
+                        Assert.That(resultAttachmentList[k].ImageBytes, Is.EqualTo(expectedResultAttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
                     }
                 }
             }

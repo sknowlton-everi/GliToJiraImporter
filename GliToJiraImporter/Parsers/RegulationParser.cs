@@ -31,7 +31,7 @@ namespace GliToJiraImporter.Parsers
         {
             RegulationModel regulationModel = this._state;
 
-            ClauseIdParser clauseIdParser = new ClauseIdParser((ClauseIdModel)regulationModel.ClauseID);
+            ClauseIdParser clauseIdParser = new ClauseIdParser((ClauseIdModel)regulationModel.ClauseId);
             Caretaker clauseIdCaretaker = new Caretaker(clauseIdParser);
             DescriptionParser descriptionParser = new DescriptionParser(regulationModel.Description);
             Caretaker descriptionCaretaker = new Caretaker(descriptionParser);
@@ -73,7 +73,7 @@ namespace GliToJiraImporter.Parsers
 
             if (clauseIdParser.Save().IsValid())
             {
-                regulationModel.ClauseID = (ClauseIdModel)clauseIdParser.Save();
+                regulationModel.ClauseId = (ClauseIdModel)clauseIdParser.Save();
             }
             if (descriptionParser.Save().IsValid())
             {

@@ -32,7 +32,7 @@
 
         public bool IsEmpty()
         {
-            return !ImageBytes.Any();
+            return !this.ImageBytes.Any();
         }
 
         public bool IsValid()

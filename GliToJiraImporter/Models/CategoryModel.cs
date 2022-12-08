@@ -6,7 +6,7 @@ namespace GliToJiraImporter.Models
     {
         public string Category { get; set; } = string.Empty;
         public IList<RegulationModel> RegulationList { get; set; } = new List<RegulationModel>();
-        public bool NoCategory { get; set; } = false;
+        public bool NoCategory { get; set; }
         //public IList<IMemento> RegulationList { get; set; } = (IList<IMemento>)new List<RegulationModel>();
         //TODO Should ln:8 be IMemento instead, like ln:9^?
 
@@ -22,12 +22,12 @@ namespace GliToJiraImporter.Models
         public bool IsValid()
         {
             bool result = !IsEmpty() && !Category.Equals(string.Empty) && RegulationList.Count != 0;
-            if (result)
+
+            if (!result) return result;
+
+            for (int i = 0; i < RegulationList.Count && result; i++)
             {
-                for (int i = 0; i < RegulationList.Count && result; i++)
-                {
-                    result = RegulationList[i].IsValid() && (NoCategory || !RegulationList[i].Subcategory.Equals(string.Empty));
-                }
+                result = RegulationList[i].IsValid() && (NoCategory || !RegulationList[i].Subcategory.Equals(string.Empty));
             }
             return result;
         }
@@ -35,12 +35,12 @@ namespace GliToJiraImporter.Models
         public bool IsEmpty()
         {
             bool result = Category.Trim().Equals(string.Empty) && RegulationList.Count == 0;
-            if (result)
+
+            if (!result) return result;
+
+            for (int i = 0; i < RegulationList.Count && result; i++)
             {
-                for (int i = 0; i < RegulationList.Count && result; i++)
-                {
-                    result = RegulationList[i].IsEmpty();
-                }
+                result = RegulationList[i].IsEmpty();
             }
             return result;
         }
