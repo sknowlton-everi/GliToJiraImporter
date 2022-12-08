@@ -2,7 +2,7 @@
 {
     public class ErrorRoot
     {
-        public IList<string> ErrorMessages { get; set; } = new List<string>();
-        public IList<object> WarningMessages { get; set; } = new List<object>();
+        public List<string> ErrorMessages { get; set; } = new List<string>();
+        public List<object> WarningMessages { get; set; } = new List<object>();
     }
 }

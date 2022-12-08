@@ -13,13 +13,11 @@ namespace GliToJiraImporter
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
         private readonly ParameterModel parameterModel;
-        private readonly StorageUtilities storageUtilities;
 
         public Parser(ParameterModel parameterModel)
         {
             log.Info(new StackFrame().GetMethod()?.Name);
             this.parameterModel = parameterModel;
-            this.storageUtilities = new StorageUtilities(this.parameterModel);
         }
 
         public IList<CategoryModel> Parse()
@@ -39,10 +37,7 @@ namespace GliToJiraImporter
                 throw new Exception("Provided Document Type is Unknown. Try type 1 for Checkoff documents.");//TODO is this okay? I don't like the vagueness of type 'Exception'
             }
             log.Debug($"Completed list size: {result.Count}");
-            storageUtilities.UploadToJira(result);
-            // Uncomment if you want to save results to the public folder in the test project
-            //this.storageUtilities.SaveText(@"..\..\..\..\GliToJiraImporter.Testing\Public\Results.txt", JsonSerializer.Serialize(result));
-            //this.storageUtilities.SaveCsv(@"..\..\..\..\GliToJiraImporter.Testing\Public\ResultsCsv.csv", result);
+
             return result;
         }
 

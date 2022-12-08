@@ -1,4 +1,5 @@
 ﻿using GliToJiraImporter.Models;
+using GliToJiraImporter.Utilities;
 using log4net;
 using log4net.Config;
 using log4net.Repository;
@@ -24,7 +25,15 @@ namespace GliToJiraImporter
                 ParameterModel parameterModel = parseCommandLine(args);
                 parameterModel.UserName = $"{parameterModel.UserName}:{Environment.GetEnvironmentVariable("JIRA_API_TOKEN")}";
                 Parser parser = new(parameterModel);
-                parser.Parse();
+                IList<CategoryModel> parsedCategoryModels = parser.Parse();
+
+                StorageUtilities storageUtilities = new (parameterModel);
+                storageUtilities.UploadToJira(parsedCategoryModels);
+                // Uncomment if you want to save results to the public folder in the test project
+                //this.storageUtilities.SaveText(@"..\..\..\..\GliToJiraImporter.Testing\Public\Results.txt", JsonSerializer.Serialize(result));
+                //this.storageUtilities.SaveCsv(@"..\..\..\..\GliToJiraImporter.Testing\Public\ResultsCsv.csv", result);
+
+                //TODO verify
             }
             catch (Exception e)
             {
@@ -51,6 +60,13 @@ namespace GliToJiraImporter
             }
 
             return result;
+        }
+
+        private bool verifyResults()
+        {
+
+
+            return false;
         }
     }
 }
