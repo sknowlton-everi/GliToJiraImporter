@@ -27,7 +27,7 @@
         public JiraIssueFields(string projectKey, string issueTypeName, string summary, string gliClauseId, string gliCategory, string gliSubcategory, string description)
         {
             this.project = new JiraProject(projectKey);
-            issuetype = new JiraIssueType(issueTypeName);
+            this.issuetype = new JiraIssueType(issueTypeName);
             this.summary = summary;
             this.customfield_10046 = gliClauseId;
             this.customfield_10044 = gliCategory;

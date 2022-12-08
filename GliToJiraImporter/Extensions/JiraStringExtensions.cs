@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.PortableExecutable;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GliToJiraImporter.Extensions
+﻿namespace GliToJiraImporter.Extensions
 {
     public static class JiraStringExtensions
     {
@@ -22,7 +15,7 @@ namespace GliToJiraImporter.Extensions
                 return false;
             }
 
-            if (headerLength != trimmedValue.Substring(1, trimmedValue.Length - 2).Split("|").Length)
+            if (headerLength != trimmedValue.Trim('|').Split("|").Length)
             {
                 return false;
             }

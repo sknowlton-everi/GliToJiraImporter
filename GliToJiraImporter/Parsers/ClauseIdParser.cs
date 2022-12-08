@@ -35,7 +35,7 @@ namespace GliToJiraImporter.Parsers
                 WParagraph paragraph = cell.Paragraphs[i];
                 if (!paragraph.Text.Equals(string.Empty))
                 {
-                    if (this._state.BaseClauseId.Equals(string.Empty) && this._state.ContainsClauseId(paragraph.Text))
+                    if (this._state.BaseClauseId.Equals(string.Empty) && ClauseIdModel.ContainsClauseId(paragraph.Text))
                     {
                         this._state.BaseClauseId = paragraph.Text.Trim();
                         this._state.FullClauseId = paragraph.Text.Trim();

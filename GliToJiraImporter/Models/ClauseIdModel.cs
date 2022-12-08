@@ -6,7 +6,7 @@ namespace GliToJiraImporter.Models
 {
     public class ClauseIdModel : IMemento
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
         public string BaseClauseId { get; set; } = string.Empty;
         public string FullClauseId { get; set; } = string.Empty;
 
@@ -35,40 +35,39 @@ namespace GliToJiraImporter.Models
 
         public bool IsValid()
         {
-            return !this.IsEmpty() && this.ContainsClauseId(BaseClauseId);
+            return !this.IsEmpty() && ContainsClauseId(BaseClauseId);
         }
 
-        public bool ContainsClauseId(string textToCheck)
+        public static bool ContainsClauseId(string textToCheck)
         {
             bool result = false;
             Regex[] clauseIdRegexs = new Regex[]
             {
                 // 3 sets of numbers
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([(])+(\d+)+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([A-Za-z0-9]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([(])+(\d+)+([)]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+(.)+(\d+)+([A-Za-z0-9]))"),
                 // 2 sets of numbers
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([(])+(\d+)+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([A-Za-z0-9]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+(\d+)+([)])+([(])+([A-Za-z0-9])+([)]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([(])+(\d+)+([)]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+(.)+(\d+)+([A-Za-z0-9]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+(\d+)+([)])+([(])+([A-Za-z0-9])+([)]))"),
                 // 1 set of numbers
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+(\d+)+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
-                new Regex(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([A-Za-z0-9]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+(\d+)+([)]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([(])+([A-Za-z0-9])+([)]))"),
+                new(@"(([A-Za-z0-9]{0,2})+(-?)+(\d+)+([A-Za-z0-9]))"),
             };
 
-            for (int i = 0; i < clauseIdRegexs.Length; i++)
+            foreach (Regex regex in clauseIdRegexs)
             {
-                Match match = clauseIdRegexs[i].Match(textToCheck);
-                if (match.Success && match.Value.Equals(textToCheck.Trim()))
-                {
-                    result = true;
-                    break;
-                }
+                Match match = regex.Match(textToCheck);
+
+                if (!match.Success || !match.Value.Equals(textToCheck.Trim())) continue;
+
+                result = true;
             }
             return result;
         }

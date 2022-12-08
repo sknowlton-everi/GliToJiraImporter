@@ -55,7 +55,7 @@ namespace GliToJiraImporter.Utilities
             {
                 foreach (RegulationModel regulationModel in categoryModel.RegulationList)
                 {
-                    csvRegulations += $"\"{categoryModel.Category}\",\"{regulationModel.Subcategory}\",\"{regulationModel.ClauseID.FullClauseId}\",\"{regulationModel.Description.Text.Replace('\"', '\'')}\"";
+                    csvRegulations += $"\"{categoryModel.Category}\",\"{regulationModel.Subcategory}\",\"{regulationModel.ClauseId.FullClauseId}\",\"{regulationModel.Description.Text.Replace('\"', '\'')}\"";
                     //csvWriter.WriteRecord($"{categoryModel.Category},{regulationModel.Subcategory},{regulationModel.ClauseID},{regulationModel.Description},");
                     //foreach (byte[] image in regulationModel.AttachmentList)
                     //{
@@ -126,16 +126,16 @@ namespace GliToJiraImporter.Utilities
             {
                 foreach (RegulationModel regulationModel in categoryModel.RegulationList)
                 {
-                    if (jiraExistingClauseIdList.ContainsKey(regulationModel.ClauseID.FullClauseId))
+                    if (jiraExistingClauseIdList.ContainsKey(regulationModel.ClauseId.FullClauseId))
                     {
-                        log.Debug($"Skipping clauseId {regulationModel.ClauseID.FullClauseId} because it already exists in the project {parameterModel.ProjectKey}");
+                        log.Debug($"Skipping clauseId {regulationModel.ClauseId.FullClauseId} because it already exists in the project {parameterModel.ProjectKey}");
                         log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
                         continue;
                     }
                     this.createIssue(regulationModel, categoryModel.Category);
 
 
-                    log.Debug($"Completed issue creation attempt for GLI ClauseID {regulationModel.ClauseID.FullClauseId}");
+                    log.Debug($"Completed issue creation attempt for GLI ClauseID {regulationModel.ClauseId.FullClauseId}");
                     log.Debug($"{categoryModel.RegulationList.IndexOf(regulationModel) + 1}/{categoryModel.RegulationList.Count} Complete processing.");
 
                     Thread.Sleep(this.parameterModel.SleepTime);
@@ -152,7 +152,7 @@ namespace GliToJiraImporter.Utilities
         private void createIssue(RegulationModel regulationModel, string categoryName)
         {
             log.Debug("Creating Issue");
-            JiraIssue jiraIssue = new JiraIssue(this.parameterModel.ProjectKey, "Test Plan", regulationModel.ClauseID.FullClauseId, regulationModel.ClauseID.FullClauseId, categoryName,
+            JiraIssue jiraIssue = new JiraIssue(this.parameterModel.ProjectKey, "Test Plan", regulationModel.ClauseId.FullClauseId, regulationModel.ClauseId.FullClauseId, categoryName,
                 regulationModel.Subcategory, regulationModel.Description.Text);
 
             bool status = this.jiraRequestUtilities.PostIssue(jiraIssue);
@@ -165,7 +165,7 @@ namespace GliToJiraImporter.Utilities
                 {
                     if (regulationModel.Description.AttachmentList[i].ImageName == string.Empty)
                     {
-                        regulationModel.Description.AttachmentList[i].ImageName = $"{regulationModel.ClauseID.BaseClauseId}-attachment-#{i}.png";
+                        regulationModel.Description.AttachmentList[i].ImageName = $"{regulationModel.ClauseId.BaseClauseId}-attachment-#{i}.png";
                         jiraIssue.fields.description.Replace("(Image included below, Name: )", $"(Image included below, Name: {regulationModel.Description.AttachmentList[i].ImageName})");
                     }
                     regulationModel.Description.AttachmentList[i].ImageName = regulationModel.Description.AttachmentList[i].ImageName.Replace(" ", "-");
@@ -198,7 +198,7 @@ namespace GliToJiraImporter.Utilities
                 return null;
             }
 
-            foreach (GliToJiraImporter.Models.Issue issue in jiraExistingIssueList)
+            foreach (Models.Issue issue in jiraExistingIssueList)
             {
                 if (issue.fields.customfield_10000 != null)
                 {

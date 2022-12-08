@@ -10,11 +10,11 @@ namespace GliToJiraImporter
     // It works with all mementos via the base Memento interface.
     public class Caretaker
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
-        private List<IMemento> _mementos = new List<IMemento>();
+        private readonly List<IMemento> _mementos = new();
 
-        private IOriginator _originator;
+        private readonly IOriginator _originator;
 
         public Caretaker(IOriginator originator)
         {
@@ -34,7 +34,7 @@ namespace GliToJiraImporter
                 return;
             }
 
-            var memento = this._mementos.Last();
+            IMemento memento = this._mementos.Last();
             this._mementos.Remove(memento);
 
             log.Debug("Caretaker: Restoring state to: " + JsonSerializer.Serialize(memento.GetState()));

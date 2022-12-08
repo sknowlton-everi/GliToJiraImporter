@@ -8,9 +8,9 @@ namespace GliToJiraImporter.Parsers
 {
     public class CategoryParser : IOriginator
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
-        private CategoryModel _state = new CategoryModel();
+        private CategoryModel _state = new();
 
         public CategoryParser() { }
 
@@ -34,7 +34,6 @@ namespace GliToJiraImporter.Parsers
             {
                 categoryModel = new CategoryModel();
             }
-            string currentCategoryName = string.Empty;
 
             // Originator instantiation
             RegulationParser regulationParser = new RegulationParser();
