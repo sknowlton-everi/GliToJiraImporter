@@ -73,7 +73,12 @@ namespace GliToJiraImporter.Models
                 {
                     CategoryModel inputModel = (CategoryModel)obj;
                     result = this.Category.Equals(inputModel.Category);
-                    result = result && this.RegulationList.Count.Equals(inputModel.RegulationList.Count);
+                    if (!result)
+                    {
+                        return false;
+                    }
+                    result = this.RegulationList.Count.Equals(inputModel.RegulationList.Count);
+
                     for (int i = 0; i < this.RegulationList.Count && result; i++)
                     {
                         result = this.RegulationList[i].Equals(inputModel.RegulationList[i]);

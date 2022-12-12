@@ -17,9 +17,9 @@
         public JiraProject project { get; set; } = new JiraProject();
         public JiraIssueType issuetype { get; set; } = new JiraIssueType();
         public string summary { get; set; } = string.Empty;
-        public string customfield_10046 { get; set; } = string.Empty;
-        public string customfield_10044 { get; set; } = string.Empty;
-        public string customfield_10045 { get; set; } = string.Empty;
+        public string customfield_10046 { get; set; } = string.Empty; //GliClauseId
+        public string customfield_10044 { get; set; } = string.Empty; //GliCategory
+        public string customfield_10045 { get; set; } = string.Empty; //GliSubcategory
         public string description { get; set; } = string.Empty;
 
         public JiraIssueFields() { }

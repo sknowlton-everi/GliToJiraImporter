@@ -24,16 +24,9 @@ namespace GliToJiraImporter
             {
                 ParameterModel parameterModel = parseCommandLine(args);
                 parameterModel.UserName = $"{parameterModel.UserName}:{Environment.GetEnvironmentVariable("JIRA_API_TOKEN")}";
-                Parser parser = new(parameterModel);
-                IList<CategoryModel> parsedCategoryModels = parser.Parse();
 
-                StorageUtilities storageUtilities = new (parameterModel);
-                storageUtilities.UploadToJira(parsedCategoryModels);
-                // Uncomment if you want to save results to the public folder in the test project
-                //this.storageUtilities.SaveText(@"..\..\..\..\GliToJiraImporter.Testing\Public\Results.txt", JsonSerializer.Serialize(result));
-                //this.storageUtilities.SaveCsv(@"..\..\..\..\GliToJiraImporter.Testing\Public\ResultsCsv.csv", result);
-
-                //TODO verify
+                UnitOfWork unitOfWork = UnitOfWork.Instance();
+                unitOfWork.Execute(parameterModel);
             }
             catch (Exception e)
             {
@@ -60,13 +53,6 @@ namespace GliToJiraImporter
             }
 
             return result;
-        }
-
-        private bool verifyResults()
-        {
-
-
-            return false;
         }
     }
 }

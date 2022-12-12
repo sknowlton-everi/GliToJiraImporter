@@ -84,7 +84,7 @@ namespace GliToJiraImporter.Utilities
         // Read
         public IList<Models.Issue> GetAllIssuesWithAClauseId()
         {
-            List<Models.Issue> result = new List<Models.Issue>();
+            List<Models.Issue> result = new();
 
             string requestUri = $"{parameterModel.JiraUrl}/search";
 
@@ -122,9 +122,47 @@ namespace GliToJiraImporter.Utilities
 
         public Models.Issue GetIssueByClauseId(string clauseId)
         {
+            Models.Issue result = new();
+
+            string requestUri = $"{parameterModel.JiraUrl}/search?jql=GLIClauseId~'{clauseId}'";
+
+            RestRequest request = createRestRequest(Method.GET, requestUri);
+            if (request == null)
+            {
+                log.Error("Failed to create request. Result returned as null.");
+                return null;
+            }
+
+            object response = this.runQuery(request, requestUri);
+
+            if (response.GetType().Equals(typeof(List<Models.Issue>)))
+            {
+                List<Models.Issue> matchingIssues = (List<Models.Issue>)response;
+                foreach (Issue issue in matchingIssues)
+                {
+                    if (issue.fields.customfield_10046.Equals(clauseId))
+                    {
+                        result = this.GetIssueByIssueKey(((Models.Issue)response).key);
+                    }
+                }
+            }
+            else if (response.GetType().Equals(typeof(ErrorRoot)))
+            {
+                result = null;
+            }
+            else
+            {
+                log.Debug("No issues found.");
+            }
+
+            return result;
+        }
+
+        public Models.Issue GetIssueByIssueKey(string issueKey)
+        {
             Models.Issue result = new Models.Issue();
 
-            string requestUri = $"{parameterModel.JiraUrl}/search?jql=GLIClauseId~{clauseId}";
+            string requestUri = $"{parameterModel.JiraUrl}/issue/{issueKey}";
 
             RestRequest request = createRestRequest(Method.GET, requestUri);
             if (request == null)
@@ -138,6 +176,37 @@ namespace GliToJiraImporter.Utilities
             if (response.GetType().Equals(typeof(Models.Issue)))
             {
                 result = (Models.Issue)response;
+            }
+            else if (response.GetType().Equals(typeof(ErrorRoot)))
+            {
+                result = null;
+            }
+            else
+            {
+                log.Debug("No issues found.");
+            }
+
+            return result;
+        }
+
+        public byte[] GetIssueAttachmentById(string attachmentId)
+        {
+            byte[] result = {};
+
+            string requestUri = $"{parameterModel.JiraUrl}/attachment/content/{attachmentId}";
+
+            RestRequest request = createRestRequest(Method.GET, requestUri);
+            if (request == null)
+            {
+                log.Error("Failed to create request. Result returned as null.");
+                return null;
+            }
+
+            object response = this.runQuery(request, requestUri);
+
+            if (response.GetType().Equals(typeof(byte[])))
+            {
+                result = (byte[])response;
             }
             else if (response.GetType().Equals(typeof(ErrorRoot)))
             {
@@ -181,17 +250,17 @@ namespace GliToJiraImporter.Utilities
 
         private RestRequest createRestRequest(Method method, string requestUri)
         {
-            return createRestRequest(method, requestUri, new());
+            return this.createRestRequest(method, requestUri, new JiraIssue());
         }
 
         private RestRequest createRestRequest(Method method, string requestUri, JiraIssue jiraIssue)
         {
-            return createRestRequest(method, requestUri, jiraIssue, string.Empty);
+            return this.createRestRequest(method, requestUri, jiraIssue, string.Empty);
         }
 
         private RestRequest createRestRequest(Method method, string requestUri, JiraIssue jiraIssue, string filePath)
         {
-            RestRequest result = new RestRequest(requestUri, method);
+            RestRequest result = new(requestUri, method);
 
             if (requestUri.Equals(string.Empty))
             {
@@ -225,6 +294,10 @@ namespace GliToJiraImporter.Utilities
                     result.AddHeader("Content-Type", "application/json");
                 }
             }
+            else if (method.Equals(Method.GET))
+            {
+                result.AddHeader("X-Atlassian-Token", "no-check");
+            }
 
             return result;
         }
@@ -243,13 +316,21 @@ namespace GliToJiraImporter.Utilities
                 {
                     log.Debug($"Request succeeded. Request: {requestUri}, Status: {response.StatusCode}");
                     string jsonString = response.Content;
-                    if (request.Method == Method.GET && requestUri.EndsWith("/search"))
+                    if (request.Method == Method.GET)
                     {
-                        result = JsonConvert.DeserializeObject<Models.Root>(jsonString).issues;
-                    }
-                    else if (request.Method == Method.GET)
-                    {
-                        result = JsonConvert.DeserializeObject<Models.Root>(jsonString).issues.First();
+
+                        if (requestUri.EndsWith("/search") || requestUri.Contains("issue"))
+                        {
+                            result = JsonConvert.DeserializeObject<Models.Root>(jsonString).issues;
+                        }
+                        else if (requestUri.Contains("attachment/content"))
+                        {
+                            result = client.DownloadData(request);
+                        }
+                        else
+                        {
+                            result = JsonConvert.DeserializeObject<Models.Root>(jsonString).issues.First();
+                        }
                     }
                     else if (request.Method == Method.POST || request.Method == Method.DELETE || request.Method == Method.PUT)
                     {
