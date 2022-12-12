@@ -88,7 +88,7 @@ namespace GliToJiraImporter.Testing.Tests
             sut = new Parser(this.parameterModelStub);
         }
 
-        [TearDown] //TODO This doesn't work yet
+        //[TearDown] //TODO This doesn't work yet
         public void TearDown()
         {
             log.Debug("Teardown start");
