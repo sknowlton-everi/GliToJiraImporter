@@ -146,6 +146,14 @@ namespace GliToJiraImporter.Utilities
                     }
                 }
             }
+            else if (response.GetType().Equals(typeof(Models.Issue)))
+            {
+                Models.Issue matchingIssue = (Models.Issue)response;
+                if (matchingIssue.fields.customfield_10046.Equals(clauseId))
+                {
+                    result = this.GetIssueByIssueKey(((Models.Issue)response).key);
+                }
+            }
             else if (response.GetType().Equals(typeof(ErrorRoot)))
             {
                 result = null;
@@ -322,6 +330,10 @@ namespace GliToJiraImporter.Utilities
                         if (requestUri.EndsWith("/search") || requestUri.Contains("issue"))
                         {
                             result = JsonConvert.DeserializeObject<Models.Root>(jsonString).issues;
+                            if (result == null)
+                            {
+                                result = JsonConvert.DeserializeObject<Models.Issue>(jsonString);
+                            }
                         }
                         else if (requestUri.Contains("attachment/content"))
                         {

@@ -22,6 +22,8 @@ namespace GliToJiraImporter
 
         public static UnitOfWork Instance()
         {
+            // Uses lazy initialization.
+            // Note: this is not thread safe.
             if (instance == null)
             {
                 instance = new UnitOfWork();
@@ -47,7 +49,7 @@ namespace GliToJiraImporter
                 //this.storageUtilities.SaveCsv(@"..\..\..\..\GliToJiraImporter.Testing\Public\ResultsCsv.csv", result);
 
                 //Verify
-                if (storageUtilities.VerifyCategoryModelsExistInJira(parsedCategoryModels))
+                if (!storageUtilities.VerifyCategoryModelsExistInJira(parsedCategoryModels))
                 {
                     log.Error("The results were invalid.");
                 }
