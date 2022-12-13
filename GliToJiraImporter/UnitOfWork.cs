@@ -1,9 +1,4 @@
 ﻿using GliToJiraImporter.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using GliToJiraImporter.Utilities;
 using log4net;
 using System.Reflection;
@@ -16,26 +11,18 @@ namespace GliToJiraImporter
     /// </summary>
     public class UnitOfWork
     {
-        private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private static UnitOfWork instance;
+        private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
+        private static UnitOfWork instance = new();
 
-        protected UnitOfWork(){}
+        protected UnitOfWork() {}
 
         public static UnitOfWork Instance()
         {
-            // Uses lazy initialization.
-            // Note: this is not thread safe.
-            if (instance == null)
-            {
-                instance = new UnitOfWork();
-            }
             return instance;
         }
 
         public bool Execute(ParameterModel parameterModel)
         {
-            bool result = false;
-
             try
             {
                 //Parse
@@ -53,14 +40,16 @@ namespace GliToJiraImporter
                 if (!storageUtilities.VerifyCategoryModelsExistInJira(parsedCategoryModels))
                 {
                     log.Error("The results were invalid.");
+                    return false;
                 }
             }
             catch (InvalidCastException e)
             {
                 this.log.Error(e);
+                return false;
             }
 
-            return result;
+            return true;
         }
     }
 }
