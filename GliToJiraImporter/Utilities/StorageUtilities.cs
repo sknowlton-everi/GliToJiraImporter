@@ -9,9 +9,11 @@ namespace GliToJiraImporter.Utilities
 {
     public class StorageUtilities
     {
-        private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private ParameterModel parameterModel;
-        private JiraRequestUtilities jiraRequestUtilities = new JiraRequestUtilities();
+        private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
+        private readonly ParameterModel parameterModel = new();
+        private readonly JiraRequestUtilities jiraRequestUtilities = new();
+
+        public StorageUtilities() { }
 
         public StorageUtilities(ParameterModel parameterModel)
         {
@@ -180,7 +182,7 @@ namespace GliToJiraImporter.Utilities
                     log.Error("Attachments could not be added.");
                 }
             }
-            else if(!status)
+            else if (!status)
             {
                 log.Error("Issue could not be created.");
             }

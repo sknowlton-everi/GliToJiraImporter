@@ -8,6 +8,7 @@ using log4net.Repository;
 using RestSharp;
 using System.Diagnostics;
 using System.Reflection;
+using GliToJiraImporter.Testing.Utilities;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace GliToJiraImporter.Testing.Tests
@@ -127,7 +128,7 @@ namespace GliToJiraImporter.Testing.Tests
                     }
                     expectedResult.Clear();
                 }
-                checkForErrorsInLogs();
+                this.memoryAppender.AssertNoErrorsInLogs();
             }
             log.Debug("Teardown end");
         }
@@ -316,7 +317,7 @@ namespace GliToJiraImporter.Testing.Tests
 
         private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
         {
-            this.checkForErrorsInLogs();
+            this.memoryAppender.AssertNoErrorsInLogs();
             Assert.That(result, !Is.Null);
             Assert.That(result.Count, Is.EqualTo(expectedResult.Count), $"The result count of categories does not match the expected.");
             for (int i = 0; i < result.Count; i++)
@@ -342,15 +343,6 @@ namespace GliToJiraImporter.Testing.Tests
                         Assert.That(resultAttachmentList[k].ImageBytes, Is.EqualTo(expectedResultAttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
                     }
                 }
-            }
-        }
-
-        private void checkForErrorsInLogs()
-        {
-            LoggingEvent[] logEvents = memoryAppender.GetEvents();
-            foreach (LoggingEvent logEvent in logEvents)
-            {
-                Assert.That(logEvent.Level == Level.Info || logEvent.Level == Level.Debug, $"There was an error in the logs. \"{logEvent.RenderedMessage}\"");
             }
         }
     }
