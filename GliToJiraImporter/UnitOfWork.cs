@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GliToJiraImporter.Utilities;
 using log4net;
 using System.Reflection;
+using GliToJiraImporter.Parsers;
 
 namespace GliToJiraImporter
 {
@@ -53,6 +54,10 @@ namespace GliToJiraImporter
                 {
                     log.Error("The results were invalid.");
                 }
+            }
+            catch (InvalidCastException e)
+            {
+                this.log.Error($"InvalidCastException: {e.Message}");
             }
             catch (Exception e)
             {

@@ -1,5 +1,4 @@
 ﻿using GliToJiraImporter.Models;
-using GliToJiraImporter.Parsers;
 using GliToJiraImporter.Types;
 using GliToJiraImporter.Utilities;
 using log4net;
@@ -7,7 +6,7 @@ using Syncfusion.DocIO.DLS;
 using System.Diagnostics;
 using System.Reflection;
 
-namespace GliToJiraImporter
+namespace GliToJiraImporter.Parsers
 {
     public class Parser
     {
@@ -28,7 +27,7 @@ namespace GliToJiraImporter
             {
                 log.Debug($"Document Type: {parameterModel.GetType().Name}");
                 log.Debug("Parsing...");
-                result = this.parseMementos();
+                result = parseMementos();
             }
             else
             {

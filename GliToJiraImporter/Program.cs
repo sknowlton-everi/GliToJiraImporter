@@ -24,6 +24,10 @@ namespace GliToJiraImporter
             {
                 ParameterModel parameterModel = parseCommandLine(args);
                 parameterModel.UserName = $"{parameterModel.UserName}:{Environment.GetEnvironmentVariable("JIRA_API_TOKEN")}";
+                if (!parameterModel.JiraUrl.EndsWith("/rest/api/2"))
+                {
+                    parameterModel.JiraUrl = $"{parameterModel.JiraUrl}/rest/api/2";
+                }
 
                 UnitOfWork unitOfWork = UnitOfWork.Instance();
                 unitOfWork.Execute(parameterModel);
