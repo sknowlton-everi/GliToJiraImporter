@@ -47,7 +47,7 @@ namespace GliToJiraImporter.Testing.Tests
             {
                 FilePath = $"{checkoffFolderName}Australia-New-Zealand.docx",
                 Method = Method.GET,
-                JiraUrl = "https://gre-team.atlassian.net/rest/api/2",//search?jql=project=EGRE&maxResults=10",
+                JiraUrl = "https://gre-team.atlassian.net",//search?jql=project=EGRE&maxResults=10",
                 UserName = userNameToken,
                 IssueType = "Test Plan",
                 SleepTime = 1000,
@@ -293,25 +293,6 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            Assert.That(expectedResult, !Is.Null);
-            this.testAssertModel(expectedResult, result);
-        }
-
-        [Test]
-        public void ParserSingleDuplicateTest()
-        {
-            //given
-            parameterModelStub.FilePath = $"{checkoffFolderName}SINGLE-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserSingleTestExpectedResult.json"));
-
-            //when
-            IList<CategoryModel> result = sut.Parse();
-            result = sut.Parse();
-
-            //then
-            memoryAppender.GetEvents().First(logEvent => logEvent.Level == Level.Debug
-            && logEvent.RenderedMessage.Equals($"Skipping clauseId {expectedResult[0].RegulationList[0].ClauseId.BaseClauseId} because it already exists in the project {parameterModelStub.ProjectKey}"));
-            Assert.That(result.Any(), Is.True);
             Assert.That(expectedResult, !Is.Null);
             this.testAssertModel(expectedResult, result);
         }

@@ -29,8 +29,7 @@ namespace GliToJiraImporter
                     parameterModel.JiraUrl = $"{parameterModel.JiraUrl}/rest/api/2";
                 }
 
-                UnitOfWork unitOfWork = UnitOfWork.Instance();
-                unitOfWork.Execute(parameterModel);
+                UnitOfWork.Instance().Execute(parameterModel);
             }
             catch (Exception e)
             {
