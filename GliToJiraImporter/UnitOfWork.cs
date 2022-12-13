@@ -57,11 +57,7 @@ namespace GliToJiraImporter
             }
             catch (InvalidCastException e)
             {
-                this.log.Error($"InvalidCastException: {e.Message}");
-            }
-            catch (Exception e)
-            {
-                //TODO specify exceptions to catch. Do not leave his generic exception
+                this.log.Error(e);
             }
 
             return result;
