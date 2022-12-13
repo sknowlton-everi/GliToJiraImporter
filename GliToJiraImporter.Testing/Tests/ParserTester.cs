@@ -1,4 +1,5 @@
 using GliToJiraImporter.Models;
+using GliToJiraImporter.Parsers;
 using GliToJiraImporter.Utilities;
 using log4net;
 using log4net.Appender;
@@ -18,14 +19,8 @@ namespace GliToJiraImporter.Testing.Tests
 
         private static readonly string checkoffFolderName = @"../../../Public/TestCheckoffs/";
         private static readonly string expectedResultFolderName = @"../../../Public/ExpectedResults/";
-        private const string CLAUSE_ID = "customfield_10046";
-        private const string CATEGORY = "customfield_10044";
-        private const string SUBCATEGORY = "customfield_10045";
         private Parser sut;
         private ParameterModel parameterModelStub;
-        //private Jira jiraConnectionStub;
-        //private Project jiraProjectStub;
-        private IList<CategoryModel> expectedResult = new List<CategoryModel>();
         private MemoryAppender memoryAppender;
 
         [SetUp]
@@ -55,82 +50,7 @@ namespace GliToJiraImporter.Testing.Tests
                 Type = 1,
             };
 
-
-            //try
-            //{
-            //    using HttpClient httpClient = new();
-            //    using HttpRequestMessage request = new(parameterModelStub.Method, parameterModelStub.JiraUrl);
-            //    string base64authorization =
-            //        Convert.ToBase64String(Encoding.ASCII.GetBytes(parameterModelStub.UserName));
-            //    request.Headers.TryAddWithoutValidation("Authorization", $"Basic {base64authorization}");
-
-            //    HttpResponseMessage response = httpClient.Send(request);
-            //    if (response.StatusCode == HttpStatusCode.OK)
-            //    {
-            //        string jsonString = response.Content.ReadAsStringAsync().Result;
-            //        Models.Issue jsonObject = JsonConvert.DeserializeObject<Models.Issue>(jsonString);
-            //        log.Debug(jsonObject.ToString());
-            //    }
-            //    else
-            //    {
-            //        string jsonString = response.Content.ReadAsStringAsync().Result;
-            //        //ErrorRoot jsonObject = JsonConvert.DeserializeObject<ErrorRoot>(jsonString);
-            //        log.Debug(jsonString);
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    log.Error(ex);
-            //}
-
-            //TODO Samantha, see Jira URL above, change for each request, once you have the correct request, then update the Parser (sut) parameters below to
-            //match what you get back from the above jira calls
             sut = new Parser(this.parameterModelStub);
-        }
-
-        //[TearDown] //TODO This doesn't work yet
-        public void TearDown()
-        {
-            log.Debug("Teardown start");
-            JiraRequestUtilities jiraRequestUtilities = new JiraRequestUtilities(this.parameterModelStub);
-            //int index = 0;
-            //int itemsPerPage = 50;
-            //string queryString = string.Format("project = {0}", parameterModelStub.ProjectKey);
-            //IPagedQueryResult<Issue> jiraExistingIssueList = this.jiraConnectionStub.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
-            IList<Models.Issue> jiraExistingIssueList = jiraRequestUtilities.GetAllIssuesWithAClauseId();
-            if (jiraExistingIssueList == null)
-            {
-                log.Error("JiraRequestUtilities.GetAllIssuesWithAClauseId returned null, and therefore failed");
-                return;
-            }
-            //IList<string> clauseIds = (IList<string>)expectedResult.Select(category => category.RegulationList.Select(regulation => regulation.ClauseID).ToList()).ToList();
-            //IList<string> categories = expectedResult.Select(cat => cat.Category).ToList();
-            //Dictionary<string, Issue> issues = (Dictionary<string, Issue>)this.jiraConnectionStub.Issues.GetIssuesAsync().Result;
-            //foreach (Models.Issue issue in jiraExistingIssueList)
-            if (jiraExistingIssueList.Count > 0)
-            {
-                for (int i = 0; i < this.expectedResult.Count; i++)
-                {
-                    for (int j = 0; j < this.expectedResult[i].RegulationList.Count; j++)
-                    {
-                        //Models.Issue issue = jiraExistingIssueList[i];
-                        Models.Issue issueFound = jiraRequestUtilities.GetIssueByClauseId(this.expectedResult[i].RegulationList[j].ClauseId.FullClauseId);
-                        //Models.Issue issueFound = jiraExistingIssueList.First(issue => issue.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseId.FullClauseId));
-                        if (issueFound != null && issueFound.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseId.FullClauseId))//categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not a good enough check
-                        {
-                            bool success = jiraRequestUtilities.DeleteIssueByKey(issueFound.key);//this.deleteIssueByKey(issue.Key.Value);
-                            if (success != true)
-                            {
-                                log.Error($"Issue failed to delete. {issueFound.key}");
-                            }
-                        }
-                        Thread.Sleep(this.parameterModelStub.SleepTime);
-                    }
-                    expectedResult.Clear();
-                }
-                checkForErrorsInLogs();
-            }
-            log.Debug("Teardown end");
         }
 
         [Test]
@@ -139,7 +59,7 @@ namespace GliToJiraImporter.Testing.Tests
             //given
             parameterModelStub.FilePath = $"{checkoffFolderName}SINGLE-Australia-New-Zealand.docx";
             string expectedResultPath = $"{expectedResultFolderName}ParserSingleTestExpectedResult.json";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
+            IList<CategoryModel> expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -154,7 +74,7 @@ namespace GliToJiraImporter.Testing.Tests
             //given
             parameterModelStub.FilePath = $"{checkoffFolderName}SINGLE-MULTIDESC-Australia-New-Zealand.docx";
             string expectedResultPath = $"{expectedResultFolderName}ParserSingleMultiDescTestExpectedResult.json";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
+            IList<CategoryModel> expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -168,7 +88,7 @@ namespace GliToJiraImporter.Testing.Tests
         {
             //given
             parameterModelStub.FilePath = $"{checkoffFolderName}PICTURES-SHORT-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}PicturesTestExpectedResult.json"));
+            IList<CategoryModel> expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}PicturesTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -178,13 +98,13 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Does not work due to more then 50 tasks")]
+        //[Ignore("Does not work due to more then 50 tasks")]
         [Test]
         public void ParserSpecialsTest()
         {
             //given
             parameterModelStub.FilePath = $"{checkoffFolderName}SPECIALS-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserSpecialsTestExpectedResult.json"));
+            IList<CategoryModel> expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserSpecialsTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -199,7 +119,7 @@ namespace GliToJiraImporter.Testing.Tests
         public void ParserFullTest()
         {
             //given
-            //expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}FullTestSearchExpectedResult.json"));
+            //IList<CategoryModel> expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}FullTestSearchExpectedResult.json"));
             parameterModelStub.FilePath = $"{checkoffFolderName}Australia-New-Zealand.docx";
             int expectedCount = 633;
             //when
@@ -241,7 +161,7 @@ namespace GliToJiraImporter.Testing.Tests
         {
             //given
             parameterModelStub.FilePath = $"{checkoffFolderName}CHARFORMAT-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserCharFormatTestExpectedResult.json"));
+            IList<CategoryModel> expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserCharFormatTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -251,13 +171,12 @@ namespace GliToJiraImporter.Testing.Tests
             this.testAssertModel(expectedResult, result);
         }
 
-        [Ignore("Doesn't work properly anymore. Will need to be fixed.")]
         [Test]
         public void ParserClauseIdVarietiesTest()
         {
             //given
             parameterModelStub.FilePath = $"{checkoffFolderName}CLAUSEID-VARIETIES.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserClauseIdVarietiesTestExpectedResult.json"));
+            IList<CategoryModel> expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserClauseIdVarietiesTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -272,7 +191,7 @@ namespace GliToJiraImporter.Testing.Tests
         {
             //given
             parameterModelStub.FilePath = $"{checkoffFolderName}NO-CATEGORY-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserNoCategoryTestExpectedResult.json"));
+            IList<CategoryModel> expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserNoCategoryTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
@@ -287,7 +206,7 @@ namespace GliToJiraImporter.Testing.Tests
         {
             //given
             parameterModelStub.FilePath = $"{checkoffFolderName}LINKS-Australia-New-Zealand.docx";
-            expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserLinkTestExpectedResult.json"));
+            IList<CategoryModel> expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserLinkTestExpectedResult.json"));
 
             //when
             IList<CategoryModel> result = sut.Parse();
