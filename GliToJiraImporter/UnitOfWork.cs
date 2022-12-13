@@ -12,7 +12,7 @@ namespace GliToJiraImporter
     public class UnitOfWork
     {
         private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
-        private static UnitOfWork instance = new();
+        private static readonly UnitOfWork instance = new();
 
         protected UnitOfWork() {}
 
@@ -39,7 +39,7 @@ namespace GliToJiraImporter
                 //Verify
                 if (!storageUtilities.VerifyCategoryModelsExistInJira(parsedCategoryModels))
                 {
-                    log.Error("The results were invalid.");
+                    this.log.Error("The results were invalid.");
                     return false;
                 }
             }
@@ -47,6 +47,10 @@ namespace GliToJiraImporter
             {
                 this.log.Error(e);
                 return false;
+            }
+            catch (Exception e)
+            {
+                this.log.Error(e);
             }
 
             return true;
