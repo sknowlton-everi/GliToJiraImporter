@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Atlassian.Jira;
+using Newtonsoft.Json;
 
 namespace GliToJiraImporter.Models
 {
@@ -12,6 +13,32 @@ namespace GliToJiraImporter.Models
     {
         public string self { get; set; }
         public string accountId { get; set; }
+        public string emailAddress { get; set; }
+        public AvatarUrls avatarUrls { get; set; }
+        public string displayName { get; set; }
+        public bool active { get; set; }
+        public string timeZone { get; set; }
+        public string accountType { get; set; }
+    }
+
+    public class Attachment
+    {
+        public string self { get; set; }
+        public string id { get; set; }
+        public string filename { get; set; }
+        public Author author { get; set; }
+        public DateTime created { get; set; }
+        public int size { get; set; }
+        public string mimeType { get; set; }
+        public string content { get; set; }
+        public string thumbnail { get; set; }
+    }
+
+    public class Author
+    {
+        public string self { get; set; }
+        public string accountId { get; set; }
+        public string emailAddress { get; set; }
         public AvatarUrls avatarUrls { get; set; }
         public string displayName { get; set; }
         public bool active { get; set; }
@@ -45,6 +72,7 @@ namespace GliToJiraImporter.Models
     {
         public string self { get; set; }
         public string accountId { get; set; }
+        public string emailAddress { get; set; }
         public AvatarUrls avatarUrls { get; set; }
         public string displayName { get; set; }
         public bool active { get; set; }
@@ -120,6 +148,7 @@ namespace GliToJiraImporter.Models
         public object customfield_10007 { get; set; }
         public object customfield_10008 { get; set; }
         public object aggregatetimeestimate { get; set; }
+        public List<Attachment> attachment { get; set; }
         public object customfield_10009 { get; set; }
         public string summary { get; set; }
         public Creator creator { get; set; }
@@ -134,7 +163,7 @@ namespace GliToJiraImporter.Models
         public string customfield_10000 { get; set; }
         public object customfield_10045 { get; set; }
         public object customfield_10001 { get; set; }
-        public object customfield_10046 { get; set; }
+        public string customfield_10046 { get; set; }
         public object customfield_10002 { get; set; }
         public object customfield_10003 { get; set; }
         public object customfield_10004 { get; set; }
@@ -143,6 +172,8 @@ namespace GliToJiraImporter.Models
         public object duedate { get; set; }
         public Progress progress { get; set; }
         public Votes votes { get; set; }
+        public Comment comment { get; set; }
+        public Worklog worklog { get; set; }
     }
 
     public class Issue
@@ -201,6 +232,7 @@ namespace GliToJiraImporter.Models
     {
         public string self { get; set; }
         public string accountId { get; set; }
+        public string emailAddress { get; set; }
         public AvatarUrls avatarUrls { get; set; }
         public string displayName { get; set; }
         public bool active { get; set; }

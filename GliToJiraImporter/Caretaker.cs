@@ -43,7 +43,7 @@ namespace GliToJiraImporter
             {
                 this._originator.Restore(memento);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 this.Undo();
             }
