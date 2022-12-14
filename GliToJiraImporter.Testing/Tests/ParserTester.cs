@@ -1,5 +1,6 @@
 using GliToJiraImporter.Models;
 using GliToJiraImporter.Parsers;
+using GliToJiraImporter.Testing.Extensions;
 using GliToJiraImporter.Utilities;
 using log4net;
 using log4net.Appender;
@@ -9,7 +10,6 @@ using log4net.Repository;
 using RestSharp;
 using System.Diagnostics;
 using System.Reflection;
-using GliToJiraImporter.Testing.Utilities;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace GliToJiraImporter.Testing.Tests
@@ -21,8 +21,8 @@ namespace GliToJiraImporter.Testing.Tests
         private static readonly string checkoffFolderName = @"../../../Public/TestCheckoffs/";
         private static readonly string expectedResultFolderName = @"../../../Public/ExpectedResults/";
         private Parser sut;
-        private ParameterModel parameterModelStub;
-        private MemoryAppender memoryAppender;
+        private ParameterModel parameterModelStub = new();
+        private readonly MemoryAppender memoryAppender = new();
 
         [SetUp]
         public void Setup()
@@ -30,7 +30,6 @@ namespace GliToJiraImporter.Testing.Tests
             ILoggerRepository logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
 
-            this.memoryAppender = new log4net.Appender.MemoryAppender();
             BasicConfigurator.Configure(this.memoryAppender);
 
             log.Info(message: new StackFrame().GetMethod().Name);
@@ -43,7 +42,7 @@ namespace GliToJiraImporter.Testing.Tests
             {
                 FilePath = $"{checkoffFolderName}Australia-New-Zealand.docx",
                 Method = Method.GET,
-                JiraUrl = "https://gre-team.atlassian.net",//search?jql=project=EGRE&maxResults=10",
+                JiraUrl = "https://gre-team.atlassian.net/rest/api/2",//search?jql=project=EGRE&maxResults=10",
                 UserName = userNameToken,
                 IssueType = "Test Plan",
                 SleepTime = 1000,
@@ -66,7 +65,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            this.testAssertModel(expectedResult, result);
+            expectedResult.TestAssertCategoryModels(result);
         }
 
         [Test]
@@ -81,7 +80,7 @@ namespace GliToJiraImporter.Testing.Tests
             IList<CategoryModel> result = sut.Parse();
 
             //then
-            this.testAssertModel(expectedResult, result);
+            expectedResult.TestAssertCategoryModels(result);
         }
 
         [Test]
@@ -96,7 +95,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //then
             Assert.That(expectedResult, !Is.Null);
-            this.testAssertModel(expectedResult, result);
+            expectedResult.TestAssertCategoryModels(result);
         }
 
         //[Ignore("Does not work due to more then 50 tasks")]
@@ -112,7 +111,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //then
             Assert.That(expectedResult, !Is.Null);
-            this.testAssertModel(expectedResult, result);
+            expectedResult.TestAssertCategoryModels(result);
         }
 
         [Ignore("This test is very large and takes a long time to complete.")]
@@ -134,7 +133,7 @@ namespace GliToJiraImporter.Testing.Tests
                 totalRegs += categoryModel.RegulationList.Count;
             }
             Assert.That(totalRegs, Is.EqualTo(expectedCount));
-            //this.testAssertModel(expectedResult, result);
+            //expectedResult.TestAssertCategoryModels(result);
         }
 
         [Test]
@@ -169,7 +168,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //then
             Assert.That(expectedResult, !Is.Null);
-            this.testAssertModel(expectedResult, result);
+            expectedResult.TestAssertCategoryModels(result);
         }
 
         [Test]
@@ -184,7 +183,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //then
             Assert.That(expectedResult, !Is.Null);
-            this.testAssertModel(expectedResult, result);
+            expectedResult.TestAssertCategoryModels(result);
         }
 
         [Test]
@@ -199,7 +198,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //then
             Assert.That(expectedResult, !Is.Null);
-            this.testAssertModel(expectedResult, result);
+            expectedResult.TestAssertCategoryModels(result);
         }
 
         [Test]
@@ -214,38 +213,7 @@ namespace GliToJiraImporter.Testing.Tests
 
             //then
             Assert.That(expectedResult, !Is.Null);
-            this.testAssertModel(expectedResult, result);
-        }
-
-        private void testAssertModel(IList<CategoryModel> expectedResult, IList<CategoryModel> result)
-        {
-            this.memoryAppender.AssertNoErrorsInLogs();
-            Assert.That(result, !Is.Null);
-            Assert.That(result.Count, Is.EqualTo(expectedResult.Count), $"The result count of categories does not match the expected.");
-            for (int i = 0; i < result.Count; i++)
-            {
-                Assert.That(result[i].Category, Is.EqualTo(expectedResult[i].Category), $"The Category of {result[i].Category} does not match the expected.");
-                Assert.That(result[i].RegulationList.Count, Is.EqualTo(expectedResult[i].RegulationList.Count), $"The RegulationList count of \"{result[i].Category}\" does not match the expected.");
-
-                for (int j = 0; j < result[i].RegulationList.Count; j++)
-                {
-                    RegulationModel resultRegulation = (RegulationModel)result[i].RegulationList[j];
-                    RegulationModel expectedResultRegulation = (RegulationModel)expectedResult[i].RegulationList[j];
-                    Assert.That(resultRegulation.ClauseId.BaseClauseId, Is.EqualTo(expectedResultRegulation.ClauseId.BaseClauseId), $"The BaseClauseId of {resultRegulation.ClauseId.BaseClauseId} does not match the expected.");
-                    Assert.That(resultRegulation.ClauseId.FullClauseId, Is.EqualTo(expectedResultRegulation.ClauseId.FullClauseId), $"The FullClauseId of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
-                    Assert.That(resultRegulation.Subcategory, Is.EqualTo(expectedResultRegulation.Subcategory), $"The Subcategory of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
-                    Assert.That(resultRegulation.Description.Text, Is.EqualTo(expectedResultRegulation.Description.Text), $"The Description Text of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
-
-                    IList<PictureModel> resultAttachmentList = ((DescriptionModel)resultRegulation.Description).AttachmentList;
-                    IList<PictureModel> expectedResultAttachmentList = ((DescriptionModel)expectedResultRegulation.Description).AttachmentList;
-                    Assert.That(resultAttachmentList.Count, Is.EqualTo(expectedResultAttachmentList.Count), $"The AttachmentList of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
-                    for (int k = 0; k < resultAttachmentList.Count; k++)
-                    {
-                        Assert.That(resultAttachmentList[k].ImageName, Is.EqualTo(expectedResultAttachmentList[k].ImageName), $"ImageName at position {k} of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
-                        Assert.That(resultAttachmentList[k].ImageBytes, Is.EqualTo(expectedResultAttachmentList[k].ImageBytes), $"ImageBytes at position {k} of {resultRegulation.ClauseId.FullClauseId} does not match the expected.");
-                    }
-                }
-            }
+            expectedResult.TestAssertCategoryModels(result);
         }
     }
 }

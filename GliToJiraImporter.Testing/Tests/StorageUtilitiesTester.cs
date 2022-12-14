@@ -14,7 +14,7 @@ using log4net.Config;
 using log4net.Repository;
 using RestSharp;
 using System.Diagnostics;
-using GliToJiraImporter.Testing.Utilities;
+using GliToJiraImporter.Testing.Extensions;
 
 namespace GliToJiraImporter.Testing.Tests
 {
@@ -43,7 +43,7 @@ namespace GliToJiraImporter.Testing.Tests
             {
                 FilePath = @"../../../Public/TestCheckoffs/SINGLE-Australia-New-Zealand.docx",
                 Method = Method.GET,
-                JiraUrl = "https://gre-team.atlassian.net",
+                JiraUrl = "https://gre-team.atlassian.net/rest/api/2",
                 UserName = userNameToken,
                 IssueType = "Test Plan",
                 SleepTime = 1000,
@@ -52,24 +52,6 @@ namespace GliToJiraImporter.Testing.Tests
             };
 
             this.sut = new StorageUtilities(this.parameterModelStub);
-        }
-
-        [Test]
-        public void StorageUtilitiesUploadToJiraTest()
-        {
-            //given
-            //parameterModelStub.FilePath = $"{checkoffFolderName}SINGLE-Australia-New-Zealand.docx";
-            IList<CategoryModel> categories = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{ExpectedResultFolderName}ParserSingleTestExpectedResult.json"));
-
-            //when
-            sut.UploadToJira(categories);
-
-            //then
-            this.memoryAppender.AssertNoErrorsInLogs();
-
-            Assert.That(result.Any(), Is.True);
-            Assert.That(expectedResult, !Is.Null);
-            this.testAssertModel(expectedResult, result);
         }
 
         [Test]

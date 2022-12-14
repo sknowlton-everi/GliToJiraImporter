@@ -3,11 +3,11 @@ using GliToJiraImporter.Utilities;
 using log4net;
 using log4net.Appender;
 using log4net.Config;
-using log4net.Core;
 using log4net.Repository;
 using RestSharp;
 using System.Diagnostics;
 using System.Reflection;
+using GliToJiraImporter.Testing.Extensions;
 using JsonSerializer = System.Text.Json.JsonSerializer;
 
 namespace GliToJiraImporter.Testing.Tests
@@ -17,11 +17,14 @@ namespace GliToJiraImporter.Testing.Tests
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
         private JiraRequestUtilities sut = new();
         private ParameterModel parameterModelStub = new();
-        private MemoryAppender memoryAppender = new log4net.Appender.MemoryAppender();
-        private static readonly string expectedResultFolderName = @"../../../Public/ExpectedResults/";
+        private MemoryAppender memoryAppender = new();
+        private const string checkoffFolderName = @"../../../Public/TestCheckoffs/";
+        private const string expectedResultFolderName = @"../../../Public/ExpectedResults/";
+        private CategoryModel expectedResult = new();
+        private JiraIssue jiraIssue = new();
 
-        [SetUp]
-        public void Setup()
+        [OneTimeSetUp]
+        public void Init()
         {
             ILoggerRepository logRepository = LogManager.GetRepository(Assembly.GetEntryAssembly());
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
@@ -33,11 +36,11 @@ namespace GliToJiraImporter.Testing.Tests
             string token = Environment.GetEnvironmentVariable("JIRA_API_TOKEN");
             string userNameToken = $"{userName}:{token}";
 
-            parameterModelStub = new()
+            this.parameterModelStub = new()
             {
-                FilePath = @"../../../Public/TestCheckoffs/SINGLE-Australia-New-Zealand.docx",
+                FilePath = checkoffFolderName + @"SINGLE-Australia-New-Zealand.docx",
                 Method = Method.GET,
-                JiraUrl = "https://gre-team.atlassian.net",
+                JiraUrl = "https://gre-team.atlassian.net/rest/api/2",
                 UserName = userNameToken,
                 IssueType = "Test Plan",
                 SleepTime = 1000,
@@ -45,67 +48,142 @@ namespace GliToJiraImporter.Testing.Tests
                 Type = 1,
             };
 
+            string expectedResultPath = $"{expectedResultFolderName}ParserSingleTestExpectedResult.json";
+            this.expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath)).First();
+            this.jiraIssue = new JiraIssue(this.parameterModelStub.ProjectKey, "Test Plan",
+                this.expectedResult.RegulationList[0].ClauseId.FullClauseId, this.expectedResult.RegulationList[0].ClauseId.FullClauseId,
+                this.expectedResult.Category, this.expectedResult.RegulationList[0].Subcategory, this.expectedResult.RegulationList[0].Description.Text);
+
             this.sut = new JiraRequestUtilities(this.parameterModelStub);
         }
 
-        [TearDown] //TODO This doesn't work perfectly
-        public void TearDown()
+        [Test, Order(1)]
+        public void JiraPostIssueTest()
         {
-            log.Debug("Teardown start"); JiraRequestUtilities jiraRequestUtilities = new JiraRequestUtilities(this.parameterModelStub); //int index = 0; //int itemsPerPage = 50; //string queryString = string.Format("project = \{0}
-            ", parameterModelStub.ProjectKey);
-        //IPagedQueryResult<Issue> jiraExistingIssueList = this.jiraConnectionStub.Issues.GetIssuesFromJqlAsync(queryString, itemsPerPage, index).Result;
-IList<Models.Issue> jiraExistingIssueList = jiraRequestUtilities.GetAllIssuesWithAClauseId();
-            if (jiraExistingIssueList == null)
-
-            { log.Error("JiraRequestUtilities.GetAllIssuesWithAClauseId returned null, and therefore failed"); return; }
-            //IList<string> clauseIds = (IList<string>)expectedResult.Select(category => category.RegulationList.Select(regulation => regulation.ClauseID).ToList()).ToList();
-            //IList<string> categories = expectedResult.Select(cat => cat.Category).ToList();
-            //Dictionary<string, Issue> issues = (Dictionary<string, Issue>)this.jiraConnectionStub.Issues.GetIssuesAsync().Result;
-            //foreach (Models.Issue issue in jiraExistingIssueList)
-            if (jiraExistingIssueList.Count > 0)
-            {
-                for (int i = 0; i < this.expectedResult.Count; i++)
-                {
-                    for (int j = 0; j < this.expectedResult[i].RegulationList.Count; j++)
-                    {
-                        //Models.Issue issue = jiraExistingIssueList[i];
-                        Models.Issue issueFound = jiraRequestUtilities.GetIssueByClauseId(this.expectedResult[i].RegulationList[j].ClauseId.FullClauseId);
-                        //Models.Issue issueFound = jiraExistingIssueList.First(issue => issue.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseId.FullClauseId));
-                        if (issueFound != null && issueFound.fields.customfield_10046.Equals(this.expectedResult[i].RegulationList[j].ClauseId.FullClauseId))//categories.Contains(issue["GLICategory"].Value) && issue.Labels.Count() == 0)//TODO not a good enough check
-                        {
-                            bool success = jiraRequestUtilities.DeleteIssueByKey(issueFound.key);//this.deleteIssueByKey(issue.Key.Value);
-                            if (success != true)
-                            {
-                                log.Error($"Issue failed to delete. \{issueFound.key}
-                            ");
-                            }
-                        }
-                        Thread.Sleep(this.parameterModelStub.SleepTime);
-                    }
-                    expectedResult.Clear();
-                }
-                checkForErrorsInLogs();
-            }
-            log.Debug("Teardown end");
-        }
-
-        [Test]
-        public void ParserSingleDuplicateTest()
-        {
-            //given
-            //parameterModelStub.FilePath = $"{checkoffFolderName}SINGLE-Australia-New-Zealand.docx";
-            IList<CategoryModel> categorys = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText($"{expectedResultFolderName}ParserSingleTestExpectedResult.json"));
-
             //when
-            IList<CategoryModel> result = sut.
-            result = sut.Parse();
+            bool result = this.sut.PostIssue(this.jiraIssue);
 
             //then
-            memoryAppender.GetEvents().First(logEvent => logEvent.Level == Level.Debug
-                                                         && logEvent.RenderedMessage.Equals($"Skipping clauseId {expectedResult[0].RegulationList[0].ClauseId.BaseClauseId} because it already exists in the project {parameterModelStub.ProjectKey}"));
-            Assert.That(result.Any(), Is.True);
-            Assert.That(expectedResult, !Is.Null);
-            this.testAssertModel(expectedResult, result);
+            Assert.That(result, Is.True);
+            this.memoryAppender.AssertNoErrorsInLogs();
+
+            //expectedResult.TestAssertModel(result);
+        }
+
+        [Test, Order(3)]
+        public void JiraPostAttachmentToIssueByKeyTest()
+        {
+            //when
+            string issueKey = this.sut.GetIssueByClauseId(this.jiraIssue.fields.customfield_10046).key;
+            bool result = this.sut.PostAttachmentToIssueByKey(this.jiraIssue, @"../../../Public/Picture-2.png", issueKey);
+            PictureModel pictureModel = new();
+            pictureModel.ImageName = "Picture-2.png";
+            pictureModel.ImageBytes = File.ReadAllBytes(@"../../../Public/Picture-2.png");
+            this.expectedResult.RegulationList[0].Description.AttachmentList.Add(pictureModel);
+            //then
+            Assert.That(result, Is.True);
+            this.memoryAppender.AssertNoErrorsInLogs();
+
+            //expectedResult.TestAssertModel(result);
+        }
+
+        [Test, Order(7)]
+        public void JiraGetAllIssuesWithAClauseIdTest()
+        {
+            //when
+            IList<Issue> result = this.sut.GetAllIssuesWithAClauseId();
+
+            //then
+            Assert.That(result, !Is.Null);
+            this.memoryAppender.AssertNoErrorsInLogs();
+
+            for (int i = 0; i < result.Count; i++)
+            {
+                Assert.That(result[i].fields.customfield_10045, !Is.EqualTo(this.expectedResult.RegulationList[0].ClauseId.FullClauseId));
+            }
+        }
+
+        [Test, Order(2)]
+        public void JiraGetIssueByClauseIdTest()
+        {
+            //when
+            Issue result = this.sut.GetIssueByClauseId(this.expectedResult.RegulationList[0].ClauseId.FullClauseId);
+
+            //then
+            Assert.That(result, !Is.Null);
+            this.memoryAppender.AssertNoErrorsInLogs();
+
+            this.expectedResult.TestAssertCategoryModel(this.issueToCategoryModel(result));
+        }
+
+        [Test, Order(5)]
+        public void JiraGetIssueByIssueKeyTest()
+        {
+            //when
+            string issueKey = this.sut.GetIssueByClauseId(this.expectedResult.RegulationList[0].ClauseId.FullClauseId).key;
+            Issue result = this.sut.GetIssueByIssueKey(issueKey);
+
+            //then
+            Assert.That(result, !Is.Null);
+            this.memoryAppender.AssertNoErrorsInLogs();
+
+            this.expectedResult.TestAssertCategoryModel(this.issueToCategoryModel(result));
+        }
+
+        [Test, Order(4)]
+        public void JiraGetIssueAttachmentByIdTest()
+        {
+            //when
+            Issue issue = sut.GetIssueByClauseId(this.expectedResult.RegulationList[0].ClauseId.FullClauseId);
+            byte[] result = this.sut.GetIssueAttachmentById(issue.fields.attachment[0].id);
+
+            //then
+            Assert.That(result, !Is.Null);
+            this.memoryAppender.AssertNoErrorsInLogs();
+
+            Assert.That(result, Is.EqualTo(this.expectedResult.RegulationList[0].Description.AttachmentList[0].ImageBytes));
+        }
+
+        [Test, Order(6)]
+        public void JiraDeleteIssueByKeyTest()
+        {
+            //when
+            string issueKey = this.sut.GetIssueByClauseId(this.jiraIssue.fields.customfield_10046).key;
+            bool result = this.sut.DeleteIssueByKey(issueKey);
+
+            //then
+            Assert.That(result, Is.True);
+            this.memoryAppender.AssertNoErrorsInLogs();
+        }
+
+        private CategoryModel issueToCategoryModel(Issue issue)
+        {
+            CategoryModel result = new();
+            result.Category = (string)issue.fields.customfield_10044;
+
+
+            DescriptionModel descriptionModel = new();
+            descriptionModel.Text = issue.fields.description;
+            foreach (Attachment attachment in issue.fields.attachment)
+            {
+                PictureModel picture = new();
+                picture.ImageName = attachment.filename;
+                picture.ImageBytes = this.expectedResult.RegulationList[0].Description.AttachmentList[0].ImageBytes;
+                descriptionModel.AttachmentList.Add(picture);
+            }
+
+            ClauseIdModel clauseId = new();
+            clauseId.FullClauseId = issue.fields.customfield_10046;
+            clauseId.BaseClauseId = this.expectedResult.RegulationList[0].ClauseId.BaseClauseId;
+
+            RegulationModel regulationModel = new();
+            regulationModel.Description = descriptionModel;
+            regulationModel.ClauseId = clauseId;
+            regulationModel.Subcategory = (string)issue.fields.customfield_10045;
+
+            result.RegulationList.Add(regulationModel);
+
+            return result;
         }
     }
 }
