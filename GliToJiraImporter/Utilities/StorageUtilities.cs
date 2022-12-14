@@ -208,5 +208,84 @@ namespace GliToJiraImporter.Utilities
 
             return existingClauseIdList;
         }
+
+        public bool VerifyCategoryModelsExistInJira(IList<CategoryModel> categoryModels)
+        {
+            bool result = true;
+            string errorMessage = "Regulation {0} was not uploaded correctly.";
+            IList<Issue> jiraIssues = jiraRequestUtilities.GetAllIssuesWithAClauseId();
+
+            for (int i = 0; i < categoryModels.Count; i++)
+            {
+
+                for (int j = 0; j < categoryModels[i].RegulationList.Count; j++)
+                {
+                    Issue issue = jiraRequestUtilities.GetIssueByClauseId(categoryModels[i].RegulationList[j].ClauseId.FullClauseId);
+                    RegulationModel regulationModel = categoryModels[i].RegulationList[j];
+                    if (issue.fields == null)
+                    {
+                        this.log.Error($"No issue with ClauseId {categoryModels[i].RegulationList[j].ClauseId.FullClauseId} was found.");
+                        continue;
+                    }
+
+                    if (!regulationModel.ClauseId.FullClauseId.Equals(issue.fields.customfield_10046))
+                    {
+                        log.Error(string.Format(errorMessage + " The ClauseIds did not match.", regulationModel.ClauseId.FullClauseId));
+                        result = false;
+                        continue;
+                    }
+
+                    if (!categoryModels[i].Category.Equals(issue.fields.customfield_10044))
+                    {
+                        log.Error(string.Format(errorMessage + " The Categories did not match.", regulationModel.ClauseId.FullClauseId));
+                        result = false;
+                        continue;
+                    }
+
+                    if (regulationModel.Subcategory != string.Empty && !regulationModel.Subcategory.Equals(issue.fields.customfield_10045))
+                    {
+                        log.Error(string.Format(errorMessage + " The Subcategories did not match.", regulationModel.ClauseId.FullClauseId));
+                        result = false;
+                        continue;
+                    }
+
+                    if (!regulationModel.Description.Text.Equals(issue.fields.description))
+                    {
+                        log.Error(string.Format(errorMessage + " The Subcategories did not match.", regulationModel.ClauseId.FullClauseId));
+                        result = false;
+                        continue;
+                    }
+
+                    if (regulationModel.Description.AttachmentList.Count > 0)
+                    {
+                        if (issue.fields.attachment == null || !regulationModel.Description.AttachmentList.Count.Equals(issue.fields.attachment.Count))
+                        {
+                            log.Error(string.Format(errorMessage + " The number of attachments did not match.", regulationModel.ClauseId.FullClauseId));
+                            result = false;
+                            continue;
+                        }
+
+                        for (int k = 0; k < regulationModel.Description.AttachmentList.Count; k++)
+                        {
+                            if (!regulationModel.Description.AttachmentList[k].ImageName.Equals(issue.fields.attachment[k].filename))
+                            {
+                                log.Error(string.Format(errorMessage + " The attachments names did not match for attachment {1}.", regulationModel.ClauseId.FullClauseId, regulationModel.Description.AttachmentList[k].ImageName));
+                                result = false;
+                                continue;
+                            }
+
+                            byte[] attachment = jiraRequestUtilities.GetIssueAttachmentById(issue.fields.attachment[k].id);
+                            if (!regulationModel.Description.AttachmentList[k].ImageBytes.SequenceEqual(attachment))
+                            {
+                                log.Error(string.Format(errorMessage + " The attachments bytes did not match for attachment {1}.", regulationModel.ClauseId.FullClauseId, regulationModel.Description.AttachmentList[k].ImageName));
+                                result = false;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
     }
 }

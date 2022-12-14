@@ -1,4 +1,5 @@
 ﻿using GliToJiraImporter.Models;
+using GliToJiraImporter.Utilities;
 using log4net;
 using log4net.Config;
 using log4net.Repository;
@@ -23,8 +24,12 @@ namespace GliToJiraImporter
             {
                 ParameterModel parameterModel = parseCommandLine(args);
                 parameterModel.UserName = $"{parameterModel.UserName}:{Environment.GetEnvironmentVariable("JIRA_API_TOKEN")}";
-                Parser parser = new(parameterModel);
-                parser.Parse();
+                if (!parameterModel.JiraUrl.EndsWith("/rest/api/2"))
+                {
+                    parameterModel.JiraUrl = $"{parameterModel.JiraUrl}/rest/api/2";
+                }
+
+                UnitOfWork.Instance().Execute(parameterModel);
             }
             catch (Exception e)
             {

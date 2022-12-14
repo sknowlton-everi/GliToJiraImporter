@@ -43,7 +43,7 @@ namespace GliToJiraImporter.Parsers
                     // Check for additions to clauseId
                     else
                     {
-                        this._state.FullClauseId += $" --- {paragraph.Text.Trim()}";
+                        this._state.FullClauseId += $"({paragraph.Text.Trim().Replace(' ','-')})";
                     }
                 }
             }
