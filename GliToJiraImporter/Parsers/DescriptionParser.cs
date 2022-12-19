@@ -12,7 +12,7 @@ namespace GliToJiraImporter.Parsers
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
 
-        private DescriptionModel _state = new DescriptionModel();
+        private DescriptionModel _state = new();
 
         public DescriptionParser() { }
 
@@ -108,7 +108,7 @@ namespace GliToJiraImporter.Parsers
                     WTextRange textRange = (WTextRange)paragraph.Items[i];
 
                     // Checking for certain characters in front of and behind a word, then added spaces to avoid Jira confusing them for formating
-                    textRange = this.ignoreUnintendedFormating(textRange);
+                    textRange = this.ignoreUnintendedFormatting(textRange);
 
                     // Checking for formatting like bolding, and adding the characters needed for Jira to know about it
                     textRange = this.checkForIntendedFormatting(textRange);
@@ -169,7 +169,7 @@ namespace GliToJiraImporter.Parsers
             return result;
         }
 
-        private WTextRange ignoreUnintendedFormating(WTextRange textRange)
+        private WTextRange ignoreUnintendedFormatting(WTextRange textRange)
         {
             string[] formatingChars = { @"\*", "_", "-", @"\+" };
 
@@ -228,6 +228,8 @@ namespace GliToJiraImporter.Parsers
                     textRange.Text = textRange.Text.Replace(textRange.Text, $"{textRange.Text}+");
                 }
             }
+
+            
 
             return textRange;
         }
