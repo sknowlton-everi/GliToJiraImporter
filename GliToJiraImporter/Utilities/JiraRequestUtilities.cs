@@ -79,8 +79,7 @@ namespace GliToJiraImporter.Utilities
 
             return requestSucceeded;
         }
-
-
+        
         // Read
         public IList<Models.Issue> GetAllIssuesWithAClauseId()
         {
