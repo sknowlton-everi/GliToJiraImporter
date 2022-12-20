@@ -1,6 +1,5 @@
 ﻿using GliToJiraImporter.Models;
 using GliToJiraImporter.Types;
-using GliToJiraImporter.Utilities;
 using log4net;
 using Syncfusion.DocIO.DLS;
 using System.Diagnostics;
@@ -103,10 +102,8 @@ namespace GliToJiraImporter.Parsers
 
         private WordDocument getDocumentFromPath()
         {
-            using (FileStream fs = File.Open(parameterModel.FilePath, FileMode.Open))
-            {
-                return new WordDocument(fs);
-            }
+            using FileStream fs = File.Open(this.parameterModel.FilePath, FileMode.Open);
+            return new WordDocument(fs);
         }
     }
 }

@@ -10,7 +10,7 @@ namespace GliToJiraImporter.Parsers
 {
     public class DescriptionParser : IOriginator
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
         private DescriptionModel _state = new();
 
@@ -18,14 +18,7 @@ namespace GliToJiraImporter.Parsers
 
         public DescriptionParser(IMemento state)
         {
-            if (state == null)
-            {
-                this._state = new DescriptionModel();
-            }
-            else
-            {
-                this._state = (DescriptionModel)state;
-            }
+            this._state = (DescriptionModel)state;
             log.Debug("DescriptionParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
@@ -33,9 +26,9 @@ namespace GliToJiraImporter.Parsers
         {
             string result = string.Empty;
 
-            PictureParser pictureParser = new PictureParser();
-            Caretaker pictureCaretaker = new Caretaker(pictureParser);
-            EmbeddedTableParser embeddedTableParser = new EmbeddedTableParser();
+            PictureParser pictureParser = new();
+            Caretaker pictureCaretaker = new(pictureParser);
+            EmbeddedTableParser embeddedTableParser = new();
 
             // Iterates through the paragraphs of the cell
             for (int i = 0; i < cell.Paragraphs.Count; i++)
@@ -92,7 +85,7 @@ namespace GliToJiraImporter.Parsers
             this._state.Text += result;
         }
 
-        private string parseParagraph(WParagraph paragraph)
+        private string parseParagraph(IWParagraph paragraph)
         {
             string result = string.Empty;
 
@@ -171,12 +164,12 @@ namespace GliToJiraImporter.Parsers
 
         private WTextRange ignoreUnintendedFormatting(WTextRange textRange)
         {
-            string[] formatingChars = { @"\*", "_", "-", @"\+" };
+            string[] formattingChars = { @"\*", "_", "-", @"\+" };
 
-            foreach (string character in formatingChars)
+            foreach (string character in formattingChars)
             {
-                string formatingCharRegex = "([^A-Za-z0-9])(" + character + @")([^\s].+[^\s])(" + character + ")([^A-Za-z0-9])";
-                textRange.Text = Regex.Replace(textRange.Text, formatingCharRegex, "$1\\$2$3\\$4$5");
+                string formattingCharRegex = "([^A-Za-z0-9])(" + character + @")([^\s].+[^\s])(" + character + ")([^A-Za-z0-9])";
+                textRange.Text = Regex.Replace(textRange.Text, formattingCharRegex, "$1\\$2$3\\$4$5");
             }
 
             return textRange;
@@ -229,7 +222,7 @@ namespace GliToJiraImporter.Parsers
                 }
             }
 
-            
+
 
             return textRange;
         }
@@ -245,7 +238,7 @@ namespace GliToJiraImporter.Parsers
         {
             if (!(memento is DescriptionModel))
             {
-                throw new Exception("Unknown memento class " + memento.ToString());
+                throw new Exception("Unknown memento class " + memento);
             }
 
             this._state = (DescriptionModel)memento.GetState();

@@ -1,5 +1,4 @@
 ﻿using GliToJiraImporter.Models;
-using GliToJiraImporter.Utilities;
 using log4net;
 using log4net.Config;
 using log4net.Repository;
@@ -49,7 +48,7 @@ namespace GliToJiraImporter
                 log.Debug("No processing happened.  Invalid command line parameters.  Press any key to continue");
             }
 
-            ParameterModel result = (commandLineArgs as CommandLine.Parsed<ParameterModel>).Value;
+            ParameterModel result = ((CommandLine.Parsed<ParameterModel>)commandLineArgs).Value;
             if (File.Exists(result.FilePath) == false)
             {
                 log.Debug($"No processing happened.  Unable to find the specified file:  {result.FilePath}");

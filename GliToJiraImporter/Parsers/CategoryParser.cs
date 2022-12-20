@@ -16,24 +16,13 @@ namespace GliToJiraImporter.Parsers
 
         public CategoryParser(CategoryModel state)
         {
-            if (state == null)
-            {
-                this._state = new CategoryModel();
-            }
-            else
-            {
-                this._state = state;
-            }
+            this._state = state;
             log.Debug("CategoryParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
         public bool Parse(IWTable table, ref int rowIndex)
         {
             CategoryModel categoryModel = this._state;
-            if (categoryModel == null)
-            {
-                categoryModel = new CategoryModel();
-            }
 
             // Originator instantiation
             RegulationParser regulationParser = new RegulationParser();
@@ -43,7 +32,7 @@ namespace GliToJiraImporter.Parsers
                 categoryModel.RegulationList.RemoveAt(categoryModel.RegulationList.Count - 1);
             }
             // Caretaker instantiation
-            Caretaker regulationCaretaker = new Caretaker(regulationParser);
+            Caretaker regulationCaretaker = new(regulationParser);
 
             bool categoryComplete = false;
 
@@ -58,7 +47,7 @@ namespace GliToJiraImporter.Parsers
                 {
                     // Add the originators memento if it's valid
                     IMemento regulationParserModel = regulationParser.Save();
-                    if (regulationParserModel != null && regulationParserModel.IsValid())
+                    if (regulationParserModel.IsValid())
                     {
                         categoryModel.RegulationList.Add((RegulationModel)regulationParserModel);
                     }
@@ -141,7 +130,7 @@ namespace GliToJiraImporter.Parsers
         {
             if (!(memento is CategoryModel))
             {
-                throw new Exception("Unknown memento class " + memento.ToString());
+                throw new Exception("Unknown memento class " + memento);
             }
 
             this._state = (CategoryModel)memento.GetState();
