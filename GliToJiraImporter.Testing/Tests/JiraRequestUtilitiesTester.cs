@@ -17,9 +17,9 @@ namespace GliToJiraImporter.Testing.Tests
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
         private JiraRequestUtilities sut = new();
         private ParameterModel parameterModelStub = new();
-        private MemoryAppender memoryAppender = new();
-        private const string checkoffFolderName = @"../../../Public/TestCheckoffs/";
-        private const string expectedResultFolderName = @"../../../Public/ExpectedResults/";
+        private readonly MemoryAppender memoryAppender = new();
+        private const string CheckoffFolderName = @"../../../Public/TestCheckoffs/";
+        private const string ExpectedResultFolderName = @"../../../Public/ExpectedResults/";
         private CategoryModel expectedResult = new();
         private JiraIssue jiraIssue = new();
 
@@ -30,15 +30,15 @@ namespace GliToJiraImporter.Testing.Tests
             XmlConfigurator.Configure(logRepository, new FileInfo("log4net.config"));
             BasicConfigurator.Configure(this.memoryAppender);
 
-            log.Info(message: new StackFrame().GetMethod().Name);
+            log.Info(message: new StackFrame().GetMethod()?.Name);
 
-            string userName = "samantha.knowlton@everi.com";
+            const string userName = "samantha.knowlton@everi.com";
             string token = Environment.GetEnvironmentVariable("JIRA_API_TOKEN");
             string userNameToken = $"{userName}:{token}";
 
-            this.parameterModelStub = new()
+            this.parameterModelStub = new ParameterModel
             {
-                FilePath = checkoffFolderName + @"SINGLE-Australia-New-Zealand.docx",
+                FilePath = CheckoffFolderName + @"SINGLE-Australia-New-Zealand.docx",
                 Method = Method.GET,
                 JiraUrl = "https://gre-team.atlassian.net/rest/api/2",
                 UserName = userNameToken,
@@ -48,7 +48,7 @@ namespace GliToJiraImporter.Testing.Tests
                 Type = 1,
             };
 
-            string expectedResultPath = $"{expectedResultFolderName}ParserSingleTestExpectedResult.json";
+            const string expectedResultPath = $"{ExpectedResultFolderName}ParserSingleTestExpectedResult.json";
             this.expectedResult = JsonSerializer.Deserialize<List<CategoryModel>>(File.ReadAllText(expectedResultPath)).First();
             this.jiraIssue = new JiraIssue(this.parameterModelStub.ProjectKey, "Test Plan",
                 this.expectedResult.RegulationList[0].ClauseId.FullClauseId, this.expectedResult.RegulationList[0].ClauseId.FullClauseId,
@@ -76,9 +76,11 @@ namespace GliToJiraImporter.Testing.Tests
             //when
             string issueKey = this.sut.GetIssueByClauseId(this.jiraIssue.fields.customfield_10046).key;
             bool result = this.sut.PostAttachmentToIssueByKey(this.jiraIssue, @"../../../Public/Picture-2.png", issueKey);
-            PictureModel pictureModel = new();
-            pictureModel.ImageName = "Picture-2.png";
-            pictureModel.ImageBytes = File.ReadAllBytes(@"../../../Public/Picture-2.png");
+            PictureModel pictureModel = new()
+            {
+                ImageName = "Picture-2.png",
+                ImageBytes = File.ReadAllBytes(@"../../../Public/Picture-2.png")
+            };
             this.expectedResult.RegulationList[0].Description.AttachmentList.Add(pictureModel);
             //then
             Assert.That(result, Is.True);
@@ -97,9 +99,9 @@ namespace GliToJiraImporter.Testing.Tests
             Assert.That(result, !Is.Null);
             this.memoryAppender.AssertNoErrorsInLogs();
 
-            for (int i = 0; i < result.Count; i++)
+            foreach (Issue issue in result)
             {
-                Assert.That(result[i].fields.customfield_10045, !Is.EqualTo(this.expectedResult.RegulationList[0].ClauseId.FullClauseId));
+                Assert.That(issue.fields.customfield_10045, !Is.EqualTo(this.expectedResult.RegulationList[0].ClauseId.FullClauseId));
             }
         }
 
@@ -134,7 +136,7 @@ namespace GliToJiraImporter.Testing.Tests
         public void JiraGetIssueAttachmentByIdTest()
         {
             //when
-            Issue issue = sut.GetIssueByClauseId(this.expectedResult.RegulationList[0].ClauseId.FullClauseId);
+            Issue issue = this.sut.GetIssueByClauseId(this.expectedResult.RegulationList[0].ClauseId.FullClauseId);
             byte[] result = this.sut.GetIssueAttachmentById(issue.fields.attachment[0].id);
 
             //then
@@ -158,28 +160,38 @@ namespace GliToJiraImporter.Testing.Tests
 
         private CategoryModel issueToCategoryModel(Issue issue)
         {
-            CategoryModel result = new();
-            result.Category = (string)issue.fields.customfield_10044;
+            CategoryModel result = new()
+            {
+                Category = (string)issue.fields.customfield_10044
+            };
 
 
-            DescriptionModel descriptionModel = new();
-            descriptionModel.Text = issue.fields.description;
+            DescriptionModel descriptionModel = new()
+            {
+                Text = issue.fields.description
+            };
             foreach (Attachment attachment in issue.fields.attachment)
             {
-                PictureModel picture = new();
-                picture.ImageName = attachment.filename;
-                picture.ImageBytes = this.expectedResult.RegulationList[0].Description.AttachmentList[0].ImageBytes;
+                PictureModel picture = new()
+                {
+                    ImageName = attachment.filename,
+                    ImageBytes = this.expectedResult.RegulationList[0].Description.AttachmentList[0].ImageBytes
+                };
                 descriptionModel.AttachmentList.Add(picture);
             }
 
-            ClauseIdModel clauseId = new();
-            clauseId.FullClauseId = issue.fields.customfield_10046;
-            clauseId.BaseClauseId = this.expectedResult.RegulationList[0].ClauseId.BaseClauseId;
+            ClauseIdModel clauseId = new()
+            {
+                FullClauseId = issue.fields.customfield_10046,
+                BaseClauseId = this.expectedResult.RegulationList[0].ClauseId.BaseClauseId
+            };
 
-            RegulationModel regulationModel = new();
-            regulationModel.Description = descriptionModel;
-            regulationModel.ClauseId = clauseId;
-            regulationModel.Subcategory = (string)issue.fields.customfield_10045;
+            RegulationModel regulationModel = new()
+            {
+                Description = descriptionModel,
+                ClauseId = clauseId,
+                Subcategory = (string)issue.fields.customfield_10045
+            };
 
             result.RegulationList.Add(regulationModel);
 

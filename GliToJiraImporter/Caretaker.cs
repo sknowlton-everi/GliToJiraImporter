@@ -23,7 +23,7 @@ namespace GliToJiraImporter
 
         public void Backup()
         {
-            log.Debug($"Caretaker: Saving Originator {_originator.GetType().Name}'s state...");
+            log.Debug($"Caretaker: Saving Originator {this._originator.GetType().Name}'s state...");
             this._mementos.Add(this._originator.Save());
         }
 
@@ -53,7 +53,7 @@ namespace GliToJiraImporter
         {
             log.Debug("Caretaker: Here's the list of mementos:");
 
-            foreach (var memento in this._mementos)
+            foreach (IMemento memento in this._mementos)
             {
                 log.Info(JsonSerializer.Serialize(memento.GetState()));
             }

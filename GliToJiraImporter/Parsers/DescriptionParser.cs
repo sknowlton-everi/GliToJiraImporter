@@ -100,7 +100,7 @@ namespace GliToJiraImporter.Parsers
                 {
                     WTextRange textRange = (WTextRange)paragraph.Items[i];
 
-                    // Checking for certain characters in front of and behind a word, then added spaces to avoid Jira confusing them for formating
+                    // Checking for certain characters in front of and behind a word, then added spaces to avoid Jira confusing them for formatting
                     textRange = this.ignoreUnintendedFormatting(textRange);
 
                     // Checking for formatting like bolding, and adding the characters needed for Jira to know about it
@@ -236,7 +236,7 @@ namespace GliToJiraImporter.Parsers
         // Restores the Originator's state from a memento object.
         public void Restore(IMemento memento)
         {
-            if (!(memento is DescriptionModel))
+            if (memento is not DescriptionModel)
             {
                 throw new Exception("Unknown memento class " + memento);
             }

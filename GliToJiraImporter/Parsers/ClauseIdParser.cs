@@ -8,22 +8,15 @@ namespace GliToJiraImporter.Parsers
 {
     public class ClauseIdParser : IOriginator
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
-        private ClauseIdModel _state = new ClauseIdModel();
+        private ClauseIdModel _state = new();
 
         public ClauseIdParser() { }
 
         public ClauseIdParser(IMemento state)
         {
-            if (state == null)
-            {
-                this._state = new ClauseIdModel();
-            }
-            else
-            {
-                this._state = (ClauseIdModel)state;
-            }
+            this._state = (ClauseIdModel)state;
             log.Debug("ClauseIdParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
@@ -60,7 +53,7 @@ namespace GliToJiraImporter.Parsers
         {
             if (memento is not ClauseIdModel)
             {
-                throw new Exception("Unknown memento class " + memento.ToString());
+                throw new Exception("Unknown memento class " + memento);
             }
 
             this._state = (ClauseIdModel)memento.GetState();

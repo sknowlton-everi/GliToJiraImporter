@@ -86,7 +86,7 @@ namespace GliToJiraImporter.Parsers
         // Restores the Originator's state from a memento object.
         public void Restore(IMemento memento)
         {
-            if (!(memento is RegulationModel))
+            if (memento is not RegulationModel)
             {
                 throw new Exception("Unknown memento class " + memento);
             }

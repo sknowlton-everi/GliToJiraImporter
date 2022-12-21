@@ -2,29 +2,20 @@
 using GliToJiraImporter.Extensions;
 using Syncfusion.DocIO.DLS;
 using System.Reflection;
-using Microsoft.SqlServer.Management.HadrModel;
 
 namespace GliToJiraImporter.Parsers
 {
     public class EmbeddedTableParser
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
         private string _state = string.Empty;
 
-        public EmbeddedTableParser()
-        { }
+        public EmbeddedTableParser() { }
 
         public EmbeddedTableParser(string state)
         {
-            if (state == null)
-            {
-                this._state = string.Empty;
-            }
-            else
-            {
-                this._state = state;
-            }
+            this._state = state;
             log.Debug("EmbeddedTableParser: My initial state is: " + this._state);
         }
 
@@ -83,7 +74,7 @@ namespace GliToJiraImporter.Parsers
                 result = !headers[i].Trim().Equals(string.Empty);
             }
 
-            // Check that every row is formated correctly and the number of columns match
+            // Check that every row is formatted correctly and the number of columns match
             for (int i = 1; i < formattedTableRows.Length && result; i++)
             {
                 result = formattedTableRows[i].IsValidRowFormatting(headers.Length);

@@ -2,7 +2,7 @@
 {
     public struct JiraIssue
     {
-        public JiraIssueFields fields { get; set; } = new JiraIssueFields();
+        public JiraIssueFields fields { get; set; } = new();
 
         public JiraIssue() { }
 
@@ -14,8 +14,8 @@
 
     public struct JiraIssueFields
     {
-        public JiraProject project { get; set; } = new JiraProject();
-        public JiraIssueType issuetype { get; set; } = new JiraIssueType();
+        public JiraProject project { get; set; } = new();
+        public JiraIssueType issuetype { get; set; } = new();
         public string summary { get; set; } = string.Empty;
         public string customfield_10046 { get; set; } = string.Empty; //GliClauseId
         public string customfield_10044 { get; set; } = string.Empty; //GliCategory

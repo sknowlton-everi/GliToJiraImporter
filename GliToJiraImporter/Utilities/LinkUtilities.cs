@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace GliToJiraImporter.Utilities
 {
@@ -11,9 +6,8 @@ namespace GliToJiraImporter.Utilities
     {
         public static bool IsValidWebLink(string text)
         {
-            Uri? uriResult;
-            return Uri.TryCreate(text.Trim(), UriKind.Absolute, out uriResult)
-                && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
+            return Uri.TryCreate(text.Trim(), UriKind.Absolute, out Uri? uriResult)
+                   && (uriResult.Scheme == Uri.UriSchemeHttp || uriResult.Scheme == Uri.UriSchemeHttps);
         }
 
         public static bool IsValidEmailAddress(string text)
