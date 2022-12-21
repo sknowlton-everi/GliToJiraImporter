@@ -47,7 +47,7 @@ namespace GliToJiraImporter.Utilities
         {
             // Category;SubCategory;ClauseID;Description;AttachmentList
             string csvHeaders = "Category,SubCategory,ClauseID,Description,AttachmentList";
-            var csvConfig = new CsvConfiguration(CultureInfo.CurrentCulture)
+            CsvConfiguration csvConfig = new(CultureInfo.CurrentCulture)
             {
                 HasHeaderRecord = true
             };
@@ -79,7 +79,7 @@ namespace GliToJiraImporter.Utilities
                 using (FileStream fs = File.Create(fileName))
                 {
                     // Add some text to file
-                    Byte[] textBytes = new UTF8Encoding(true).GetBytes(csvHeaders + "\n" + csvRegulations);
+                    byte[] textBytes = new UTF8Encoding(true).GetBytes(csvHeaders + "\n" + csvRegulations);
                     fs.Write(textBytes, 0, textBytes.Length);
                 }
             }
@@ -148,17 +148,17 @@ namespace GliToJiraImporter.Utilities
 
         private bool isExpectedIMementoType(IMemento memento, Type expectedType)
         {
-            return typeof(IMemento).Equals(expectedType);
+            return typeof(IMemento) == expectedType;
         }
 
         private void createIssue(RegulationModel regulationModel, string categoryName)
         {
             log.Debug("Creating Issue");
-            JiraIssue jiraIssue = new JiraIssue(this.parameterModel.ProjectKey, "Test Plan", regulationModel.ClauseId.FullClauseId, regulationModel.ClauseId.FullClauseId, categoryName,
+            JiraIssue jiraIssue = new(this.parameterModel.ProjectKey, "Test Plan", regulationModel.ClauseId.FullClauseId, regulationModel.ClauseId.FullClauseId, categoryName,
                 regulationModel.Subcategory, regulationModel.Description.Text);
 
             bool status = this.jiraRequestUtilities.PostIssue(jiraIssue);
-            string appDataPath = System.Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            string appDataPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
 
             if (status && regulationModel.Description.AttachmentList.Count != 0)
             {
@@ -202,10 +202,7 @@ namespace GliToJiraImporter.Utilities
 
             foreach (Models.Issue issue in jiraExistingIssueList)
             {
-                if (issue.fields.customfield_10000 != null)
-                {
-                    existingClauseIdList.Add((string)issue.fields.customfield_10046, issue.id);
-                }
+                existingClauseIdList.Add((string)issue.fields.customfield_10046, issue.id);
             }
 
             return existingClauseIdList;
@@ -214,15 +211,15 @@ namespace GliToJiraImporter.Utilities
         public bool VerifyCategoryModelsExistInJira(IList<CategoryModel> categoryModels)
         {
             bool result = true;
-            string errorMessage = "Regulation {0} was not uploaded correctly.";
-            IList<Issue> jiraIssues = jiraRequestUtilities.GetAllIssuesWithAClauseId();
+            const string errorMessage = "Regulation {0} was not uploaded correctly.";
+            IList<Issue> jiraIssues = this.jiraRequestUtilities.GetAllIssuesWithAClauseId();
 
             for (int i = 0; i < categoryModels.Count; i++)
             {
 
                 for (int j = 0; j < categoryModels[i].RegulationList.Count; j++)
                 {
-                    Issue issue = jiraRequestUtilities.GetIssueByClauseId(categoryModels[i].RegulationList[j].ClauseId.FullClauseId);
+                    Issue issue = this.jiraRequestUtilities.GetIssueByClauseId(categoryModels[i].RegulationList[j].ClauseId.FullClauseId);
                     RegulationModel regulationModel = categoryModels[i].RegulationList[j];
                     if (issue.fields == null)
                     {

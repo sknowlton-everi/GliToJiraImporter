@@ -8,22 +8,15 @@ namespace GliToJiraImporter.Parsers
 {
     public class RegulationParser : IOriginator
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
-        private RegulationModel _state = new RegulationModel();
+        private RegulationModel _state = new();
 
         public RegulationParser() { }
 
         public RegulationParser(IMemento state)
         {
-            if (state == null)
-            {
-                this._state = new RegulationModel();
-            }
-            else
-            {
-                this._state = (RegulationModel)state;
-            }
+            this._state = (RegulationModel)state;
             log.Debug("RegulationParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
@@ -31,10 +24,10 @@ namespace GliToJiraImporter.Parsers
         {
             RegulationModel regulationModel = this._state;
 
-            ClauseIdParser clauseIdParser = new ClauseIdParser((ClauseIdModel)regulationModel.ClauseId);
-            Caretaker clauseIdCaretaker = new Caretaker(clauseIdParser);
-            DescriptionParser descriptionParser = new DescriptionParser(regulationModel.Description);
-            Caretaker descriptionCaretaker = new Caretaker(descriptionParser);
+            ClauseIdParser clauseIdParser = new(regulationModel.ClauseId);
+            Caretaker clauseIdCaretaker = new(clauseIdParser);
+            DescriptionParser descriptionParser = new(regulationModel.Description);
+            Caretaker descriptionCaretaker = new(descriptionParser);
 
             bool regulationComplete = false;
 
@@ -93,9 +86,9 @@ namespace GliToJiraImporter.Parsers
         // Restores the Originator's state from a memento object.
         public void Restore(IMemento memento)
         {
-            if (!(memento is RegulationModel))
+            if (memento is not RegulationModel)
             {
-                throw new Exception("Unknown memento class " + memento.ToString());
+                throw new Exception("Unknown memento class " + memento);
             }
 
             this._state = (RegulationModel)memento.GetState();

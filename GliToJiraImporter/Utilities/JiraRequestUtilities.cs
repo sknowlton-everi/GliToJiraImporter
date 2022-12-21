@@ -10,8 +10,8 @@ namespace GliToJiraImporter.Utilities
 {
     public class JiraRequestUtilities
     {
-        private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
-        private ParameterModel parameterModel = new ParameterModel();
+        private readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
+        private readonly ParameterModel parameterModel = new();
 
         public JiraRequestUtilities() { }
 
@@ -25,9 +25,9 @@ namespace GliToJiraImporter.Utilities
         {
             bool requestSucceeded = false;
 
-            string requestUri = $"{parameterModel.JiraUrl}/issue";
+            string requestUri = $"{this.parameterModel.JiraUrl}/issue";
 
-            RestRequest request = createRestRequest(Method.POST, requestUri, jiraIssue);
+            RestRequest request = this.createRestRequest(Method.POST, requestUri, jiraIssue);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -36,11 +36,11 @@ namespace GliToJiraImporter.Utilities
 
             object response = this.runQuery(request, requestUri);
 
-            if (response.GetType().Equals(typeof(bool)))
+            if (response.GetType() == typeof(bool))
             {
                 requestSucceeded = (bool)response;
             }
-            else if (response.GetType().Equals(typeof(ErrorRoot)))
+            else if (response.GetType() == typeof(ErrorRoot))
             {
                 requestSucceeded = false;
             }
@@ -53,13 +53,13 @@ namespace GliToJiraImporter.Utilities
         {
             bool requestSucceeded = false;
 
-            string requestUri = $"{parameterModel.JiraUrl}/issue/{issueKey}";
+            string requestUri = $"{this.parameterModel.JiraUrl}/issue/{issueKey}";
             if (!attachmentPath.Equals(string.Empty))
             {
                 requestUri += "/attachments";
             }
 
-            RestRequest request = createRestRequest(Method.POST, requestUri, jiraIssue, attachmentPath);
+            RestRequest request = this.createRestRequest(Method.POST, requestUri, jiraIssue, attachmentPath);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -68,11 +68,11 @@ namespace GliToJiraImporter.Utilities
 
             object response = this.runQuery(request, requestUri);
 
-            if (response.GetType().Equals(typeof(bool)))
+            if (response.GetType() == typeof(bool))
             {
                 requestSucceeded = (bool)response;
             }
-            else if (response.GetType().Equals(typeof(ErrorRoot)) || response.GetType().Equals(typeof(string)))
+            else if (response.GetType() == typeof(ErrorRoot) || response.GetType() == typeof(string))
             {
                 requestSucceeded = false;
             }
@@ -85,9 +85,9 @@ namespace GliToJiraImporter.Utilities
         {
             List<Models.Issue> result = new();
 
-            string requestUri = $"{parameterModel.JiraUrl}/search";
+            string requestUri = $"{this.parameterModel.JiraUrl}/search";
 
-            RestRequest request = createRestRequest(Method.GET, requestUri);
+            RestRequest request = this.createRestRequest(Method.GET, requestUri);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -96,8 +96,7 @@ namespace GliToJiraImporter.Utilities
 
             object response = this.runQuery(request, requestUri);
 
-            Type responseType = response.GetType();
-            if (response.GetType().Equals(typeof(List<Models.Issue>)))
+            if (response.GetType() == typeof(List<Models.Issue>))
             {
                 foreach (Models.Issue issue in (List<Models.Issue>)response)
                 {
@@ -107,7 +106,7 @@ namespace GliToJiraImporter.Utilities
                     }
                 }
             }
-            else if (response.GetType().Equals(typeof(ErrorRoot)))
+            else if (response.GetType() == typeof(ErrorRoot))
             {
                 result = null;
             }
@@ -123,9 +122,9 @@ namespace GliToJiraImporter.Utilities
         {
             Models.Issue result = new();
 
-            string requestUri = $"{parameterModel.JiraUrl}/search?jql=GLIClauseId~'{clauseId}'";
+            string requestUri = $"{this.parameterModel.JiraUrl}/search?jql=GLIClauseId~'{clauseId}'";
 
-            RestRequest request = createRestRequest(Method.GET, requestUri);
+            RestRequest request = this.createRestRequest(Method.GET, requestUri);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -134,7 +133,7 @@ namespace GliToJiraImporter.Utilities
 
             object response = this.runQuery(request, requestUri);
 
-            if (response.GetType().Equals(typeof(List<Models.Issue>)))
+            if (response.GetType() == typeof(List<Models.Issue>))
             {
                 List<Models.Issue> matchingIssues = (List<Models.Issue>)response;
                 foreach (Issue issue in matchingIssues)
@@ -145,7 +144,7 @@ namespace GliToJiraImporter.Utilities
                     }
                 }
             }
-            else if (response.GetType().Equals(typeof(Models.Issue)))
+            else if (response.GetType() == typeof(Models.Issue))
             {
                 Models.Issue matchingIssue = (Models.Issue)response;
                 if (matchingIssue.fields.customfield_10046.Equals(clauseId))
@@ -153,7 +152,7 @@ namespace GliToJiraImporter.Utilities
                     result = this.GetIssueByIssueKey(((Models.Issue)response).key);
                 }
             }
-            else if (response.GetType().Equals(typeof(ErrorRoot)))
+            else if (response.GetType() == typeof(ErrorRoot))
             {
                 result = null;
             }
@@ -167,11 +166,11 @@ namespace GliToJiraImporter.Utilities
 
         public Models.Issue GetIssueByIssueKey(string issueKey)
         {
-            Models.Issue result = new Models.Issue();
+            Models.Issue result = new();
 
-            string requestUri = $"{parameterModel.JiraUrl}/issue/{issueKey}";
+            string requestUri = $"{this.parameterModel.JiraUrl}/issue/{issueKey}";
 
-            RestRequest request = createRestRequest(Method.GET, requestUri);
+            RestRequest request = this.createRestRequest(Method.GET, requestUri);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -180,11 +179,11 @@ namespace GliToJiraImporter.Utilities
 
             object response = this.runQuery(request, requestUri);
 
-            if (response.GetType().Equals(typeof(Models.Issue)))
+            if (response.GetType() == typeof(Models.Issue))
             {
                 result = (Models.Issue)response;
             }
-            else if (response.GetType().Equals(typeof(ErrorRoot)))
+            else if (response.GetType() == typeof(ErrorRoot))
             {
                 result = null;
             }
@@ -200,9 +199,9 @@ namespace GliToJiraImporter.Utilities
         {
             byte[] result = {};
 
-            string requestUri = $"{parameterModel.JiraUrl}/attachment/content/{attachmentId}";
+            string requestUri = $"{this.parameterModel.JiraUrl}/attachment/content/{attachmentId}";
 
-            RestRequest request = createRestRequest(Method.GET, requestUri);
+            RestRequest request = this.createRestRequest(Method.GET, requestUri);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -211,11 +210,11 @@ namespace GliToJiraImporter.Utilities
 
             object response = this.runQuery(request, requestUri);
 
-            if (response.GetType().Equals(typeof(byte[])))
+            if (response.GetType() == typeof(byte[]))
             {
                 result = (byte[])response;
             }
-            else if (response.GetType().Equals(typeof(ErrorRoot)))
+            else if (response.GetType() == typeof(ErrorRoot))
             {
                 result = null;
             }
@@ -232,9 +231,9 @@ namespace GliToJiraImporter.Utilities
         {
             bool requestSucceeded = false;
 
-            string requestUri = $"{parameterModel.JiraUrl}/issue/{issueKey}";
+            string requestUri = $"{this.parameterModel.JiraUrl}/issue/{issueKey}";
 
-            RestRequest request = createRestRequest(Method.DELETE, requestUri);
+            RestRequest request = this.createRestRequest(Method.DELETE, requestUri);
             if (request == null)
             {
                 log.Error("Failed to create request. Result returned as null.");
@@ -243,11 +242,11 @@ namespace GliToJiraImporter.Utilities
 
             object response = this.runQuery(request, requestUri);
 
-            if (response.GetType().Equals(typeof(bool)))
+            if (response.GetType() == typeof(bool))
             {
                 requestSucceeded = (bool)response;
             }
-            else if (response.GetType().Equals(typeof(ErrorRoot)) || response.GetType().Equals(typeof(string)))
+            else if (response.GetType() == typeof(ErrorRoot) || response.GetType() == typeof(string))
             {
                 requestSucceeded = false;
             }
@@ -275,9 +274,9 @@ namespace GliToJiraImporter.Utilities
                 return null;
             }
 
-            string base64authorization = Convert.ToBase64String(Encoding.ASCII.GetBytes(parameterModel.UserName));
+            string base64Authorization = Convert.ToBase64String(Encoding.ASCII.GetBytes(this.parameterModel.UserName));
 
-            if (result.AddHeader("Authorization", $"Basic {base64authorization}") == null)
+            if (result.AddHeader("Authorization", $"Basic {base64Authorization}") == null)
             {
                 log.Error("Authorization header could not be added.");
                 return null;
@@ -310,12 +309,12 @@ namespace GliToJiraImporter.Utilities
         }
 
         //TODO cleanup
-        private object runQuery(RestRequest request, string requestUri)
+        private object runQuery(IRestRequest request, string requestUri)
         {
             object result = new();
             try
             {
-                RestClient client = new RestClient();
+                RestClient client = new();
 
                 IRestResponse response = client.Execute(request);
 

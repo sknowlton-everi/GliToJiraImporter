@@ -1,5 +1,4 @@
 ﻿using GliToJiraImporter.Models;
-using GliToJiraImporter.Utilities;
 using log4net;
 using log4net.Config;
 using log4net.Repository;

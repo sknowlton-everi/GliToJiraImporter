@@ -7,9 +7,9 @@ namespace GliToJiraImporter.Models
     public class RegulationModel : IMemento
     {
         private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
-        public ClauseIdModel ClauseId { get; set; } = new ClauseIdModel();
+        public ClauseIdModel ClauseId { get; set; } = new();
         public string Subcategory { get; set; } = string.Empty;
-        public DescriptionModel Description { get; set; } = new DescriptionModel();
+        public DescriptionModel Description { get; set; } = new();
 
         public RegulationModel() { }
 
@@ -32,12 +32,12 @@ namespace GliToJiraImporter.Models
 
         public bool IsValid()
         {
-            return !this.IsEmpty() && this.ClauseId.IsValid() && Description.IsValid();
+            return !this.IsEmpty() && this.ClauseId.IsValid() && this.Description.IsValid();
         }
 
         public bool IsEmpty()
         {
-            return this.ClauseId.IsEmpty() && Description.IsEmpty() && Subcategory.Trim().Equals(string.Empty);// && AttachmentList.Count == 0; //TODO Cleanup
+            return this.ClauseId.IsEmpty() && this.Description.IsEmpty() && this.Subcategory.Trim().Equals(string.Empty);// && AttachmentList.Count == 0; //TODO Cleanup
         }
 
         public string ToJson()

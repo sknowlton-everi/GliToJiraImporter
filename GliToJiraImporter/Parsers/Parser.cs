@@ -1,6 +1,5 @@
 ﻿using GliToJiraImporter.Models;
 using GliToJiraImporter.Types;
-using GliToJiraImporter.Utilities;
 using log4net;
 using Syncfusion.DocIO.DLS;
 using System.Diagnostics;
@@ -23,15 +22,15 @@ namespace GliToJiraImporter.Parsers
         {
             log.Debug("Checking doc type...");
             IList<CategoryModel> result;
-            if (parameterModel.Type == (int)DocumentType.CHECK_OFF)
+            if (this.parameterModel.Type == (int)DocumentType.CHECK_OFF)
             {
-                log.Debug($"Document Type: {parameterModel.GetType().Name}");
+                log.Debug($"Document Type: {this.parameterModel.GetType().Name}");
                 log.Debug("Parsing...");
-                result = parseMementos();
+                result = this.parseMementos();
             }
             else
             {
-                log.Debug($"Document Type Unknown: {parameterModel.Type}");
+                log.Debug($"Document Type Unknown: {this.parameterModel.Type}");
                 // Log and throw unknown type
                 throw new Exception("Provided Document Type is Unknown. Try type 1 for Checkoff documents.");//TODO is this okay? I don't like the vagueness of type 'Exception'
             }
@@ -49,7 +48,7 @@ namespace GliToJiraImporter.Parsers
             Caretaker caretaker = new(categoryOriginator);
 
             // Creates an instance of WordDocument class
-            WSection section = getDocumentFromPath().Sections[0];
+            WSection section = this.getDocumentFromPath().Sections[0];
 
             // Iterates the tables of the section
             //TODO if i is set to anything below 4, the tests get the following error. When running it myself it seems to maybe be an infinite loop issue
@@ -103,10 +102,8 @@ namespace GliToJiraImporter.Parsers
 
         private WordDocument getDocumentFromPath()
         {
-            using (FileStream fs = File.Open(parameterModel.FilePath, FileMode.Open))
-            {
-                return new WordDocument(fs);
-            }
+            using FileStream fs = File.Open(this.parameterModel.FilePath, FileMode.Open);
+            return new WordDocument(fs);
         }
     }
 }

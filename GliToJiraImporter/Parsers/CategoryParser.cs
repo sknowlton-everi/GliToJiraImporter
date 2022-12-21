@@ -14,36 +14,25 @@ namespace GliToJiraImporter.Parsers
 
         public CategoryParser() { }
 
-        public CategoryParser(CategoryModel state)
+        public CategoryParser(IMemento state)
         {
-            if (state == null)
-            {
-                this._state = new CategoryModel();
-            }
-            else
-            {
-                this._state = state;
-            }
+            this._state = (CategoryModel)state;
             log.Debug("CategoryParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
         public bool Parse(IWTable table, ref int rowIndex)
         {
             CategoryModel categoryModel = this._state;
-            if (categoryModel == null)
-            {
-                categoryModel = new CategoryModel();
-            }
 
             // Originator instantiation
-            RegulationParser regulationParser = new RegulationParser();
+            RegulationParser regulationParser = new();
             if (!categoryModel.IsEmpty() && (categoryModel.RegulationList.Count > 0))
             {
                 regulationParser = new RegulationParser((RegulationModel)categoryModel.RegulationList.Last().GetState());
                 categoryModel.RegulationList.RemoveAt(categoryModel.RegulationList.Count - 1);
             }
             // Caretaker instantiation
-            Caretaker regulationCaretaker = new Caretaker(regulationParser);
+            Caretaker regulationCaretaker = new(regulationParser);
 
             bool categoryComplete = false;
 
@@ -58,7 +47,7 @@ namespace GliToJiraImporter.Parsers
                 {
                     // Add the originators memento if it's valid
                     IMemento regulationParserModel = regulationParser.Save();
-                    if (regulationParserModel != null && regulationParserModel.IsValid())
+                    if (regulationParserModel.IsValid())
                     {
                         categoryModel.RegulationList.Add((RegulationModel)regulationParserModel);
                     }
@@ -79,7 +68,7 @@ namespace GliToJiraImporter.Parsers
                     }
                     else // This row is a subcategory header
                     {
-                        RegulationModel newRegulation = new RegulationModel();
+                        RegulationModel newRegulation = new();
 
                         // Check if a category was found, and if not, sets it using the Subcategory instead
                         if (categoryModel.Category.Equals(string.Empty))
@@ -114,8 +103,10 @@ namespace GliToJiraImporter.Parsers
                         {
                             log.Debug("Regulation Parsing valid");
                             categoryModel.RegulationList.Add((RegulationModel)regulationParser.Save());
-                            RegulationModel newRegulationModel = new RegulationModel();
-                            newRegulationModel.Subcategory = regulationParser.Save().GetName();
+                            RegulationModel newRegulationModel = new()
+                            {
+                                Subcategory = regulationParser.Save().GetName()
+                            };
                             regulationParser = new RegulationParser(newRegulationModel);
                         }
                     }
@@ -139,9 +130,9 @@ namespace GliToJiraImporter.Parsers
         // Restores the Originator's state from a memento object.
         public void Restore(IMemento memento)
         {
-            if (!(memento is CategoryModel))
+            if (memento is not CategoryModel)
             {
-                throw new Exception("Unknown memento class " + memento.ToString());
+                throw new Exception("Unknown memento class " + memento);
             }
 
             this._state = (CategoryModel)memento.GetState();

@@ -8,22 +8,15 @@ namespace GliToJiraImporter.Parsers
 {
     public class PictureParser : IOriginator
     {
-        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod().DeclaringType);
+        private static readonly ILog log = LogManager.GetLogger(MethodBase.GetCurrentMethod()?.DeclaringType);
 
-        private PictureModel _state = new PictureModel();
+        private PictureModel _state = new();
 
         public PictureParser() { }
 
-        public PictureParser(PictureModel state)
+        public PictureParser(IMemento state)
         {
-            if (state == null)
-            {
-                this._state = new PictureModel();
-            }
-            else
-            {
-                this._state = state;
-            }
+            this._state = (PictureModel)state;
             log.Debug("PictureParser: My initial state is: " + JsonSerializer.Serialize(this._state));
         }
 
@@ -48,9 +41,9 @@ namespace GliToJiraImporter.Parsers
         // Restores the Originator's state from a memento object.
         public void Restore(IMemento memento)
         {
-            if (!(memento is PictureModel))
+            if (memento is not PictureModel)
             {
-                throw new Exception("Unknown memento class " + memento.ToString());
+                throw new Exception("Unknown memento class " + memento);
             }
 
             this._state = (PictureModel)memento.GetState();
