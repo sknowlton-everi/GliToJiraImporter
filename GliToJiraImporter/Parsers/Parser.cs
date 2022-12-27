@@ -3,6 +3,7 @@ using GliToJiraImporter.Types;
 using log4net;
 using Syncfusion.DocIO.DLS;
 using System.Diagnostics;
+using System.Drawing;
 using System.Reflection;
 
 namespace GliToJiraImporter.Parsers
@@ -42,6 +43,7 @@ namespace GliToJiraImporter.Parsers
         private IList<CategoryModel> parseMementos()
         {
             IList<CategoryModel> result = new List<CategoryModel>();
+            IDictionary<string, Color> regulationDocs = new Dictionary<string, Color>();
 
             // Originator and Caretaker instantiation
             CategoryParser categoryOriginator = new();
@@ -51,9 +53,21 @@ namespace GliToJiraImporter.Parsers
             WSection section = this.getDocumentFromPath().Sections[0];
 
             // Iterates the tables of the section
+            int i = 4;
+            //for (; i < section.Tables.Count; i++)
+            //{
+            //    WTableCell firstCell = section.Tables[i].Rows[0].Cells[0];
+            //    if (firstCell.Paragraphs[0].Text.Contains("Tested against Requirements"))
+            //    {
+            //        regulationDocs = this.parseDocumentColors(section.Tables[i]);
+            //        break;
+            //    }
+            //}
+
+            // Continues iterating the tables of the section
             //TODO if i is set to anything below 4, the tests get the following error. When running it myself it seems to maybe be an infinite loop issue
             //  log4net:ERROR RollingFileAppender: INTERNAL ERROR. Append is False but OutputFile [C:\MForce\GliToJiraImporter\GliToJiraImporter.Testing\bin\Debug\net6.0\gliToJiraImporter.log] already exists.
-            for (int i = 4; i < section.Tables.Count; i++)
+            for (; i < section.Tables.Count; i++)
             {
                 // Iterates the rows of the table
                 for (int j = 0; j < section.Tables[i].Rows.Count; j++)
@@ -104,6 +118,24 @@ namespace GliToJiraImporter.Parsers
         {
             using FileStream fs = File.Open(this.parameterModel.FilePath, FileMode.Open);
             return new WordDocument(fs);
+        }
+
+        private IDictionary<string, Color> parseDocumentColors(IWTable table)
+        {
+            IDictionary<string, Color> result = new Dictionary<string, Color>();
+            for (int j = 0; j < table.Rows.Count; j++)
+            {
+                for (int k = 1; k < table.Rows[j].Cells.Count; k++)
+                {
+                    WParagraph paragraph = table.Rows[j].Cells[k].Paragraphs[0];
+                    for (int l = 0; l < paragraph.Items.Count; l++)
+                    {
+                        result.Add(paragraph.Text, ((WTextRange)paragraph.Items[l]).CharacterFormat.TextColor);
+                    }
+                }
+            }
+
+            return result;
         }
     }
 }

@@ -222,8 +222,6 @@ namespace GliToJiraImporter.Parsers
                 }
             }
 
-
-
             return textRange;
         }
 
