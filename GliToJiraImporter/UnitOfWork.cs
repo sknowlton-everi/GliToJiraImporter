@@ -34,7 +34,7 @@ namespace GliToJiraImporter
                 storageUtilities.UploadToJira(parsedCategoryModels);
                 // Uncomment if you want to save results to the public folder in the test project
                 //this.storageUtilities.SaveText(@"..\..\..\..\GliToJiraImporter.Testing\Public\Results.txt", JsonSerializer.Serialize(result));
-                //this.storageUtilities.SaveCsv(@"..\..\..\..\GliToJiraImporter.Testing\Public\ResultsCsv.csv", result);
+                //this.storageUtilities.SaveCsv(@"..\..\..\..\GliToJiraImporter.Testing\Public", result);
 
                 //Verify
                 if (!storageUtilities.VerifyCategoryModelsExistInJira(parsedCategoryModels))

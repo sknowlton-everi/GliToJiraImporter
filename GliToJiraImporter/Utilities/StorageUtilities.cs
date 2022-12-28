@@ -43,7 +43,7 @@ namespace GliToJiraImporter.Utilities
         }
 
         // This doesn't fully work
-        public void SaveCsv(string fileName, IList<CategoryModel> categoryModelList)//TODO IList<IMemento> ?
+        public void SaveCsv(string fileFolder, IList<CategoryModel> categoryModelList)//TODO IList<IMemento> ?
         {
             // Category;SubCategory;ClauseID;Description;AttachmentList
             string csvHeaders = "Category,SubCategory,ClauseID,Description,AttachmentList";
@@ -72,6 +72,8 @@ namespace GliToJiraImporter.Utilities
 
             try
             {
+                string fileName = $"{fileFolder}\\ResultsCsv.csv";
+
                 // Check if file already exists. If yes, delete it.
                 if (File.Exists(fileName)) File.Delete(fileName);
 
