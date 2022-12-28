@@ -50,33 +50,55 @@ namespace GliToJiraImporter.Parsers
             // Creates an instance of WordDocument class
             WSection section = this.getDocumentFromPath().Sections[0];
 
-            // Iterates the tables of the section
-            //TODO if i is set to anything below 4, the tests get the following error. When running it myself it seems to maybe be an infinite loop issue
-            //  log4net:ERROR RollingFileAppender: INTERNAL ERROR. Append is False but OutputFile [C:\MForce\GliToJiraImporter\GliToJiraImporter.Testing\bin\Debug\net6.0\gliToJiraImporter.log] already exists.
-            for (int i = 4; i < section.Tables.Count; i++)
+            WTextBody? documentBody = section.Body;
+            
+            if (documentBody == null)
             {
-                // Iterates the rows of the table
-                for (int j = 0; j < section.Tables[i].Rows.Count; j++)
+                //Throw exception
+                const string errorMessage = "No text body was found in the document.";
+                log.Error(errorMessage);
+                throw new Exception(errorMessage);
+            }
+
+            // Get the main table starting index
+            int j = this.getMainTableIndex(documentBody.ChildEntities);
+            if (j < 0)
+            {
+                //Throw exception
+                const string errorMessage = "No paragraph with \"Jurisdictional Requirements\" was found.";
+                log.Error(errorMessage);
+                throw new Exception(errorMessage);
+            }
+
+            // Iterates through the entities of the section
+            for (; j < documentBody.ChildEntities.Count; j++)
+            {
+                if (documentBody.ChildEntities[j].GetType() == typeof(WTable))
                 {
-                    // Backup state and parse
-                    log.Debug("Backing up and parsing...");
-                    caretaker.Backup();
-                    bool isCategoryComplete = categoryOriginator.Parse(section.Tables[i], ref j);
-
-                    if (!isCategoryComplete) continue;
-
-                    j--;
-                    // Validate the parse and undo if invalid
-                    if (!categoryOriginator.Save().IsValid())
+                    WTable table = (WTable)documentBody.ChildEntities[j];
+                    // Iterates the rows of the table
+                    for (int k = 0; k < table.Rows.Count; k++)
                     {
-                        log.Debug("Category Parsing invalid, undoing");
-                        caretaker.Undo();
-                    }
-                    else if (categoryOriginator.Save().IsValid())
-                    {
-                        log.Debug("Category Parsing valid");
-                        result.Add((CategoryModel)categoryOriginator.Save());
-                        categoryOriginator = new CategoryParser();
+                        // Backup state and parse
+                        log.Debug("Backing up and parsing...");
+                        caretaker.Backup();
+                        bool isCategoryComplete = categoryOriginator.Parse(table, ref k);
+
+                        if (!isCategoryComplete) continue;
+
+                        k--;
+                        // Validate the parse and undo if invalid
+                        if (!categoryOriginator.Save().IsValid())
+                        {
+                            log.Debug("Category Parsing invalid, undoing");
+                            caretaker.Undo();
+                        }
+                        else if (categoryOriginator.Save().IsValid())
+                        {
+                            log.Debug("Category Parsing valid");
+                            result.Add((CategoryModel)categoryOriginator.Save());
+                            categoryOriginator = new CategoryParser();
+                        }
                     }
                 }
             }
@@ -104,6 +126,19 @@ namespace GliToJiraImporter.Parsers
         {
             using FileStream fs = File.Open(this.parameterModel.FilePath, FileMode.Open);
             return new WordDocument(fs);
+        }
+
+        private int getMainTableIndex(EntityCollection documentBodyEntities)
+        {
+            // Find the text preceding the main table and return that + 1
+            for (int i = 0; i < documentBodyEntities.Count; i++)
+            {
+                if (documentBodyEntities[i].GetType() == typeof(WParagraph) && ((WParagraph)documentBodyEntities[i]).Text.Contains("Jurisdictional Requirements"))
+                {
+                    return ++i;
+                }
+            }
+            return -1;
         }
     }
 }
