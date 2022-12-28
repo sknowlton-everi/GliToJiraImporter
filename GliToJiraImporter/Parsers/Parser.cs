@@ -50,16 +50,8 @@ namespace GliToJiraImporter.Parsers
             // Creates an instance of WordDocument class
             WSection section = this.getDocumentFromPath().Sections[0];
 
-            WTextBody? documentBody = null;
-            // Iterates the tables of the section
-            for (int i = 0; i < section.ChildEntities.Count; i++)
-            {
-                if (section.ChildEntities[i].GetType() == typeof(WTextBody))
-                {
-                    documentBody = (WTextBody)section.ChildEntities[i];
-                }
-            }
-
+            WTextBody? documentBody = section.Body;
+            
             if (documentBody == null)
             {
                 //Throw exception
@@ -77,6 +69,8 @@ namespace GliToJiraImporter.Parsers
                 log.Error(errorMessage);
                 throw new Exception(errorMessage);
             }
+
+            // Iterates through the entities of the section
             for (; j < documentBody.ChildEntities.Count; j++)
             {
                 if (documentBody.ChildEntities[j].GetType() == typeof(WTable))
